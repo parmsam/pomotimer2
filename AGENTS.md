@@ -10,7 +10,7 @@ Aesthetic Pomodoro timer. Static site on GitHub Pages; no backend. All persisten
 ## Stack
 - Vite + TypeScript (strict), **no UI framework** — plain DOM modules.
 - anime.js v4 for UI animation; three.js only for optional background scenes, always **lazy-loaded** via dynamic `import()`.
-- vite-plugin-pwa for offline/install.
+- vite-plugin-pwa for offline/install (`registerType: 'prompt'`, so never auto-reload; see `src/ui/pwa.ts`). The service worker only exists in production builds; `e2e/pwa.spec.ts` runs against `vite preview`.
 
 ## Commands
 - `npm install`

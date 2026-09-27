@@ -88,12 +88,12 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 ### Phase 3 — Eye candy
 - [ ] three.js scenes (particles/fireflies, shader gradient mesh, rain on glass, low-poly tomato)
 - [ ] Ambient audio loops
-- [ ] PWA (offline, installable)
+- [x] PWA (offline, installable)
 - [ ] Wake Lock, progress favicon
 - [ ] Pop-out mini timer via Document Picture-in-Picture (Chromium; hide the button elsewhere)
 - [ ] Custom background photos (IndexedDB, a few images, never leave the device)
 - [ ] Lofi / vinyl-crackle ambient option
-- [ ] PWA "new version available" prompt
+- [x] PWA "new version available" prompt
 - [ ] Mobile notice: background timers/alarms are unreliable on mobile browsers
 
 #### Background animation options
@@ -204,3 +204,4 @@ Only pick these up if there's real demand. Several overlap with Phase 3 clock th
 - 2026-09-27 — Customization trimmed to presets + per-mode colors in Phase 2; the other ideas are reserved in Phase 4.
 - 2026-09-27 — Phase 2 complete; the name greeting moved to Phase 4 alongside quotes.
 - 2026-09-27 — Safari fix: settings switches are <label>s with `appearance: none` checkboxes. Some WebKit builds shrink native checkboxes to 12x12, which made most of each switch unclickable.
+- 2026-09-27 — PWA via vite-plugin-pwa with registerType 'prompt': updates wait for the user so a running session is never reloaded. The PWA e2e project runs against a production preview.

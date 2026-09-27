@@ -20,6 +20,7 @@ An aesthetic, customizable Pomodoro timer with smooth [anime.js](https://animejs
 - **Optional extras:** strict mode (no pausing), interruption tracking (internal/external, with notes saved for later), and focus mode, which hides everything but the timer.
 - **Make it yours.** Five themes, per-mode colors, interval presets (25/5/15 · 50/10/20 · 90/15/30), alarm sounds, and an optional tick.
 - **Works with multiple tabs.** Open tabs stay in sync, and only one of them rings.
+- **Installable and offline.** Install it from the address bar (or Add to Home Screen) and it works without a connection. Updates wait until you choose to reload.
 - **Your data stays local.** No account, no server, no tracking. Export a JSON backup to move between browsers.
 - **Accessible.** Full keyboard control, screen-reader labels, and it respects "reduce motion".
 
@@ -61,14 +62,14 @@ npm run check      # typecheck + unit tests + end-to-end tests
 |---|---|
 | Stack | Vite + TypeScript (no UI framework), anime.js v4, Web Audio for synthesized alarms |
 | Unit tests | Vitest (`src/**/*.test.ts`), with fake timers for time-based logic |
-| E2E tests | Playwright on Chromium, WebKit and a mobile viewport (`e2e/`) |
+| E2E tests | Playwright on Chromium, WebKit and a mobile viewport (`e2e/`), plus an offline check against the production build |
 | CI / deploy | Every push runs the tests; pushes to `main` deploy to GitHub Pages only if they pass |
 
 The plan and roadmap live in [`PLAN.md`](PLAN.md), and conventions for contributors (human or AI) in [`AGENTS.md`](AGENTS.md).
 
 ## Roadmap
 
-Up next: an installable offline app, clock themes (a tomato kitchen timer, a Tamagotchi), three.js backgrounds, ambient sounds and haptics. See [`PLAN.md`](PLAN.md).
+Up next: clock themes (a tomato kitchen timer, a Tamagotchi), three.js backgrounds, ambient sounds and haptics. See [`PLAN.md`](PLAN.md).
 
 ## Credits
 
