@@ -98,6 +98,18 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [ ] PWA "new version available" prompt
 - [ ] Mobile notice: background timers/alarms are unreliable on mobile browsers
 
+#### Background animation options
+- [ ] Background picker in settings: blobs (current) / three.js scenes / custom photo / solid
+- [ ] Per-scene controls: speed, density/intensity, color follows theme vs. mode
+- [ ] Scenes react to the timer (e.g. calmer during breaks, subtle pulse on completion)
+- [ ] Auto-pause heavy scenes when the tab is hidden or on battery saver; always off under reduced motion
+
+#### Markdown export
+- [ ] Export session history as Markdown (per-day headings, sessions with times and durations, daily totals)
+- [ ] Export tasks as a Markdown checklist (`- [x]`), with pomodoros and tracked time per task
+- [ ] Export options: date range, include tasks / sessions / stats summary
+- [ ] Download as `.md` + copy to clipboard (for pasting into Obsidian, Notion, GitHub)
+
 ## Reference notes
 **pomodorotimer.online** (studied 2026-09-27; captured into `ref/`, which is gitignored). A Nuxt PWA with no backend; data lives in localStorage and IndexedDB. What stood out:
 - Timer uses a wall-clock deadline in a Web Worker; sessions that finish while the tab is closed still count. (We already do the deadline and missed-completion credit.)
@@ -117,3 +129,4 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - 2026-09-27 — Default long break stays 15 min to match other popular apps (Wikipedia/Cirillo canon is 20–30).
 - 2026-09-27 — From the Wikipedia article: pomodoros are indivisible and interruptions get logged → Phase 2 items for abandoned sessions, interruption log, strict mode.
 - 2026-09-27 — Rolling digits off by default (felt busy); kept as an Appearance toggle.
+- 2026-09-27 — Phase 3 adds richer background animation options and Markdown export of sessions/tasks (JSON export/import stays in Phase 2 for backup).
