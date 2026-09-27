@@ -55,7 +55,7 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [x] Notifications, title countdown
 - [x] Favicon (SVG tomato)
 - [x] Rolling-digit clock animation as an opt-in setting (off by default)
-- [ ] First deploy to GitHub Pages (merge to `main`, enable Pages → GitHub Actions)
+- [x] First deploy to GitHub Pages (merge to `main`, enable Pages → GitHub Actions)
 
 ### Phase 2 — Polish
 - [ ] Task list (est. pomodoros, active task linked to sessions)
@@ -75,6 +75,17 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [ ] Cross-tab sync via the `storage` event
 - [ ] Rotating break tips + editable motivational quote
 - [ ] Optional name + time-of-day greeting
+
+#### Customization
+- [ ] Timer style: ring / minimal (digits only) / progress bar
+- [ ] Clock font choice (a few curated Google Fonts) + weight
+- [ ] Per-mode colors (short/long break too, not just focus)
+- [ ] Custom theme builder: tweak bg, blobs, text; save as "My theme"
+- [ ] Background controls: blob intensity/speed, grain on/off, solid color option
+- [ ] Alarm per mode (e.g. gentle chime to end a break) + alarm repeat count
+- [ ] Toggle UI elements: cycle dots, subtitle, tab counters, quote
+- [ ] Custom mode names and subtitle messages
+- [ ] Preset intervals quick-pick (25/5/15 · 50/10/20 · 90/15/30)
 
 ### Phase 3 — Eye candy
 - [ ] three.js scenes (particles/fireflies, shader gradient mesh, rain on glass, low-poly tomato)
