@@ -17,6 +17,16 @@ Aesthetic Pomodoro timer. Static site on GitHub Pages; no backend. All persisten
 - `npm run dev` — local dev server
 - `npm run build` — typecheck + production build to `dist/`
 - `npm run preview` — serve the built site
+- `npm test` — unit tests (Vitest, jsdom); `npm run test:watch` while developing
+- `npm run test:e2e` — end-to-end tests (Playwright: Chromium, WebKit, mobile); starts its own dev server
+- `npm run check` — typecheck + unit + e2e; run before every commit
+
+## Testing
+CI (`.github/workflows/ci.yml`) runs typecheck, unit and e2e tests on every branch push and PR. Deploys to Pages only happen when they pass.
+- **Unit tests** sit next to the module as `src/**/*.test.ts`. Core logic (`src/core/`) must stay DOM-light so it's easy to test. Use `vi.useFakeTimers()` + `vi.setSystemTime()` for anything time-based instead of real waits.
+- **E2E tests** live in `e2e/`. Use `open(page, seed)` from `e2e/helpers.ts` to start from a known localStorage state (e.g. `focusInProgress(20)` for a session 20 min in) instead of waiting in real time. Import `test` from the helpers, which fail on any uncaught page error.
+- New behavior needs tests. Every bug fix needs a regression test that fails without the fix.
+- Prefer role/label locators (`getByRole`) over CSS classes where practical, which also exercises accessibility.
 
 ## Conventions
 - **Timer logic**: never count down with `setInterval`. Store `endsAt` (epoch ms) and derive remaining time from `Date.now()`.

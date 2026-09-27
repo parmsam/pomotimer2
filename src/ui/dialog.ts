@@ -72,12 +72,12 @@ export function ask(opts: DialogOptions): Promise<DialogResult> {
 
   function close(result: DialogResult) {
     document.removeEventListener('keydown', onKey, true);
-    const done = () => {
-      backdrop.remove();
-      prevFocus?.focus();
-      open = null;
-      resolve(result);
-    };
+    // Act on the choice right away; the fade-out runs on its own.
+    backdrop.style.pointerEvents = 'none';
+    prevFocus?.focus();
+    open = null;
+    resolve(result);
+    const done = () => backdrop.remove();
     if (reducedMotion()) return done();
     animate(box, { scale: 0.96, opacity: 0, duration: 160, ease: 'in(2)' });
     animate(backdrop, { opacity: 0, duration: 200, ease: 'in(2)', onComplete: done });

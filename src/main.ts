@@ -2,6 +2,7 @@ import './themes/tokens.css';
 import './styles.css';
 
 import { playAlarm, playTick, unlockAudio } from './core/audio';
+import { formatTime } from './core/format';
 import { notify } from './core/notify';
 import { clearAll, defaultAppData, DEFAULT_SETTINGS, loadAppData, loadSettings, write } from './core/storage';
 import { createStore, persist } from './core/store';
@@ -14,7 +15,7 @@ import { createInterruptionLogger } from './ui/interruptions';
 import { createSessionActions } from './ui/sessionActions';
 import { createSettingsPanel } from './ui/settingsPanel';
 import { createTasksPanel } from './ui/tasks';
-import { createTimerView, formatTime } from './ui/timerView';
+import { createTimerView } from './ui/timerView';
 
 const $ = <T extends HTMLElement = HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
 

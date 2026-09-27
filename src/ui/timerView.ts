@@ -1,15 +1,9 @@
 import type { JSAnimation } from 'animejs';
+import { formatTime } from '../core/format';
 import { rollChar, tweenProgress } from '../fx/anims';
 
 const RADIUS = 100;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-
-export function formatTime(ms: number): string {
-  const total = Math.ceil(ms / 1000);
-  const m = Math.floor(total / 60);
-  const s = total % 60;
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-}
 
 export interface TimerView {
   /** Per-frame update while running. */

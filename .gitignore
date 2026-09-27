@@ -5,3 +5,7 @@ dist/
 
 # Reference material from other sites (study only, never commit)
 ref/
+
+# Test output
+test-results/
+playwright-report/

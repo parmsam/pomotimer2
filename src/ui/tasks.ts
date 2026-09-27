@@ -1,4 +1,5 @@
 import { animate } from 'animejs';
+import { formatDuration } from '../core/format';
 import type { Store } from '../core/store';
 import type { Timer } from '../core/timer';
 import type { AppData, Settings, Task } from '../core/types';
@@ -10,14 +11,6 @@ const ICONS = {
   edit: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg>',
   trash: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
 };
-
-export function formatDuration(ms: number): string {
-  const mins = Math.floor(ms / 60_000);
-  if (mins < 1) return ms > 0 ? '<1m' : '0m';
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  return h ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m`;
-}
 
 const uid = () => (crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`).slice(0, 12);
 

@@ -44,6 +44,11 @@ public/sounds/
 ## Phases & status
 Keep this checklist current: tick items as they land, add new ones as scope changes.
 
+### Quality
+- [x] Unit tests (Vitest) for the timer engine, storage, store and formatting
+- [x] E2E tests (Playwright) on Chromium, WebKit and mobile
+- [x] CI on every push/PR; deploys blocked unless tests pass
+
 ### Phase 1 — MVP
 - [x] Vite + TS scaffold, GitHub Pages deploy workflow
 - [x] Timer engine (timestamp-based, survives reload)
@@ -104,6 +109,10 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [ ] Scenes react to the timer (e.g. calmer during breaks, subtle pulse on completion)
 - [ ] Auto-pause heavy scenes when the tab is hidden or on battery saver; always off under reduced motion
 
+#### Repo & discoverability
+- [ ] README: what it is, screenshot/GIF, live link, features, keyboard shortcuts, privacy note (data stays in the browser), local dev + testing commands, credits (Cirillo, inspirations)
+- [ ] Nicely placed GitHub link in the app: small GitHub icon in the top bar or an "About" footer in settings, opening the repo in a new tab
+
 #### Clock themes
 Whole-timer "faces" that go beyond the Phase 2 timer styles (ring / minimal / bar). Each face is a module that renders from the same `remaining / duration / mode / status` state, so the engine doesn't change.
 - [ ] Face picker in settings with live previews
@@ -147,3 +156,4 @@ Basics already exist (Space, R, S, `,`, Esc).
 - 2026-09-27 — Rolling digits off by default (felt busy); kept as an Appearance toggle.
 - 2026-09-27 — Phase 3 adds richer background animation options and Markdown export of sessions/tasks (JSON export/import stays in Phase 2 for backup).
 - 2026-09-27 — Clock themes (Tomato kitchen timer, Tamagotchi, and others) planned for Phase 3 as swappable timer faces on the same engine.
+- 2026-09-27 — Added Vitest + Playwright test suites and CI gating deploys, after bugs (ring offset, settings drawer) slipped past ad-hoc checks.
