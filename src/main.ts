@@ -155,7 +155,7 @@ const panel = createSettingsPanel(settings, () => {
 
 const actions = createSessionActions(data, timer);
 const tasks = createTasksPanel(data, settings, timer);
-const interruptions = createInterruptionLogger(data, timer, (title) => tasks.add(title));
+const interruptions = createInterruptionLogger(data, settings, timer, (title) => tasks.add(title));
 
 toggleBtn.addEventListener('click', () => {
   unlockAudio();
@@ -202,7 +202,7 @@ const SHORTCUTS: Shortcut[] = [
     match: (k) => k === '1' || k === '2' || k === '3',
     run: (e) => void actions.switchTo((['focus', 'short', 'long'] as Mode[])[Number(e.key) - 1]),
   },
-  { keys: ['I'], label: 'Log an interruption', group: 'Timer', match: (k) => k === 'i', run: () => interruptions.open() },
+  { keys: ['I'], label: 'Log an interruption (when tracking is on)', group: 'Timer', match: (k) => k === 'i', run: () => interruptions.open() },
   { keys: ['T'], label: 'Show / hide tasks', group: 'Tasks', match: (k) => k === 't', run: () => tasks.toggleVisible() },
   {
     keys: ['N'],
@@ -240,9 +240,9 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && panel.isOpen() && !dialogOpen() && !help.isOpen()) panel.close();
 });
 bindShortcuts(SHORTCUTS, {
-  modalOpen: () => dialogOpen() || help.isOpen(),
+  modalOpen: () => dialogOpen() || help.isOpen() || interruptions.isOpen(),
   settingsOpen: () => panel.isOpen(),
-  popoverOpen: () => interruptions.isOpen(),
+  popoverOpen: () => false,
 });
 
 // First visit on a device with a keyboard: point people at the cheat sheet once.

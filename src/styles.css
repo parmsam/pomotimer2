@@ -638,27 +638,6 @@ input[type='range'] {
   color: var(--on-accent);
   background: var(--mode);
 }
-.interrupt-pop {
-  position: absolute;
-  z-index: 5;
-  left: 50%;
-  bottom: calc(100% + 10px);
-  translate: -50% 0;
-  width: min(320px, calc(100vw - 32px));
-  padding: 14px;
-  border-radius: var(--radius);
-  background: var(--surface-strong);
-  border: 1px solid var(--border);
-  box-shadow: 0 20px 50px rgb(0 0 0 / 0.3);
-}
-.interrupt-q {
-  margin: 0 0 10px;
-  font-weight: 500;
-}
-.interrupt-pop input {
-  width: 100%;
-  margin-bottom: 10px;
-}
 .interrupt-kinds {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -718,7 +697,7 @@ input[type='range'] {
 }
 .task-add input[name='title'],
 .task-editor input[name='title'],
-.interrupt-pop input {
+.interrupt-dialog input {
   flex: 1;
   min-width: 0;
   padding: 10px 12px;
@@ -1077,4 +1056,69 @@ kbd {
 .toast-close svg {
   width: 16px;
   height: 16px;
+}
+
+.dialog-backdrop.light {
+  background: rgb(0 0 0 / 0.25);
+  backdrop-filter: none;
+}
+.interrupt-dialog p {
+  margin-bottom: 14px;
+}
+.interrupt-dialog input {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+/* ---------- Noted for later ---------- */
+
+.notes {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.notes[hidden] {
+  display: none;
+}
+.notes h3 {
+  margin: 0 0 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.notes-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.note {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 10px;
+  align-items: center;
+  padding: 8px 4px;
+}
+.note + .note {
+  border-top: 1px dashed var(--border);
+}
+.note-text {
+  overflow-wrap: anywhere;
+}
+.note-meta {
+  grid-row: 2;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.note-actions {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  display: flex;
+  gap: 6px;
+}
+.btn.small {
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  border-radius: 9px;
 }

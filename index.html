@@ -72,19 +72,11 @@
         <div class="cycle" id="cycle"></div>
 
         <div class="interrupt" id="interrupt" hidden>
-          <button class="interrupt-btn" type="button" aria-expanded="false" aria-haspopup="true">
+          <button class="interrupt-btn" type="button" aria-haspopup="dialog">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3 5 13h6l-1 8 8-10h-6l1-8Z"/></svg>
             Interrupted?
             <span class="interrupt-count" hidden></span>
           </button>
-          <div class="interrupt-pop" role="dialog" aria-label="Log an interruption" hidden>
-            <p class="interrupt-q">What pulled you away?</p>
-            <input type="text" maxlength="120" placeholder="Jot it down for later (optional)" aria-label="Note — saved as a task" />
-            <div class="interrupt-kinds">
-              <button type="button" class="btn" data-kind="internal"><strong>Internal</strong><small>My own urge</small></button>
-              <button type="button" class="btn" data-kind="external"><strong>External</strong><small>Someone or something</small></button>
-            </div>
-          </div>
         </div>
         </div>
 
@@ -100,6 +92,10 @@
           </form>
           <p class="tasks-empty">Add a task, then tap it to track your focus time against it.</p>
           <ul class="task-list"></ul>
+          <section class="notes" id="notes" aria-labelledby="notes-title" hidden>
+            <h3 id="notes-title">Noted for later</h3>
+            <ul class="notes-list"></ul>
+          </section>
           <footer class="tasks-foot">
             <span id="tasks-foot"></span>
             <button class="link-btn" id="tasks-clear" type="button" hidden>Clear finished</button>

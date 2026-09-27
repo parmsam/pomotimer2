@@ -108,14 +108,38 @@ test.describe('stopping a pomodoro early', () => {
   });
 });
 
-test('interruptions are tallied and notes become tasks', async ({ page }) => {
-  await open(page, { data: focusInProgress(3) });
-  await blur(page);
-  await page.keyboard.press('i');
-  await page.getByRole('textbox', { name: /Note/ }).fill('Call the bank');
-  await page.getByRole('button', { name: /External/ }).click();
-  await expect(page.locator('.interrupt-count')).toHaveText('1');
-  await expect(page.locator('.task-title')).toHaveText(['Call the bank']);
-  const d = await stored(page);
-  expect(d.timer.interruptions).toEqual({ internal: 0, external: 1 });
+test.describe('interruption tracking', () => {
+  test('is off by default', async ({ page }) => {
+    await open(page, { data: focusInProgress(3) });
+    await expect(page.locator('.interrupt-btn')).toBeHidden();
+  });
+
+  test('tallies interruptions and keeps notes out of the task list until promoted', async ({ page }) => {
+    await open(page, { data: focusInProgress(3), settings: { trackInterruptions: true } });
+    await page.locator('.interrupt-btn').click();
+    const dialog = page.getByRole('dialog', { name: 'What pulled you away?' });
+    await dialog.getByRole('textbox', { name: 'Note for later' }).fill('Call the bank');
+    await dialog.getByRole('button', { name: /External/ }).click();
+    await expect(dialog).toBeHidden();
+    await expect(page.locator('.interrupt-count')).toHaveText('1');
+    expect((await stored(page)).timer.interruptions).toEqual({ internal: 0, external: 1 });
+
+    // Not a task yet: it waits in "Noted for later".
+    await expect(page.locator('.task')).toHaveCount(0);
+    const notes = page.getByRole('region', { name: 'Noted for later' });
+    await expect(notes).toContainText('Call the bank');
+    await expect(notes).toContainText('External');
+
+    await notes.getByRole('button', { name: 'Add “Call the bank” as a task' }).click();
+    await expect(page.locator('.task-title')).toHaveText(['Call the bank']);
+    await expect(notes).toBeHidden();
+  });
+
+  test('notes can be dismissed', async ({ page }) => {
+    await open(page, { data: { ...focusInProgress(3), notes: [{ id: 'n1', at: Date.now(), kind: 'internal', text: 'Check email' }] } });
+    const notes = page.getByRole('region', { name: 'Noted for later' });
+    await notes.getByRole('button', { name: 'Dismiss “Check email”' }).click();
+    await expect(notes).toBeHidden();
+    expect((await stored(page)).notes).toEqual([]);
+  });
 });

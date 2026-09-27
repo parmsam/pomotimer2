@@ -43,6 +43,7 @@ describe('loadAppData', () => {
     expect(d.timer.interruptions).toEqual({ internal: 0, external: 0 });
     expect(d.history).toHaveLength(1);
     expect(d.tasks).toEqual([]);
+    expect(d.notes).toEqual([]);
     expect(d.activeTaskId).toBeNull();
   });
 

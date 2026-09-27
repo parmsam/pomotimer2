@@ -18,6 +18,7 @@ export const DEFAULT_SETTINGS: Settings = {
   strictMode: false,
   showTasks: true,
   muted: false,
+  trackInterruptions: false,
   shortcutsHintSeen: false,
 };
 
@@ -36,6 +37,7 @@ export function defaultAppData(settings: Settings): AppData {
     history: [],
     tasks: [],
     activeTaskId: null,
+    notes: [],
   };
 }
 
@@ -90,5 +92,6 @@ export function loadAppData(settings: Settings): AppData {
     history: Array.isArray(stored.history) ? (stored.history as AppData['history']) : [],
     tasks: Array.isArray(stored.tasks) ? (stored.tasks as AppData['tasks']) : [],
     activeTaskId: typeof stored.activeTaskId === 'string' ? stored.activeTaskId : null,
+    notes: Array.isArray(stored.notes) ? (stored.notes as AppData['notes']) : [],
   };
 }

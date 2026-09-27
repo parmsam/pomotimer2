@@ -22,6 +22,8 @@ export interface Settings {
   strictMode: boolean;
   showTasks: boolean;
   muted: boolean;
+  /** Show the interruption logger during focus (Cirillo's internal/external marks). */
+  trackInterruptions: boolean;
   /** The one-time "press ? for shortcuts" tip has been shown. */
   shortcutsHintSeen: boolean;
 }
@@ -47,6 +49,14 @@ export interface Interruptions {
   internal: number;
   /** Someone or something else (Cirillo's -). */
   external: number;
+}
+
+/** A distraction jotted down during focus, kept apart from tasks until you decide. */
+export interface InterruptionNote {
+  id: string;
+  at: number;
+  kind: keyof Interruptions;
+  text: string;
 }
 
 export interface SessionRecord {
@@ -80,6 +90,7 @@ export interface AppData {
   history: SessionRecord[];
   tasks: Task[];
   activeTaskId: string | null;
+  notes: InterruptionNote[];
 }
 
 export const MODE_LABELS: Record<Mode, string> = {

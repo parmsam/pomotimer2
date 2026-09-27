@@ -87,10 +87,10 @@ test.describe('keyboard shortcuts', () => {
 
 test('I logs an interruption during focus', async ({ page, isMobile }) => {
   test.skip(isMobile, 'keyboard shortcut');
-  await open(page, { data: focusInProgress(2) });
+  await open(page, { data: focusInProgress(2), settings: { trackInterruptions: true } });
   await blur(page);
   await page.keyboard.press('i');
-  await page.getByRole('button', { name: /Internal/ }).click();
+  await page.getByRole('dialog', { name: 'What pulled you away?' }).getByRole('button', { name: /Internal/ }).click();
   expect((await stored(page)).timer.interruptions.internal).toBe(1);
 });
 

@@ -80,6 +80,7 @@ export function createSettingsPanel(settings: Store<Settings>, onResetAll: () =>
     toggle('autoStartBreaks', 'Auto-start breaks'),
     toggle('autoStartFocus', 'Auto-start focus', 'After a break ends'),
     toggle('strictMode', 'Strict mode', 'No pausing — stopping a pomodoro abandons it'),
+    toggle('trackInterruptions', 'Track interruptions', 'Log internal/external distractions during focus (I)'),
   );
 
   // --- Appearance
