@@ -14,6 +14,7 @@ An aesthetic, customizable Pomodoro timer with smooth [anime.js](https://animejs
 
 - **A timer that doesn't drift.** It counts from a saved end time, so background tabs, sleep and reloads don't throw it off. A session that finishes while the page is closed still counts.
 - **Tasks.** A "Today" list with pomodoro estimates, an estimated finish time, and focus time tracked against whichever task you're working on.
+- **Markdown in and out.** Paste a Markdown checklist to add many tasks at once (`- [ ] Write report 🍅3`). Copy your tasks or today's log as Markdown, or download a session log for any period.
 - **Honest sessions.** Following Cirillo's rule that a pomodoro is indivisible, stopping early abandons it, but your focused minutes still count toward today. Past the halfway mark you can still count it.
 - **Progress.** A daily streak, a daily goal, per-mode counts, and a 7-day focus chart.
 - **Optional extras:** strict mode (no pausing), interruption tracking (internal/external, with notes saved for later), and focus mode, which hides everything but the timer.
@@ -67,7 +68,7 @@ The plan and roadmap live in [`PLAN.md`](PLAN.md), and conventions for contribut
 
 ## Roadmap
 
-Up next: Markdown import/export of tasks, an installable offline app, clock themes (a tomato kitchen timer, a Tamagotchi), three.js backgrounds, ambient sounds and haptics. See [`PLAN.md`](PLAN.md).
+Up next: an installable offline app, clock themes (a tomato kitchen timer, a Tamagotchi), three.js backgrounds, ambient sounds and haptics. See [`PLAN.md`](PLAN.md).
 
 ## Credits
 

@@ -59,3 +59,23 @@ test('GitHub link and version are shown in the footer and in About', async ({ pa
   const about = page.getByRole('complementary', { name: 'Settings' }).locator('.about');
   await expect(about.getByRole('link', { name: 'Report an issue' })).toHaveAttribute('href', /\/issues\/new$/);
 });
+
+test('the whole switch is clickable, not just a corner (Safari regression)', async ({ page }) => {
+  await open(page);
+  await page.locator('#settings-open').click();
+  for (const id of ['#set-tick', '#set-autoStartBreaks', '#set-muted']) {
+    const input = page.locator(id);
+    const sw = input.locator('..');
+    await sw.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(150);
+    const box = (await sw.boundingBox())!;
+    const before = await input.isChecked();
+    // Click the far side of the track, away from where a shrunken native checkbox would sit.
+    await page.mouse.click(box.x + box.width * 0.8, box.y + box.height * 0.6);
+    await expect(input).toBeChecked({ checked: !before });
+    // Some WebKit builds shrink native checkboxes to 12x12, so the behavior above can pass
+    // by luck. Pin the two things that make it robust everywhere:
+    expect(await sw.evaluate((el) => el.tagName)).toBe('LABEL'); // clicking anywhere on a label toggles its input
+    expect(await input.evaluate((el) => getComputedStyle(el).appearance)).toBe('none'); // lets the input fill the switch
+  }
+});

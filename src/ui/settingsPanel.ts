@@ -31,6 +31,8 @@ export interface SettingsPanel {
 }
 
 export interface DataActions {
+  /** Download the session log as Markdown; `days` null = all time. */
+  exportLog(days: number | null): void;
   resetAll(): void;
   exportBackup(): void;
   importBackup(file: File): Promise<void>;
@@ -55,7 +57,7 @@ export function createSettingsPanel(settings: Store<Settings>, dataActions: Data
     syncers.push((s) => (input.checked = s[key]));
     const labelEl = el('label', { htmlFor: input.id }, label);
     if (hint) labelEl.append(el('small', {}, hint));
-    return el('div', { className: 'row' }, labelEl, el('span', { className: 'switch' }, input, el('span')));
+    return el('div', { className: 'row' }, labelEl, el('label', { className: 'switch' }, input, el('span')));
   }
 
   function numberRow(min: number, max: number, get: (s: Settings) => number, set: (n: number) => void) {
@@ -215,8 +217,21 @@ export function createSettingsPanel(settings: Store<Settings>, dataActions: Data
     });
     if (r === 'confirm') dataActions.resetAll();
   });
+  const logRange = el(
+    'select',
+    { id: 'log-range' },
+    el('option', { value: '1' }, 'Today'),
+    el('option', { value: '7' }, 'Last 7 days'),
+    el('option', { value: '30' }, 'Last 30 days'),
+    el('option', { value: 'all' }, 'All time'),
+  );
+  logRange.setAttribute('aria-label', 'Log period');
+  const logBtn = el('button', { className: 'btn', type: 'button' }, 'Download log (.md)');
+  logBtn.addEventListener('click', () => dataActions.exportLog(logRange.value === 'all' ? null : Number(logRange.value)));
+
   const dataSection = section(
     'Data',
+    el('div', { className: 'row' }, el('span', { className: 'label' }, 'Session log as Markdown'), logRange, logBtn),
     el('p', { className: 'hint' }, 'Everything is saved only in this browser. Back it up to move to another device or browser.'),
     el('div', { className: 'data-actions' }, exportBtn, importBtn, fileInput, resetBtn),
   );

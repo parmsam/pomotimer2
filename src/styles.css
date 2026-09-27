@@ -470,18 +470,25 @@ input[type='range'] {
 }
 
 /* Switch */
+/* The switch is a <label> wrapping its checkbox, so the whole thing is clickable. */
 .switch {
   position: relative;
   flex: none;
   width: 46px;
   height: 26px;
+  cursor: pointer;
 }
 .switch input {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   opacity: 0;
   margin: 0;
   cursor: pointer;
+  /* Safari ignores width/height on native checkboxes (12x12 hit area) unless appearance is off. */
+  -webkit-appearance: none;
+  appearance: none;
 }
 .switch span {
   position: absolute;
@@ -1511,4 +1518,122 @@ body.focus-mode .app-foot {
   gap: 6px;
   color: var(--text);
   text-underline-offset: 3px;
+}
+
+/* ---------- Task menu & Markdown import ---------- */
+
+.tasks-head {
+  align-items: center;
+}
+.tasks-head-end {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.menu-anchor {
+  position: relative;
+}
+.menu {
+  position: absolute;
+  z-index: 8;
+  top: calc(100% + 6px);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+  padding: 6px;
+  border-radius: 14px;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  box-shadow: 0 16px 40px rgb(0 0 0 / 0.3);
+}
+.menu button {
+  padding: 9px 12px;
+  border-radius: 9px;
+  text-align: left;
+  font-size: 0.9rem;
+}
+.menu button:hover,
+.menu button:focus-visible {
+  background: color-mix(in oklab, var(--text) 8%, transparent);
+  outline: none;
+}
+
+.dialog.import {
+  width: min(520px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+.dialog.import p {
+  margin-bottom: 12px;
+}
+.dialog.import textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font: 0.9rem/1.5 ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  color: var(--text);
+  resize: vertical;
+}
+.syntax {
+  margin: 8px 0 4px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.syntax summary {
+  cursor: pointer;
+}
+.syntax pre {
+  margin: 8px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in oklab, var(--text) 6%, transparent);
+  color: var(--text);
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+}
+.syntax p {
+  margin: 0 0 4px !important;
+}
+.syntax code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: color-mix(in oklab, var(--text) 8%, transparent);
+  color: var(--text);
+}
+.import-preview {
+  min-height: 24px;
+  margin: 10px 0 16px;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.import-preview ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.import-preview li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 2px;
+  color: var(--text);
+  border-bottom: 1px dashed var(--border);
+}
+.import-preview li.done {
+  color: var(--muted);
+}
+.import-preview li span {
+  color: var(--muted);
+  white-space: nowrap;
+}
+.import-preview .more {
+  margin: 6px 0 0 !important;
+  font-size: 0.8rem;
+}
+#log-range {
+  width: auto;
+  flex: none;
 }

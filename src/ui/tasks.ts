@@ -1,5 +1,8 @@
 import { animate } from 'animejs';
 import { formatDuration } from '../core/format';
+import type { ParsedTask } from '../core/markdown';
+import { openImportDialog } from './importTasks';
+import { toast } from './toast';
 import type { Store } from '../core/store';
 import type { Timer } from '../core/timer';
 import type { AppData, Settings, Task } from '../core/types';
@@ -16,6 +19,8 @@ const uid = () => (crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`).sl
 
 export interface TasksPanel {
   add(title: string, estimate?: number): void;
+  addMany(tasks: ParsedTask[]): void;
+  importMarkdown(initial?: string): void;
   /** Refresh live values (the active task's tracked time). Call about once a second. */
   tick(): void;
   toggleVisible(): void;
@@ -51,6 +56,27 @@ export function createTasksPanel(data: Store<AppData>, settings: Store<Settings>
     const firstOpen = !tasks().some((t) => !t.done);
     setTasks((ts) => [...ts, task], firstOpen && !data.get().activeTaskId ? { activeTaskId: task.id } : {});
   }
+
+  function addMany(parsed: ParsedTask[]) {
+    if (!parsed.length) return;
+    const now = Date.now();
+    const created: Task[] = parsed.map((p, i) => ({
+      id: uid(),
+      title: p.title,
+      estimate: p.estimate,
+      pomodoros: p.pomodoros,
+      trackedMs: 0,
+      done: p.done,
+      createdAt: now + i,
+      doneAt: p.done ? now : null,
+    }));
+    const needsActive = !data.get().activeTaskId || !tasks().some((t) => t.id === data.get().activeTaskId && !t.done);
+    const firstOpen = created.find((t) => !t.done);
+    setTasks((ts) => [...ts, ...created], needsActive && firstOpen ? { activeTaskId: firstOpen.id } : {});
+    toast(`Added ${created.length} task${created.length === 1 ? '' : 's'}`);
+  }
+
+  const importMarkdown = (initial = '') => openImportDialog(initial, addMany);
 
   function toggleDone(id: string) {
     const task = tasks().find((t) => t.id === id);
@@ -292,6 +318,14 @@ export function createTasksPanel(data: Store<AppData>, settings: Store<Settings>
     }
   });
 
+  // Pasting several lines offers to add them all, with a preview.
+  input.addEventListener('paste', (e) => {
+    const text = e.clipboardData?.getData('text/plain') ?? '';
+    if (text.split(/\r?\n/).filter((l) => l.trim()).length < 2) return;
+    e.preventDefault();
+    importMarkdown(text);
+  });
+
   input.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowDown' && tasks().length) {
       e.preventDefault();
@@ -342,6 +376,8 @@ export function createTasksPanel(data: Store<AppData>, settings: Store<Settings>
 
   return {
     add,
+    addMany,
+    importMarkdown,
     tick() {
       const id = data.get().activeTaskId;
       const li = id ? rows.get(id) : undefined;

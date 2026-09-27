@@ -90,7 +90,14 @@
         <section class="tasks-panel" id="tasks" aria-labelledby="tasks-title">
           <header class="tasks-head">
             <h2 id="tasks-title">Today</h2>
-            <span class="tasks-meta" id="tasks-meta"></span>
+            <span class="tasks-head-end">
+              <span class="tasks-meta" id="tasks-meta"></span>
+              <span class="menu-anchor">
+                <button class="icon-sm" id="tasks-menu" type="button" aria-label="Task options">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3"/></svg>
+                </button>
+              </span>
+            </span>
           </header>
           <form class="task-add" autocomplete="off">
             <input name="title" maxlength="120" placeholder="What are you working on?" aria-label="New task" />

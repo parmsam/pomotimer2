@@ -123,9 +123,9 @@ Whole-timer "faces" that go beyond the Phase 2 timer styles (ring / minimal / ba
 - [ ] Faces follow the theme colours, respect reduced motion, and stay accessible (time always available to screen readers)
 
 #### Markdown export, import & bulk add
-- [ ] Export session history as Markdown (per-day headings, sessions with times and durations, daily totals)
-- [ ] One-click "Copy as Markdown" for today's tasks and outcomes (done/open, pomodoros, tracked time, interruptions)
-- [ ] Import / bulk-add tasks from Markdown, pasted into the new-task field or an import dialog, with a preview before adding. Proposed syntax, one task per line:
+- [x] Export session history as Markdown (per-day headings, sessions with times and durations, daily totals)
+- [x] One-click "Copy as Markdown" for today's tasks and outcomes (done/open, pomodoros, tracked time, interruptions)
+- [x] Import / bulk-add tasks from Markdown, pasted into the new-task field or an import dialog, with a preview before adding. Proposed syntax, one task per line:
   ```
   - [ ] Write report 🍅3        # open task, estimate 3
   - [x] Review PRs 🍅1          # already done
@@ -133,10 +133,10 @@ Whole-timer "faces" that go beyond the Phase 2 timer styles (ring / minimal / ba
   Email Sam                     # plain lines work too; estimate defaults to 1
   ## Work                       # headings are kept as optional list/group labels (future)
   ```
-- [ ] Round-trip: exported task Markdown re-imports cleanly (same syntax both ways)
-- [ ] Export tasks as a Markdown checklist (`- [x]`), with pomodoros and tracked time per task
-- [ ] Export options: date range, include tasks / sessions / stats summary
-- [ ] Download as `.md` + copy to clipboard (for pasting into Obsidian, Notion, GitHub)
+- [x] Round-trip: exported task Markdown re-imports cleanly (same syntax both ways)
+- [x] Export tasks as a Markdown checklist (`- [x]`), with pomodoros and tracked time per task
+- [x] Export options: date range, include tasks / sessions / stats summary
+- [x] Download as `.md` + copy to clipboard (for pasting into Obsidian, Notion, GitHub)
 
 #### Keyboard & gesture shortcuts
 Basics already exist (Space, R, S, `,`, Esc).
@@ -203,3 +203,4 @@ Only pick these up if there's real demand. Several overlap with Phase 3 clock th
 - 2026-09-27 — Quotes become their own Phase 4: optional, default list maintained as Markdown in the repo, or user-provided list.
 - 2026-09-27 — Customization trimmed to presets + per-mode colors in Phase 2; the other ideas are reserved in Phase 4.
 - 2026-09-27 — Phase 2 complete; the name greeting moved to Phase 4 alongside quotes.
+- 2026-09-27 — Safari fix: settings switches are <label>s with `appearance: none` checkboxes. Some WebKit builds shrink native checkboxes to 12x12, which made most of each switch unclickable.

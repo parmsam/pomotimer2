@@ -11,7 +11,11 @@ import { MODE_LABELS, type Mode } from './core/types';
 import { celebrate, driftBlobs, entrance, press, slidePill, swapText } from './fx/anims';
 import { applyTheme } from './themes/presets';
 import { backupFilename, makeBackup, parseBackup } from './core/backup';
+import { historyToMarkdown, tasksToMarkdown } from './core/markdown';
 import { dayKey } from './core/stats';
+import { copyText, downloadText } from './ui/clipboard';
+import { attachMenu, menuOpen } from './ui/menu';
+import { importOpen } from './ui/importTasks';
 import { breakTip } from './core/tips';
 import { onceAcrossTabs, syncAcrossTabs } from './core/sync';
 import { ask, dialogOpen } from './ui/dialog';
@@ -170,7 +174,14 @@ settings.subscribe((s, prev) => {
 });
 
 // ---- Controls
+const logMarkdown = (days: number | null) =>
+  historyToMarkdown({ ...data.get(), now: Date.now(), days, dailyGoal: settings.get().dailyGoal });
+
 const panel = createSettingsPanel(settings, {
+  exportLog(days) {
+    downloadText(`pomo-log-${dayKey(Date.now())}${days === null ? '-all' : days === 1 ? '' : `-${days}d`}.md`, logMarkdown(days));
+    toast('Log downloaded');
+  },
   resetAll() {
     clearAll();
     settings.set(structuredClone(DEFAULT_SETTINGS));
@@ -287,6 +298,22 @@ const SHORTCUTS: Shortcut[] = [
   { keys: ['Esc'], label: 'Close any panel or dialog', group: 'General' },
 ];
 
+attachMenu($<HTMLButtonElement>('#tasks-menu'), () => [
+  {
+    label: 'Copy tasks as Markdown',
+    run: async () => {
+      const md = tasksToMarkdown(data.get().tasks);
+      if (!md) return toast('No tasks to copy yet');
+      toast((await copyText(md)) ? 'Tasks copied as Markdown' : 'Couldn’t copy. Try Download log in Settings');
+    },
+  },
+  {
+    label: 'Copy today’s log',
+    run: async () => toast((await copyText(logMarkdown(1))) ? 'Today’s log copied' : 'Couldn’t copy. Try Download log in Settings'),
+  },
+  { label: 'Import from Markdown…', run: () => tasks.importMarkdown() },
+]);
+
 const help = createShortcutsHelp(SHORTCUTS);
 const openHelp = () => {
   if (panel.isOpen()) panel.close();
@@ -297,12 +324,12 @@ $('#shortcuts-open').addEventListener('click', openHelp);
 
 // Esc closes settings even from inside one of its inputs, otherwise leaves focus mode.
 document.addEventListener('keydown', (e) => {
-  if (e.key !== 'Escape' || e.defaultPrevented || dialogOpen() || help.isOpen() || stats.isOpen() || interruptions.isOpen()) return;
+  if (e.key !== 'Escape' || e.defaultPrevented || dialogOpen() || help.isOpen() || stats.isOpen() || interruptions.isOpen() || importOpen() || menuOpen()) return;
   if (panel.isOpen()) panel.close();
   else if (focusMode.isOn()) focusMode.exit();
 });
 bindShortcuts(SHORTCUTS, {
-  modalOpen: () => dialogOpen() || help.isOpen() || interruptions.isOpen() || stats.isOpen(),
+  modalOpen: () => dialogOpen() || help.isOpen() || interruptions.isOpen() || stats.isOpen() || importOpen() || menuOpen(),
   settingsOpen: () => panel.isOpen(),
   popoverOpen: () => false,
 });
