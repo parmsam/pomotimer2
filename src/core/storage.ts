@@ -9,6 +9,7 @@ export const DEFAULT_SETTINGS: Settings = {
   autoStartFocus: false,
   theme: 'lofi-dusk',
   accent: null,
+  rollingDigits: false,
   alarm: 'bell',
   volume: 0.6,
   tick: false,

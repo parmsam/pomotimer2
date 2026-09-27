@@ -54,6 +54,7 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [x] Alarm sounds + volume
 - [x] Notifications, title countdown
 - [x] Favicon (SVG tomato)
+- [x] Rolling-digit clock animation as an opt-in setting (off by default)
 - [ ] First deploy to GitHub Pages (merge to `main`, enable Pages → GitHub Actions)
 
 ### Phase 2 — Polish
@@ -104,3 +105,4 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - 2026-09-27 — Alarms are synthesized with Web Audio (no sample files, no licensing concerns).
 - 2026-09-27 — Default long break stays 15 min to match other popular apps (Wikipedia/Cirillo canon is 20–30).
 - 2026-09-27 — From the Wikipedia article: pomodoros are indivisible and interruptions get logged → Phase 2 items for abandoned sessions, interruption log, strict mode.
+- 2026-09-27 — Rolling digits off by default (felt busy); kept as an Appearance toggle.

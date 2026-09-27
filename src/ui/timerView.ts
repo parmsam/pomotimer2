@@ -18,7 +18,7 @@ export interface TimerView {
   refill(remainingMs: number, durationMs: number): void;
 }
 
-export function createTimerView(root: HTMLElement): TimerView {
+export function createTimerView(root: HTMLElement, rollingDigits: () => boolean): TimerView {
   const progressEl = root.querySelector<SVGCircleElement>('.ring-progress')!;
   const headEl = root.querySelector<SVGGElement>('.ring-head-wrap')!;
   const timeEl = root.querySelector<HTMLElement>('#time')!;
@@ -53,7 +53,7 @@ export function createTimerView(root: HTMLElement): TimerView {
         if (c !== shown[i]) {
           const span = timeEl.children[i] as HTMLElement;
           span.textContent = c;
-          rollChar(span, direction);
+          if (rollingDigits()) rollChar(span, direction);
         }
       });
     }

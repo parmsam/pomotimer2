@@ -118,6 +118,7 @@ export function createSettingsPanel(settings: Store<Settings>, onResetAll: () =>
       el('label', { htmlFor: accentInput.id }, 'Focus color'),
       el('div', { className: 'row' }, accentReset, accentInput),
     ),
+    toggle('rollingDigits', 'Rolling digits', 'Animate the clock as each digit changes'),
   );
 
   // --- Sound

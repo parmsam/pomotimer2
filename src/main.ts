@@ -29,7 +29,7 @@ const cycleEl = $('#cycle');
 const liveEl = $('#live');
 const pill = $('.mode-pill');
 const modeTabs = [...document.querySelectorAll<HTMLButtonElement>('.modes button')];
-const view = createTimerView($('.dial'));
+const view = createTimerView($('.dial'), () => settings.get().rollingDigits);
 
 const COMPLETE_MESSAGES: Record<Mode, string> = {
   focus: 'Nice work — time for a break.',

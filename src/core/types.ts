@@ -11,6 +11,8 @@ export interface Settings {
   theme: string;
   /** Overrides the theme's focus color when set. */
   accent: string | null;
+  /** Roll each digit in as the clock changes. */
+  rollingDigits: boolean;
   alarm: AlarmSound;
   volume: number;
   tick: boolean;
