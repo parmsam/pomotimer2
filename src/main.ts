@@ -10,7 +10,10 @@ import { createTimer } from './core/timer';
 import { MODE_LABELS, type Mode } from './core/types';
 import { celebrate, driftBlobs, entrance, press, slidePill, swapText } from './fx/anims';
 import { applyTheme } from './themes/presets';
+import { dayKey } from './core/stats';
+import { onceAcrossTabs, syncAcrossTabs } from './core/sync';
 import { dialogOpen } from './ui/dialog';
+import { createStatsView } from './ui/stats';
 import { bindShortcuts, createShortcutsHelp, type Shortcut } from './ui/shortcuts';
 import { toast } from './ui/toast';
 import { createInterruptionLogger } from './ui/interruptions';
@@ -26,6 +29,7 @@ const settings = createStore(loadSettings());
 const data = createStore(loadAppData(settings.get()));
 persist(settings, (s) => write('settings', s));
 persist(data, (d) => write('data', d));
+syncAcrossTabs(settings, data);
 
 // ---- Elements
 const root = document.documentElement;
@@ -48,14 +52,27 @@ const COMPLETE_MESSAGES: Record<Mode, string> = {
 const timer = createTimer(data, settings, ({ finished, next, missed, early }) => {
   if (!missed && !early) {
     const s = settings.get();
-    if (!s.muted) playAlarm(s.alarm, s.volume);
+    // With several tabs open, only one rings and notifies.
+    onceAcrossTabs('pomo-session-end', () => {
+      if (!s.muted) playAlarm(s.alarm, s.volume);
+      if (s.notifications) notify(`${MODE_LABELS[finished]} complete`, COMPLETE_MESSAGES[finished]);
+    });
     celebrate($('#burst'), $('.dial'));
-    if (s.notifications) notify(`${MODE_LABELS[finished]} complete`, COMPLETE_MESSAGES[finished]);
   } else if (early) {
     celebrate($('#burst'), $('.dial'));
   }
+  if (finished === 'focus') queueMicrotask(checkGoal);
   liveEl.textContent = `${MODE_LABELS[finished]} complete. Next: ${MODE_LABELS[next]}.`;
 });
+
+function checkGoal() {
+  const { goal } = stats.current();
+  const today = dayKey(Date.now());
+  if (!goal.reached || data.get().goalCelebratedOn === today) return;
+  data.set({ goalCelebratedOn: today });
+  toast(`Daily goal reached — ${goal.done} pomodoros today 🎉`, { duration: 5000 });
+  setTimeout(() => celebrate($('#burst'), $('.dial')), 450);
+}
 
 // ---- Rendering
 function renderMode(instant = false) {
@@ -117,6 +134,7 @@ function secondTick() {
   lastSecond = second;
   renderTitle(remaining);
   tasks.tick();
+  stats.refresh();
   const s = settings.get();
   const { status, mode } = data.get().timer;
   if (s.tick && !s.muted && status === 'running' && mode === 'focus' && remaining > 0) playTick(s.volume);
@@ -154,6 +172,7 @@ const panel = createSettingsPanel(settings, () => {
 });
 
 const actions = createSessionActions(data, timer);
+const stats = createStatsView(data, settings, timer);
 const tasks = createTasksPanel(data, settings, timer);
 const interruptions = createInterruptionLogger(data, settings, timer, (title) => tasks.add(title));
 
@@ -203,6 +222,7 @@ const SHORTCUTS: Shortcut[] = [
     run: (e) => void actions.switchTo((['focus', 'short', 'long'] as Mode[])[Number(e.key) - 1]),
   },
   { keys: ['I'], label: 'Log an interruption (when tracking is on)', group: 'Timer', match: (k) => k === 'i', run: () => interruptions.open() },
+  { keys: ['G'], label: 'Progress, streak & goal', group: 'General', match: (k) => k === 'g', run: () => stats.open() },
   { keys: ['T'], label: 'Show / hide tasks', group: 'Tasks', match: (k) => k === 't', run: () => tasks.toggleVisible() },
   {
     keys: ['N'],
@@ -240,7 +260,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && panel.isOpen() && !dialogOpen() && !help.isOpen()) panel.close();
 });
 bindShortcuts(SHORTCUTS, {
-  modalOpen: () => dialogOpen() || help.isOpen() || interruptions.isOpen(),
+  modalOpen: () => dialogOpen() || help.isOpen() || interruptions.isOpen() || stats.isOpen(),
   settingsOpen: () => panel.isOpen(),
   popoverOpen: () => false,
 });
@@ -257,7 +277,9 @@ if (!settings.get().shortcutsHintSeen && window.matchMedia('(hover: hover) and (
   }, 2500);
 }
 
-window.addEventListener('resize', () => renderMode(true));
+// Tab widths change with fonts, window size and the per-tab counts; keep the pill aligned.
+new ResizeObserver(() => renderMode(true)).observe(document.querySelector('.modes')!);
+modeTabs.forEach((b) => new ResizeObserver(() => renderMode(true)).observe(b));
 
 // ---- Boot
 applyTheme(settings.get().theme, settings.get().accent);
@@ -267,6 +289,5 @@ renderCycle();
 view.render(timer.remaining(), timer.duration());
 driftBlobs();
 entrance();
-document.fonts?.ready.then(() => renderMode(true));
 requestAnimationFrame(frame);
 setInterval(secondTick, 200);

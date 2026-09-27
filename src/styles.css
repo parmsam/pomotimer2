@@ -988,8 +988,9 @@ input[type='range'] {
 }
 .shortcuts-body dl {
   display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 8px 18px;
+  /* shared key-column width so descriptions line up across groups */
+  grid-template-columns: 7.5rem 1fr;
+  gap: 8px 16px;
   align-items: center;
   margin: 0;
 }
@@ -1121,4 +1122,223 @@ kbd {
   padding: 5px 10px;
   font-size: 0.8rem;
   border-radius: 9px;
+}
+
+/* ---------- Streak, goal, tab counts ---------- */
+
+.streak-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+}
+.streak-chip span[aria-hidden] {
+  filter: grayscale(1);
+  opacity: 0.6;
+  transition:
+    filter 0.4s,
+    opacity 0.4s;
+}
+.streak-chip.lit {
+  color: var(--text);
+}
+.streak-chip.lit span[aria-hidden] {
+  filter: none;
+  opacity: 1;
+}
+
+.mode-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: color-mix(in oklab, var(--text) 12%, transparent);
+  vertical-align: 1px;
+}
+.modes button[aria-selected='true'] .mode-count {
+  background: color-mix(in oklab, var(--on-accent) 18%, transparent);
+}
+.mode-count[hidden] {
+  display: none;
+}
+
+.goal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: -10px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.goal-bar {
+  width: 96px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--faint);
+  overflow: hidden;
+}
+.goal-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: var(--mode);
+  transition: width 0.8s var(--ease);
+}
+
+/* ---------- Progress dialog ---------- */
+
+.dialog.stats {
+  width: min(560px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 8px 0 20px;
+}
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: color-mix(in oklab, var(--text) 5%, transparent);
+  border: 1px solid var(--border);
+}
+.tile-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.tile-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.tile-sub {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.stats-h {
+  margin: 0 0 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.stats-note {
+  margin: 14px 0 0;
+  font-size: 0.82rem;
+}
+
+.chart {
+  position: relative;
+  padding-top: 18px;
+}
+.chart-max {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+.bars {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  height: 150px;
+  /* recessive top gridline at the scale max */
+  border-top: 1px dashed var(--border);
+}
+.bar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 0 22px;
+  border-radius: 8px;
+}
+.bar:hover,
+.bar:focus-visible {
+  background: color-mix(in oklab, var(--text) 5%, transparent);
+}
+.bar-fill {
+  width: min(28px, 70%);
+  border-radius: 4px 4px 0 0;
+  background: var(--mode);
+  transform-origin: bottom;
+  opacity: 0.55;
+}
+.bar.today .bar-fill {
+  opacity: 1;
+}
+.bar::after {
+  /* baseline */
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 22px;
+  height: 1px;
+  background: var(--border);
+}
+.bar-day {
+  position: absolute;
+  bottom: 2px;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.bar.today .bar-day {
+  color: var(--text);
+  font-weight: 600;
+}
+.bar-value {
+  margin-bottom: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.chart-tip {
+  position: absolute;
+  top: -6px;
+  translate: -50% -100%;
+  z-index: 2;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  pointer-events: none;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.25);
+}
+.chart-tip[hidden] {
+  display: none;
+}
+
+@media (max-width: 420px) {
+  .tile-value {
+    font-size: 1.05rem;
+  }
+  .streak-chip {
+    height: 44px;
+    padding: 0 11px;
+  }
+  .topbar-actions {
+    gap: 8px;
+  }
 }

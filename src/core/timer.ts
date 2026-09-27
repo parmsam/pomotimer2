@@ -181,6 +181,11 @@ export function createTimer(
     if (status === 'idle' && s.durations[mode] !== prev.durations[mode]) setTimer({ remainingMs: duration(mode) });
   });
 
+  // Another tab may start, pause or finish the session: follow its lead.
+  data.subscribe((d, prev) => {
+    if (d.timer.status !== prev.timer.status || d.timer.endsAt !== prev.timer.endsAt) schedule();
+  });
+
   // Timers are throttled in hidden tabs; re-check as soon as we're visible again.
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) check();

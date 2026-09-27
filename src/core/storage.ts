@@ -19,6 +19,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showTasks: true,
   muted: false,
   trackInterruptions: false,
+  dailyGoal: 8,
   shortcutsHintSeen: false,
 };
 
@@ -38,6 +39,7 @@ export function defaultAppData(settings: Settings): AppData {
     tasks: [],
     activeTaskId: null,
     notes: [],
+    goalCelebratedOn: null,
   };
 }
 
@@ -93,5 +95,6 @@ export function loadAppData(settings: Settings): AppData {
     tasks: Array.isArray(stored.tasks) ? (stored.tasks as AppData['tasks']) : [],
     activeTaskId: typeof stored.activeTaskId === 'string' ? stored.activeTaskId : null,
     notes: Array.isArray(stored.notes) ? (stored.notes as AppData['notes']) : [],
+    goalCelebratedOn: typeof stored.goalCelebratedOn === 'string' ? stored.goalCelebratedOn : null,
   };
 }

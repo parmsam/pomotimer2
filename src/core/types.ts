@@ -24,6 +24,8 @@ export interface Settings {
   muted: boolean;
   /** Show the interruption logger during focus (Cirillo's internal/external marks). */
   trackInterruptions: boolean;
+  /** Pomodoros per day to aim for. */
+  dailyGoal: number;
   /** The one-time "press ? for shortcuts" tip has been shown. */
   shortcutsHintSeen: boolean;
 }
@@ -91,6 +93,8 @@ export interface AppData {
   tasks: Task[];
   activeTaskId: string | null;
   notes: InterruptionNote[];
+  /** Day key when the daily-goal celebration last played, so it plays once per day across tabs. */
+  goalCelebratedOn: string | null;
 }
 
 export const MODE_LABELS: Record<Mode, string> = {

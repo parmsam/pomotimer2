@@ -73,10 +73,14 @@ export function createSettingsPanel(settings: Store<Settings>, onResetAll: () =>
   const longEvery = numberRow(2, 12, (s) => s.longBreakEvery, (n) => update({ longBreakEvery: n }));
   longEvery.id = 'set-long-every';
 
+  const goalInput = numberRow(1, 24, (s) => s.dailyGoal, (n) => update({ dailyGoal: n }));
+  goalInput.id = 'set-daily-goal';
+
   const timerSection = section(
     'Timer',
     el('div', { className: 'durations' }, ...durationFields),
     el('div', { className: 'row' }, el('label', { htmlFor: longEvery.id }, 'Long break every', el('small', {}, 'focus sessions')), longEvery),
+    el('div', { className: 'row' }, el('label', { htmlFor: goalInput.id }, 'Daily goal', el('small', {}, 'pomodoros per day')), goalInput),
     toggle('autoStartBreaks', 'Auto-start breaks'),
     toggle('autoStartFocus', 'Auto-start focus', 'After a break ends'),
     toggle('strictMode', 'Strict mode', 'No pausing — stopping a pomodoro abandons it'),

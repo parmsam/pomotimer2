@@ -64,7 +64,7 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 
 ### Phase 2 — Polish
 - [x] Task list (est. pomodoros, active task linked to sessions)
-- [ ] Stats (daily sessions, streak, 7-day chart)
+- [x] Stats (daily sessions, streak, 7-day chart)
 - [x] Keyboard shortcuts
 - [ ] Focus mode
 - [ ] Export/import data (reset is done)
@@ -73,11 +73,11 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [x] Optional strict mode (no pause; stopping = abandoning)
 - [x] "To Do Today" framing for the task list
 - [x] Nuanced stop/skip/switch dialogs (replace `confirm()`): abandoning keeps focused minutes in today's total; past the halfway mark it still counts as a session
-- [ ] Per-mode completed counters on the mode tabs
-- [ ] Streak in header (🔥 n): 1 session or N focused minutes keeps it alive; best streak; total focus
-- [ ] Daily focus goal ("challenge") with a celebration on completion
+- [x] Per-mode completed counters on the mode tabs
+- [x] Streak in header (🔥 n): 1 session or N focused minutes keeps it alive; best streak; total focus
+- [x] Daily focus goal ("challenge") with a celebration on completion
 - [x] Per-task time tracking: the focused task accrues minutes, clamped to the session, survives reload
-- [ ] Cross-tab sync via the `storage` event
+- [x] Cross-tab sync via the `storage` event
 - [ ] Rotating break tips + editable motivational quote
 - [ ] Optional name + time-of-day greeting
 
@@ -177,3 +177,5 @@ Basics already exist (Space, R, S, `,`, Esc).
 - 2026-09-27 — Phase 3 adds richer background animation options and Markdown export of sessions/tasks (JSON export/import stays in Phase 2 for backup).
 - 2026-09-27 — Clock themes (Tomato kitchen timer, Tamagotchi, and others) planned for Phase 3 as swappable timer faces on the same engine.
 - 2026-09-27 — Added Vitest + Playwright test suites and CI gating deploys, after bugs (ring offset, settings drawer) slipped past ad-hoc checks.
+- 2026-09-27 — Interruption tracking made opt-in; notes kept in a separate 'Noted for later' list instead of auto-creating tasks.
+- 2026-09-27 — Streak rule: a day counts with one counted pomodoro or 25 focused minutes. Stats are derived from session history (no separate counters to drift).
