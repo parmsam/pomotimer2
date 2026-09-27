@@ -1,5 +1,6 @@
 import { animate } from 'animejs';
 import { reducedMotion } from '../fx/anims';
+import { loadFont } from './common';
 import type { Face, FaceContext } from './types';
 
 type Sprite = string[];
@@ -85,16 +86,6 @@ function pixels(sprite: Sprite | [number, number][], ox: number, oy: number, ori
   return d;
 }
 
-let fontRequested = false;
-function loadPixelFont() {
-  if (fontRequested) return;
-  fontRequested = true;
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = 'https://fonts.googleapis.com/css2?family=VT323&display=swap';
-  document.head.append(link);
-}
-
 export function tamagotchiFace(): Face {
   let root: SVGSVGElement | null = null;
   let pet: SVGPathElement | null = null;
@@ -169,7 +160,7 @@ export function tamagotchiFace(): Face {
     preview: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3C13 3 7 14 7 26s7 19 17 19 17-7 17-19S35 3 24 3Z" fill="var(--mode)"/><rect x="13" y="14" width="22" height="18" rx="3" fill="#b9c7a5"/><path d="M20 18h8v2h2v6h-2v2h-8v-2h-2v-6h2Z" fill="#28331f"/><circle cx="17" cy="38" r="2" fill="currentColor" opacity=".5"/><circle cx="24" cy="39" r="2" fill="currentColor" opacity=".5"/><circle cx="31" cy="38" r="2" fill="currentColor" opacity=".5"/></svg>`,
     mount(layer, c) {
       ctx = c;
-      loadPixelFont();
+      loadFont('VT323');
       layer.insertAdjacentHTML(
         'beforeend',
         `<svg class="tama" viewBox="0 0 220 220" aria-hidden="true">

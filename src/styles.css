@@ -1891,3 +1891,325 @@ body.focus-mode .quote {
 .quote-options {
   margin: 0 0 6px;
 }
+
+/* ---------- Faces: shared "art on top, clock below" layout ---------- */
+
+.dial[data-face='hourglass'] .dial-center,
+.dial[data-face='plant'] .dial-center,
+.dial[data-face='potion'] .dial-center {
+  position: absolute;
+  top: 78%;
+  left: 0;
+  right: 0;
+}
+.dial[data-face='hourglass'] .time,
+.dial[data-face='plant'] .time,
+.dial[data-face='potion'] .time {
+  font-size: 11cqw;
+}
+.dial[data-face='hourglass'] .sub,
+.dial[data-face='plant'] .sub,
+.dial[data-face='potion'] .sub {
+  margin-top: 2px;
+  font-size: 3.6cqw;
+  max-width: 70cqw;
+  margin-inline: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Hourglass */
+.hg-flip {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.hg-glass {
+  fill: color-mix(in oklab, var(--text) 6%, transparent);
+  stroke: color-mix(in oklab, var(--text) 45%, transparent);
+  stroke-width: 2.5;
+}
+.hg-top-sand,
+.hg-bottom-sand {
+  fill: var(--mode);
+}
+.hg-stream {
+  stroke: var(--mode);
+  stroke-width: 2.5;
+  stroke-dasharray: 4 5;
+  opacity: 0;
+}
+.hourglass.running .hg-stream {
+  opacity: 1;
+  animation: hg-fall 0.6s linear infinite;
+}
+@keyframes hg-fall {
+  to {
+    stroke-dashoffset: -18;
+  }
+}
+.hg-shine {
+  fill: none;
+  stroke: white;
+  stroke-opacity: 0.25;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.hg-plate {
+  fill: color-mix(in oklab, var(--mode) 45%, #6b4a2e);
+}
+.hg-post {
+  fill: color-mix(in oklab, var(--mode) 30%, #6b4a2e);
+}
+
+/* Plant Buddy */
+.pl-stem {
+  fill: none;
+  stroke: #5fae6e;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.pl-leaf {
+  fill: #6bbf7a;
+}
+.pl-bud circle {
+  fill: #7fcf8c;
+}
+.pl-petal {
+  fill: color-mix(in oklab, var(--mode) 75%, white);
+}
+.pl-center {
+  fill: #f6c945;
+}
+.pl-sway {
+  transform-box: view-box;
+  transform-origin: 110px 118px;
+  animation: pl-sway 5s ease-in-out infinite;
+}
+@keyframes pl-sway {
+  50% {
+    transform: rotate(2deg);
+  }
+}
+.pl-pot {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+.pl-pot-body {
+  fill: var(--mode);
+}
+.pl-rim {
+  fill: color-mix(in oklab, var(--mode) 80%, black);
+}
+.pl-soil {
+  fill: #5b4030;
+}
+.pl-eye {
+  fill: var(--on-accent);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pl-blink 5s infinite;
+}
+@keyframes pl-blink {
+  0%,
+  94%,
+  100% {
+    transform: scaleY(1);
+  }
+  97% {
+    transform: scaleY(0.1);
+  }
+}
+.pl-smile {
+  fill: none;
+  stroke: var(--on-accent);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+.pl-cheek {
+  fill: #ff9aa2;
+  opacity: 0.55;
+}
+
+/* Zen Enso */
+.en-ghost {
+  fill: none;
+  stroke: var(--text);
+  stroke-opacity: 0.06;
+  stroke-width: 14;
+}
+.en-ink {
+  fill: none;
+  stroke: var(--text);
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.3s linear;
+}
+.en-main {
+  stroke-width: 15;
+  stroke-opacity: 0.92;
+}
+.en-dry {
+  stroke-width: 4;
+  stroke-opacity: 0.35;
+}
+.en-seal {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity 0.5s;
+}
+.en-seal rect {
+  fill: var(--mode);
+}
+.en-seal .en-seal-inner {
+  fill: none;
+  stroke: var(--on-accent);
+  stroke-width: 1.6;
+}
+
+/* Retro Handheld */
+.hh-case {
+  fill: #c9c7bd;
+  filter: drop-shadow(0 12px 26px rgb(0 0 0 / 0.3));
+}
+.hh-bezel {
+  fill: #5c5f6a;
+}
+.hh-led {
+  fill: #e0455c;
+  opacity: 0.35;
+}
+.handheld .hh-screen {
+  fill: #9bbc0f;
+}
+.hh-mode {
+  font: 400 9px 'VT323', ui-monospace, monospace;
+  letter-spacing: 1px;
+  fill: #0f380f;
+  text-anchor: middle;
+}
+.hh-block {
+  fill: #0f380f;
+  opacity: 0.15;
+}
+.hh-block.on {
+  opacity: 1;
+}
+.hh-brand {
+  font: italic 700 8px var(--font);
+  letter-spacing: 1px;
+  fill: #3b3d8f;
+}
+.hh-dpad {
+  fill: #2d2d2d;
+}
+.hh-btn {
+  fill: var(--mode);
+}
+.hh-pill {
+  fill: #8e8c85;
+}
+.hh-grill {
+  fill: none;
+  stroke: #8e8c85;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.dial[data-face='handheld'] .dial-center {
+  position: absolute;
+  top: 22%;
+  left: 0;
+  right: 0;
+}
+.dial[data-face='handheld'] .time {
+  font-family: 'VT323', ui-monospace, monospace;
+  font-size: 13.5cqw;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: #0f380f;
+}
+.dial[data-face='handheld'] .sub {
+  display: none;
+}
+
+/* Potion Flask */
+.po-body {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+.po-glass {
+  fill: color-mix(in oklab, var(--text) 6%, transparent);
+}
+.po-outline {
+  fill: none;
+  stroke: color-mix(in oklab, var(--text) 50%, transparent);
+  stroke-width: 3;
+}
+.po-liquid {
+  transition: transform 0.6s var(--ease);
+}
+.po-wave path {
+  fill: var(--mode);
+}
+.po-wave {
+  animation: po-wave 3s linear infinite;
+}
+@keyframes po-wave {
+  to {
+    transform: translateX(-40px);
+  }
+}
+.po-bubble {
+  fill: white;
+  opacity: 0;
+}
+.potion.running .po-bubble {
+  animation: po-bubble 2.6s ease-in infinite;
+}
+@keyframes po-bubble {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  30% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.po-shine {
+  fill: none;
+  stroke: white;
+  stroke-opacity: 0.3;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.po-cork {
+  fill: #b08a5a;
+}
+.po-steam circle {
+  fill: color-mix(in oklab, var(--text) 40%, transparent);
+}
+.po-steam {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pl-sway,
+  .pl-eye,
+  .po-wave,
+  .potion.running .po-bubble,
+  .hourglass.running .hg-stream {
+    animation: none;
+  }
+}
+
+.faces {
+  grid-template-columns: repeat(4, 1fr);
+}
+@media (max-width: 420px) {
+  .faces {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

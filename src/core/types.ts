@@ -14,7 +14,7 @@ export interface Settings {
   /** Page background: CSS blobs, a three.js scene, or nothing. */
   background: 'blobs' | 'fireflies' | 'aurora' | 'rain' | 'none';
   /** Timer face: ring, tomato, tamagotchi. */
-  clockFace: 'ring' | 'tomato' | 'tamagotchi';
+  clockFace: import('../faces/types').FaceId;
   /** Roll each digit in as the clock changes. */
   rollingDigits: boolean;
   alarm: AlarmSound;

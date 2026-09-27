@@ -1,6 +1,6 @@
 import type { Mode, TimerStatus } from '../core/types';
 
-export type FaceId = 'ring' | 'tomato' | 'tamagotchi';
+export type FaceId = 'ring' | 'tomato' | 'tamagotchi' | 'hourglass' | 'plant' | 'enso' | 'handheld' | 'potion';
 
 export interface FaceContext {
   mode: Mode;

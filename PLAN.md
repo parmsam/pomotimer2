@@ -121,6 +121,7 @@ Whole-timer "faces" that go beyond the Phase 2 timer styles (ring / minimal / ba
 - [x] Face picker in settings with live previews
 - [x] **Tomato**: Cirillo's original kitchen timer. A tomato dial that twists back as time runs down, with a wind-up animation on start and an optional mechanical tick. Leaves wilt slightly on breaks, and it wobbles and "rings" at the end
 - [x] **Tamagotchi**: an egg-shaped LCD device with pixel digits and a small pixel pet. The pet works alongside you during focus and plays or naps on breaks. It grows or evolves with completed pomodoros and your streak, and looks a bit sad after abandoned sessions (never punishing)
+- [x] More faces (requested): Hourglass, Plant Buddy, Zen Enso, Retro Handheld, Potion Flask
 - [x] Faces follow the theme colours, respect reduced motion, and stay accessible (time always available to screen readers)
 
 #### Markdown export, import & bulk add
@@ -213,3 +214,4 @@ Not part of any phase. Pick these up only if people ask for them.
 - 2026-09-27 — Messages: tips can be turned off (and replayed), the goal celebration has "Don't show again"; confirmations of user actions and update prompts always show.
 - 2026-09-27 — Phase 4 is quotes only; the greeting and the customization ideas live on a separate Backburner list outside the phases.
 - 2026-09-27 — Default quotes sourced from Wikiquote "Sourced" sections (and well-documented originals), cross-checked by hand. Extraction was unreliable (e.g. a nonsense citation), so anything that didn't check out was dropped. A test guards against known misattributions.
+- 2026-09-27 — Five more faces added on request. Faces expose data-level (0–100) for tests; continuous motion is CSS (off under reduced motion); art-top faces put the digits below the artwork.

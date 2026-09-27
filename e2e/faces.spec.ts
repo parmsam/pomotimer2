@@ -58,3 +58,46 @@ test('tamagotchi sleeps on a long break', async ({ page }) => {
   await open(page, { data: seed, settings: { clockFace: 'tamagotchi' } });
   await expect(page.locator('svg.tama')).toHaveAttribute('data-mood', 'sleeping');
 });
+
+test.describe('more faces', () => {
+  const halfway = () => {
+    const seed = focusInProgress(0);
+    seed.timer = { ...seed.timer, status: 'paused', endsAt: null, remainingMs: 12.5 * MIN };
+    return seed;
+  };
+
+  for (const [id, label, cls] of [
+    ['hourglass', 'Hourglass', 'hourglass'],
+    ['plant', 'Plant Buddy', 'plant'],
+    ['enso', 'Zen Enso', 'enso'],
+    ['handheld', 'Retro Handheld', 'handheld'],
+    ['potion', 'Potion', 'potion'],
+  ] as const) {
+    test(`${label}: selectable, and shows progress halfway through a session`, async ({ page }) => {
+      await open(page, { data: halfway() });
+      await page.locator('#settings-open').click();
+      await page.getByRole('group', { name: 'Clock face' }).getByRole('button', { name: label, exact: true }).click();
+      await expect(page.locator('.dial')).toHaveAttribute('data-face', id);
+      const art = page.locator(`svg.${cls}`);
+      await expect(art).toHaveCount(1);
+      const level = Number(await art.getAttribute('data-level'));
+      expect(level).toBeGreaterThanOrEqual(45);
+      expect(level).toBeLessThanOrEqual(55);
+      await expect(page.getByRole('timer')).toHaveText('12:30');
+    });
+  }
+
+  test('plant buddy is in bloom on a break', async ({ page }) => {
+    const seed = focusInProgress(0);
+    seed.timer = { ...seed.timer, mode: 'short', status: 'idle', endsAt: null, remainingMs: 5 * MIN };
+    await open(page, { data: seed, settings: { clockFace: 'plant' } });
+    await expect(page.locator('svg.plant')).toHaveAttribute('data-level', '100');
+  });
+
+  test('potion drains on a break (you drink it)', async ({ page }) => {
+    const seed = focusInProgress(0);
+    seed.timer = { ...seed.timer, mode: 'short', status: 'paused', endsAt: null, remainingMs: 1 * MIN };
+    await open(page, { data: seed, settings: { clockFace: 'potion' } });
+    await expect(page.locator('svg.potion')).toHaveAttribute('data-level', '20');
+  });
+});
