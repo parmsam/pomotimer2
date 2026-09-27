@@ -66,3 +66,11 @@ test('no horizontal scrolling', async ({ page }) => {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   expect(overflow).toBe(false);
 });
+
+test('top bar never overlaps the logo, even in a narrow desktop window', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+  await open(page);
+  const brand = (await page.locator('.brand').boundingBox())!;
+  const actions = (await page.locator('.topbar-actions').boundingBox())!;
+  expect(brand.x + brand.width).toBeLessThanOrEqual(actions.x);
+});

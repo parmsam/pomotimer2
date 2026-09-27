@@ -294,8 +294,34 @@ export function createSettingsPanel(settings: Store<Settings>, dataActions: Data
     tipsAgain.textContent = 'Tips will show again';
     setTimeout(() => (tipsAgain.textContent = 'Show tips again'), 2500);
   });
+  const quoteSource = el(
+    'select',
+    { id: 'set-quote-source' },
+    el('option', { value: 'default' }, 'Built-in (100 quotes)'),
+    el('option', { value: 'custom' }, 'My quotes'),
+  );
+  quoteSource.addEventListener('change', () => update({ quoteSource: quoteSource.value as Settings['quoteSource'] }));
+  const customQuotes = el('textarea', { id: 'set-custom-quotes', rows: 4, spellcheck: true, placeholder: 'One per line, e.g.\nShip small, ship often. — Me' });
+  customQuotes.setAttribute('aria-label', 'My quotes, one per line');
+  customQuotes.addEventListener('change', () => update({ customQuotes: customQuotes.value }));
+  const customWrap = el('div', { className: 'custom-quotes' }, customQuotes, el('p', { className: 'hint' }, 'One quote per line. Add “— Name” to credit someone.'));
+  const quoteOptions = el(
+    'div',
+    { className: 'quote-options' },
+    el('div', { className: 'row' }, el('label', { htmlFor: quoteSource.id }, 'Quotes'), quoteSource),
+    customWrap,
+  );
+  syncers.push((s) => {
+    quoteSource.value = s.quoteSource;
+    if (document.activeElement !== customQuotes) customQuotes.value = s.customQuotes;
+    quoteOptions.hidden = !s.showQuotes;
+    customWrap.hidden = s.quoteSource !== 'custom';
+  });
+
   const messagesSection = section(
     'Messages',
+    toggle('showQuotes', 'Show a quote', 'Under the timer, a new one each session'),
+    quoteOptions,
     toggle('showTips', 'Show tips', 'One-time hints, e.g. keyboard shortcuts or phone settings'),
     toggle('celebrateGoal', 'Celebrate the daily goal'),
     el('div', { className: 'row' }, el('span', { className: 'label' }, 'Seen the tips already?'), tipsAgain),

@@ -20,6 +20,7 @@ An aesthetic, customizable Pomodoro timer with smooth [anime.js](https://animejs
 - **Optional extras:** strict mode (no pausing), interruption tracking (internal/external, with notes saved for later), and focus mode, which hides everything but the timer.
 - **Clock faces.** The classic ring, a **tomato** kitchen timer whose dial turns back as time runs down, or a **Tamagotchi** whose pixel pet works alongside you, naps on breaks and grows up as you complete pomodoros.
 - **Living backgrounds.** Soft CSS color blobs, or three.js scenes (fireflies, aurora, rain) that follow your theme, calm down on breaks and pulse when a session ends. three.js only loads if you pick one.
+- **Quotes (optional).** A quote under the timer, a new one each session: 100 well-sourced lines from scientists, philosophers and writers (kept in [`src/content/quotes.md`](src/content/quotes.md)), or your own.
 - **Make it yours.** Five themes, per-mode colors, interval presets (25/5/15 · 50/10/20 · 90/15/30), alarm sounds, and an optional tick.
 - **Stays with you.** A pop-out mini timer that floats above other windows (Chrome/Edge), progress in the tab icon, and the screen stays awake while a session runs.
 - **Works with multiple tabs.** Open tabs stay in sync, and only one of them rings.
@@ -77,7 +78,7 @@ The plan and roadmap live in [`PLAN.md`](PLAN.md), and conventions for contribut
 
 ## Roadmap
 
-Next up is Phase 4 (optional quotes, a greeting, and ideas on the backburner). See [`PLAN.md`](PLAN.md).
+All planned phases are done. Ideas on the backburner are listed in [`PLAN.md`](PLAN.md).
 
 ## Credits
 

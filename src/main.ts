@@ -24,6 +24,7 @@ import { ask, dialogOpen } from './ui/dialog';
 import { createFocusMode } from './ui/focusMode';
 import { setupPwa } from './ui/pwa';
 import { createBackground } from './ui/background';
+import { createQuoteView } from './ui/quoteView';
 import { createProgressFavicon } from './ui/favicon';
 import { createPip, pipSupported } from './ui/pip';
 import { createWakeLock } from './ui/wakeLock';
@@ -331,6 +332,7 @@ const panel = createSettingsPanel(settings, {
 const actions = createSessionActions(data, timer);
 const stats = createStatsView(data, settings, timer);
 const background = createBackground(settings, data);
+createQuoteView(settings, data);
 const focusMode = createFocusMode(data, settings, () => renderMode(true));
 const tasks = createTasksPanel(data, settings, timer);
 const interruptions = createInterruptionLogger(data, settings, timer, (title) => tasks.add(title));

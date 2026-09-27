@@ -993,7 +993,8 @@ input[type='range'] {
 
 /* ---------- Keyboard shortcuts ---------- */
 
-@media (hover: none), (pointer: coarse) {
+/* Keyboard-oriented buttons: hidden on touch screens and in narrow windows (the top bar would overflow). */
+@media (hover: none), (pointer: coarse), (max-width: 480px) {
   .kbd-only {
     display: none !important;
   }
@@ -1851,4 +1852,42 @@ body.focus-mode .app-foot {
   overflow: hidden;
   opacity: 0;
   pointer-events: none;
+}
+
+/* ---------- Quote ---------- */
+
+.quote {
+  max-width: min(460px, 100%);
+  margin: -6px 0 0;
+  padding: 0 8px;
+  text-align: center;
+  color: var(--muted);
+}
+.quote blockquote {
+  margin: 0;
+  font-size: 0.9rem;
+  font-style: italic;
+  line-height: 1.5;
+  text-wrap: balance;
+}
+.quote figcaption {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+body.focus-mode .quote {
+  display: none;
+}
+.custom-quotes textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  resize: vertical;
+}
+.quote-options {
+  margin: 0 0 6px;
 }

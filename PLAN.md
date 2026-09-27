@@ -83,7 +83,7 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 #### Customization (kept lean)
 - [x] Interval presets quick-pick (25/5/15 · 50/10/20 · 90/15/30)
 - [x] Per-mode colors (short/long break too, not just focus)
-- Everything else is reserved for Phase 4 (see "Backburner")
+- Everything else is on the Backburner list
 
 ### Phase 3 — Eye candy
 - [x] three.js scenes: fireflies, aurora (shader), rain. (Low-poly tomato skipped: the Tomato clock face covers it)
@@ -148,10 +148,10 @@ Basics already exist (Space, R, S, `,`, Esc).
 - [x] Touch gestures on the timer: tap to start/pause, swipe left/right to change mode, hold to restart (swipe-up for tasks dropped: it fights page scrolling, and tasks sit right below)
 - [x] Gestures ignore scrolling areas and follow the same confirm rules as buttons (e.g. abandoning a focus session)
 
-### Phase 4 — Quotes, greeting & extra customization
-- [ ] Settings toggle: show a quote (off by default), e.g. under the timer or on breaks, rotating per session
-- [ ] Source: **Default list** (~100 quotes) or **My quotes** (one or more of the user's own, added/edited/removed in settings, stored locally)
-- [ ] Default list: ~100 productivity/work/learning quotes from scientists (e.g. Feynman, Curie, Einstein) and other accomplished people
+### Phase 4 — Quotes
+- [x] Settings toggle: show a quote (off by default), e.g. under the timer or on breaks, rotating per session
+- [x] Source: **Default list** (~100 quotes) or **My quotes** (one or more of the user's own, added/edited/removed in settings, stored locally)
+- [x] Default list: 100 productivity/work/learning quotes from scientists (e.g. Feynman, Curie, Einstein) and other accomplished people
   - Kept in a Markdown file in the repo (`src/content/quotes.md`) so it's easy to review and update in a PR. Imported at build time with Vite `?raw` and parsed, with no runtime fetch
   - Proposed format, one quote per blockquote, attribution after an em dash:
     ```
@@ -160,14 +160,12 @@ Basics already exist (Space, R, S, `,`, Esc).
     ```
   - **Accuracy rule:** only well-sourced attributions (misattributed quotes are rampant). Include a source where possible, and drop anything that's apocryphal
   - Unit test the parser, and add a test that every entry has text and an author and there are no duplicates
-- [ ] Rotation: random without repeats until the list is exhausted; don't change mid-session
-- [ ] Accessible: quote text is real text (not an image), muted styling, and it can be hidden entirely
+- [x] Rotation: random without repeats until the list is exhausted; don't change mid-session
+- [x] Accessible: quote text is real text (not an image), muted styling, and it can be hidden entirely
 
-#### Greeting
+## Backburner (revisit if there's demand)
+Not part of any phase. Pick these up only if people ask for them.
 - [ ] Optional name + time-of-day greeting (e.g. "Good morning, Sam"; "Welcome back" after a gap). Off by default; the name is stored locally only
-
-#### Backburner (revisit if there's demand)
-Not planned. Pick these up only if people ask for them. Several overlap with Phase 3 clock themes and background options, so build those first and reuse them.
 - [ ] Timer style: ring / minimal (digits only) / progress bar
 - [ ] Clock font (a few curated Google Fonts, loaded on demand) and weight
 - [ ] Custom theme builder: tweak background, blobs and text colours; save as "My theme"
@@ -213,3 +211,5 @@ Not planned. Pick these up only if people ask for them. Several overlap with Pha
 - 2026-09-27 — Moved custom photos, per-scene controls, extra clock faces and key remapping to the Phase 4 reserve (keep customization lean).
 - 2026-09-27 — No speculative clock faces in the plan; new ones will come from specific requests.
 - 2026-09-27 — Messages: tips can be turned off (and replayed), the goal celebration has "Don't show again"; confirmations of user actions and update prompts always show.
+- 2026-09-27 — Phase 4 is quotes only; the greeting and the customization ideas live on a separate Backburner list outside the phases.
+- 2026-09-27 — Default quotes sourced from Wikiquote "Sourced" sections (and well-documented originals), cross-checked by hand. Extraction was unreliable (e.g. a nonsense citation), so anything that didn't check out was dropped. A test guards against known misattributions.

@@ -44,6 +44,11 @@ export interface Settings {
   dailyGoal: number;
   /** Enter focus mode automatically when a focus session starts. */
   focusModeOnStart: boolean;
+  /** Show a quote under the timer. */
+  showQuotes: boolean;
+  quoteSource: 'default' | 'custom';
+  /** The user's own quotes, one per line ("text — author"). */
+  customQuotes: string;
   /** One-time tips (shortcuts, phones, offline). */
   showTips: boolean;
   /** The daily-goal toast + confetti. */
