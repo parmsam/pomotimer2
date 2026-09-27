@@ -32,6 +32,7 @@ export const DEFAULT_SETTINGS: Settings = {
   focusModeOnStart: false,
   showTips: true,
   celebrateGoal: true,
+  gesturesTipSeen: false,
   shortcutsHintSeen: false,
 };
 

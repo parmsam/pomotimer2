@@ -23,7 +23,7 @@ export async function open(page: Page, seed?: { data?: unknown; settings?: unkno
     localStorage.clear();
     if (seed?.data) localStorage.setItem('pomo:v1:data', JSON.stringify(seed.data));
     // The one-time shortcuts tip is off unless a test asks for it.
-    const settings = { shortcutsHintSeen: true, ...(seed?.settings as object) };
+    const settings = { shortcutsHintSeen: true, gesturesTipSeen: true, ...(seed?.settings as object) };
     localStorage.setItem('pomo:v1:settings', JSON.stringify(settings));
   }, seed);
   await page.reload();

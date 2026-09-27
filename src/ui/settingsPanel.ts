@@ -290,7 +290,7 @@ export function createSettingsPanel(settings: Store<Settings>, dataActions: Data
   shortcutsBtn.addEventListener('click', () => document.getElementById('shortcuts-open')?.click());
   const tipsAgain = el('button', { className: 'btn', type: 'button' }, 'Show tips again');
   tipsAgain.addEventListener('click', () => {
-    update({ showTips: true, shortcutsHintSeen: false, mobileTipSeen: false });
+    update({ showTips: true, shortcutsHintSeen: false, mobileTipSeen: false, gesturesTipSeen: false });
     tipsAgain.textContent = 'Tips will show again';
     setTimeout(() => (tipsAgain.textContent = 'Show tips again'), 2500);
   });

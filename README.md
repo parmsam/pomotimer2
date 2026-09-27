@@ -27,6 +27,7 @@ An aesthetic, customizable Pomodoro timer with smooth [anime.js](https://animejs
 - **Alarms on phones.** On iPhone the alarm can ring even with the silent switch on (Safari 17+).
 - **Installable and offline.** Install it from the address bar (or Add to Home Screen) and it works without a connection. Updates wait until you choose to reload.
 - **Your data stays local.** No account, no server, no tracking. Export a JSON backup to move between browsers.
+- **Touch friendly.** On phones, tap the timer to start/pause, swipe to switch modes, hold to restart. Optional vibration.
 - **Accessible.** Full keyboard control, screen-reader labels, and it respects "reduce motion".
 
 ## Keyboard shortcuts
@@ -76,7 +77,7 @@ The plan and roadmap live in [`PLAN.md`](PLAN.md), and conventions for contribut
 
 ## Roadmap
 
-Up next: swipe gestures on phones. See [`PLAN.md`](PLAN.md).
+Next up is Phase 4 (optional quotes, a greeting, and ideas on the backburner). See [`PLAN.md`](PLAN.md).
 
 ## Credits
 

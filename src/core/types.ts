@@ -48,6 +48,8 @@ export interface Settings {
   showTips: boolean;
   /** The daily-goal toast + confetti. */
   celebrateGoal: boolean;
+  /** The one-time touch gestures tip has been shown. */
+  gesturesTipSeen: boolean;
   /** The one-time "press ? for shortcuts" tip has been shown. */
   shortcutsHintSeen: boolean;
 }

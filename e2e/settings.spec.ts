@@ -91,7 +91,7 @@ test.describe('messages', () => {
     await page.locator('#settings-open').click();
     await page.getByRole('button', { name: 'Show tips again' }).click();
     const s = await storedSettings(page);
-    expect(s).toMatchObject({ showTips: true, shortcutsHintSeen: false, mobileTipSeen: false });
+    expect(s).toMatchObject({ showTips: true, shortcutsHintSeen: false, mobileTipSeen: false, gesturesTipSeen: false });
     await page.reload();
     await expect(page.getByRole('status').filter({ hasText: 'keyboard shortcuts' })).toBeVisible({ timeout: 5000 });
   });

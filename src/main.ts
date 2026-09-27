@@ -27,6 +27,7 @@ import { createBackground } from './ui/background';
 import { createProgressFavicon } from './ui/favicon';
 import { createPip, pipSupported } from './ui/pip';
 import { createWakeLock } from './ui/wakeLock';
+import { attachGestures } from './ui/gestures';
 import { createStatsView } from './ui/stats';
 import { bindShortcuts, createShortcutsHelp, type Shortcut } from './ui/shortcuts';
 import { toast } from './ui/toast';
@@ -365,6 +366,14 @@ $('#skip').addEventListener('click', (e) => {
   haptic('tap');
   void actions.skip();
 });
+attachGestures($('.dial'), {
+  toggle: () => toggleBtn.click(),
+  reset: () => void actions.reset(),
+  switchTo: (mode) => void actions.switchTo(mode),
+  currentMode: () => data.get().timer.mode,
+  feedback: () => haptic('tap'),
+});
+
 modeTabs.forEach((b) =>
   b.addEventListener('click', () => {
     haptic('tap');
@@ -477,6 +486,17 @@ bindShortcuts(SHORTCUTS, {
   settingsOpen: () => panel.isOpen(),
   popoverOpen: () => false,
 });
+
+// First visit on a touch screen: mention the timer gestures once.
+if (settings.get().showTips && !settings.get().gesturesTipSeen && window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+  setTimeout(() => {
+    if (settings.get().gesturesTipSeen) return;
+    toast('Tip: tap the timer to start or pause, swipe it to switch modes, hold to restart', {
+      duration: 9000,
+      onDismiss: () => settings.set({ gesturesTipSeen: true }),
+    });
+  }, 2500);
+}
 
 // First visit on a device with a keyboard: point people at the cheat sheet once.
 if (settings.get().showTips && !settings.get().shortcutsHintSeen && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {

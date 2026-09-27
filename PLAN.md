@@ -145,8 +145,8 @@ Basics already exist (Space, R, S, `,`, Esc).
 - [x] `?` cheat-sheet overlay, keyboard button in the top bar, one-time tip for new visitors (pulled into Phase 2)
 - [x] Task list keyboard control: ↑/↓ Home/End, Enter current, X done, E edit, Del delete, Alt+↑/↓ reorder
 - [x] More keys: `F` focus mode, `+`/`-` add or remove a minute, `P` pop-out timer
-- [ ] Swipe gestures on touch screens: swipe left/right on the dial to change mode, tap the dial to start/pause, long-press to reset, swipe up for tasks
-- [ ] Gestures ignore scrolling areas and follow the same confirm rules as buttons (e.g. abandoning a focus session)
+- [x] Touch gestures on the timer: tap to start/pause, swipe left/right to change mode, hold to restart (swipe-up for tasks dropped: it fights page scrolling, and tasks sit right below)
+- [x] Gestures ignore scrolling areas and follow the same confirm rules as buttons (e.g. abandoning a focus session)
 
 ### Phase 4 — Quotes, greeting & extra customization
 - [ ] Settings toggle: show a quote (off by default), e.g. under the timer or on breaks, rotating per session
