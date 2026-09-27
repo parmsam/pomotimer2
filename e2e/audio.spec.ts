@@ -34,10 +34,11 @@ test.describe('silent mode (Audio Session API)', () => {
     expect(await log()).toEqual(['playback', 'auto']);
   });
 
-  test('the setting shows only where the browser supports it (WebKit does)', async ({ page, browserName }) => {
+  // Support varies by platform (Apple WebKit has it; Linux WebKit in CI doesn't), so
+  // assert consistency with whatever this browser reports.
+  test('the setting shows only where the browser supports it', async ({ page }) => {
     await open(page);
     const supported = await page.evaluate(() => 'audioSession' in navigator);
-    if (browserName === 'webkit') expect(supported).toBe(true);
     await page.locator('#settings-open').click();
     await expect(page.locator('#set-alarmIgnoresSilent')).toHaveCount(supported ? 1 : 0);
   });

@@ -21,6 +21,7 @@ import { onceAcrossTabs, syncAcrossTabs } from './core/sync';
 import { ask, dialogOpen } from './ui/dialog';
 import { createFocusMode } from './ui/focusMode';
 import { setupPwa } from './ui/pwa';
+import { createBackground } from './ui/background';
 import { createStatsView } from './ui/stats';
 import { bindShortcuts, createShortcutsHelp, type Shortcut } from './ui/shortcuts';
 import { toast } from './ui/toast';
@@ -82,7 +83,10 @@ const timer = createTimer(data, settings, ({ finished, next, missed, early }) =>
     celebrate($('#burst'), $('.dial'));
   }
   if (finished === 'focus') queueMicrotask(checkGoal);
-  queueMicrotask(() => view.event('complete'));
+  queueMicrotask(() => {
+    view.event('complete');
+    if (!missed) background.pulse();
+  });
   liveEl.textContent = `${MODE_LABELS[finished]} complete. Next: ${MODE_LABELS[next]}.`;
 });
 
@@ -243,6 +247,7 @@ const panel = createSettingsPanel(settings, {
 
 const actions = createSessionActions(data, timer);
 const stats = createStatsView(data, settings, timer);
+const background = createBackground(settings, data);
 const focusMode = createFocusMode(data, settings, () => renderMode(true));
 const tasks = createTasksPanel(data, settings, timer);
 const interruptions = createInterruptionLogger(data, settings, timer, (title) => tasks.add(title));

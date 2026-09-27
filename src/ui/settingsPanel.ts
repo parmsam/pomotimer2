@@ -5,6 +5,7 @@ import type { AlarmSound, Mode, Settings } from '../core/types';
 import { closeDrawer, openDrawer } from '../fx/anims';
 import { ask } from './dialog';
 import { FACE_LIST } from '../faces';
+import { SCENES } from '../fx/scenes';
 import { THEMES, getTheme } from '../themes/presets';
 
 type BoolKey = { [K in keyof Settings]: Settings[K] extends boolean ? K : never }[keyof Settings];
@@ -153,10 +154,24 @@ export function createSettingsPanel(settings: Store<Settings>, dataActions: Data
     return btn;
   });
 
+  const BACKGROUNDS: { id: Settings['background']; label: string }[] = [
+    { id: 'blobs', label: 'Blobs' },
+    ...SCENES,
+    { id: 'none', label: 'None' },
+  ];
+  const bgBtns = BACKGROUNDS.map((b) => {
+    const btn = el('button', { className: 'btn preset', type: 'button' }, b.label);
+    btn.addEventListener('click', () => update({ background: b.id }));
+    syncers.push((s) => btn.setAttribute('aria-pressed', String(s.background === b.id)));
+    return btn;
+  });
+
   const appearanceSection = section(
     'Appearance',
     el('p', { className: 'sub-h' }, 'Clock'),
     el('div', { className: 'faces', role: 'group', ariaLabel: 'Clock face' }, ...faceBtns),
+    el('p', { className: 'sub-h' }, 'Background'),
+    el('div', { className: 'bg-options', role: 'group', ariaLabel: 'Background' }, ...bgBtns),
     el('p', { className: 'sub-h' }, 'Theme'),
     el('div', { className: 'themes' }, ...swatches),
     el('div', { className: 'mode-colors' }, ...colorPickers),

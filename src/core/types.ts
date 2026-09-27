@@ -11,6 +11,8 @@ export interface Settings {
   theme: string;
   /** Per-mode color overrides; null uses the theme's color. */
   modeColors: Record<Mode, string | null>;
+  /** Page background: CSS blobs, a three.js scene, or nothing. */
+  background: 'blobs' | 'fireflies' | 'aurora' | 'rain' | 'none';
   /** Timer face: ring, tomato, tamagotchi. */
   clockFace: 'ring' | 'tomato' | 'tamagotchi';
   /** Roll each digit in as the clock changes. */

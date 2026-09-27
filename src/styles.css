@@ -1813,3 +1813,26 @@ body.focus-mode .app-foot {
 .face-option[aria-pressed='true'] {
   border-color: var(--mode);
 }
+
+/* ---------- Background scenes ---------- */
+
+.bg canvas.scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1.2s var(--ease);
+}
+.bg[data-scene-ready] canvas.scene {
+  opacity: 1;
+}
+.bg:not([data-background='blobs']) .blob {
+  display: none;
+}
+.bg-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}

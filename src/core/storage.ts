@@ -10,6 +10,7 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'lofi-dusk',
   modeColors: { focus: null, short: null, long: null },
   clockFace: 'ring',
+  background: 'blobs',
   rollingDigits: false,
   alarm: 'bell',
   volume: 0.6,

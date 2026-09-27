@@ -48,6 +48,7 @@ test('a session that ended while closed is credited on load', async ({ page }) =
 test('ring progress sits exactly on the track', async ({ page }) => {
   // Regression: CSS transform-origin on SVG shifted the arc in some browsers.
   await open(page, { data: { ...focusInProgress(15), timer: { ...focusInProgress(15).timer, status: 'paused', endsAt: null, remainingMs: 10 * MIN } } });
+  await page.waitForTimeout(1300); // let the load-time refill animation settle
   const svg = (await page.locator('svg.ring').boundingBox())!;
   const head = (await page.locator('.ring-head').boundingBox())!;
   const scale = svg.width / 220; // viewBox is 220 wide, track radius is 100
@@ -55,8 +56,9 @@ test('ring progress sits exactly on the track', async ({ page }) => {
   const cy = svg.y + svg.height / 2;
   const hx = head.x + head.width / 2;
   const hy = head.y + head.height / 2;
-  // The playhead should lie on the track circle (the old bug was off by ~40px).
-  expect(Math.abs(Math.hypot(hx - cx, hy - cy) - 100 * scale)).toBeLessThan(2);
+  // The playhead should lie on the track circle. The old bug was ~40px off; allow a few px
+  // for rendering differences between platforms (Linux WebKit measured 2.5px).
+  expect(Math.abs(Math.hypot(hx - cx, hy - cy) - 100 * scale)).toBeLessThan(4);
 });
 
 test('no horizontal scrolling', async ({ page }) => {

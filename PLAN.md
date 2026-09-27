@@ -86,7 +86,7 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - Everything else is reserved for Phase 4 (see "Customization ideas")
 
 ### Phase 3 — Eye candy
-- [ ] three.js scenes (particles/fireflies, shader gradient mesh, rain on glass, low-poly tomato)
+- [x] three.js scenes: fireflies, aurora (shader), rain. (Low-poly tomato skipped: the Tomato clock face covers it)
 - [ ] Ambient audio loops
 - [x] PWA (offline, installable)
 - [ ] Wake Lock, progress favicon
@@ -97,10 +97,10 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [x] Mobile notice: background timers/alarms are unreliable on mobile browsers
 
 #### Background animation options
-- [ ] Background picker in settings: blobs (current) / three.js scenes / custom photo / solid
+- [x] Background picker in settings: blobs (current) / three.js scenes / custom photo / solid
 - [ ] Per-scene controls: speed, density/intensity, color follows theme vs. mode
-- [ ] Scenes react to the timer (e.g. calmer during breaks, subtle pulse on completion)
-- [ ] Auto-pause heavy scenes when the tab is hidden or on battery saver; always off under reduced motion
+- [x] Scenes react to the timer (e.g. calmer during breaks, subtle pulse on completion)
+- [x] Auto-pause heavy scenes when the tab is hidden or on battery saver; always off under reduced motion
 
 #### Repo & discoverability
 - [x] README: what it is, screenshot/GIF, live link, features, keyboard shortcuts, privacy note (data stays in the browser), local dev + testing commands, credits (Cirillo, inspirations)
@@ -210,3 +210,4 @@ Only pick these up if there's real demand. Several overlap with Phase 3 clock th
 - 2026-09-27 — Safari fix: settings switches are <label>s with `appearance: none` checkboxes. Some WebKit builds shrink native checkboxes to 12x12, which made most of each switch unclickable.
 - 2026-09-27 — PWA via vite-plugin-pwa with registerType 'prompt': updates wait for the user so a running session is never reloaded. The PWA e2e project runs against a production preview.
 - 2026-09-27 — Clock faces are modules in src/faces (ring, tomato, tamagotchi) that render from the same timer state; digits stay real text. Face artwork avoids CSS transform-origin in px (the ring bug), using transform-box: fill-box or SVG transform attributes.
+- 2026-09-27 — three.js loads lazily only when a scene is chosen (own ~130 KB gz chunk). It's precached by the PWA, so a chosen scene also works offline.

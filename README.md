@@ -19,6 +19,7 @@ An aesthetic, customizable Pomodoro timer with smooth [anime.js](https://animejs
 - **Progress.** A daily streak, a daily goal, per-mode counts, and a 7-day focus chart.
 - **Optional extras:** strict mode (no pausing), interruption tracking (internal/external, with notes saved for later), and focus mode, which hides everything but the timer.
 - **Clock faces.** The classic ring, a **tomato** kitchen timer whose dial turns back as time runs down, or a **Tamagotchi** whose pixel pet works alongside you, naps on breaks and grows up as you complete pomodoros.
+- **Living backgrounds.** Soft CSS color blobs, or three.js scenes (fireflies, aurora, rain) that follow your theme, calm down on breaks and pulse when a session ends. three.js only loads if you pick one.
 - **Make it yours.** Five themes, per-mode colors, interval presets (25/5/15 · 50/10/20 · 90/15/30), alarm sounds, and an optional tick.
 - **Works with multiple tabs.** Open tabs stay in sync, and only one of them rings.
 - **Alarms on phones.** On iPhone the alarm can ring even with the silent switch on (Safari 17+).
@@ -62,7 +63,7 @@ npm run check      # typecheck + unit tests + end-to-end tests
 
 | | |
 |---|---|
-| Stack | Vite + TypeScript (no UI framework), anime.js v4, Web Audio for synthesized alarms |
+| Stack | Vite + TypeScript (no UI framework), anime.js v4, three.js (lazy-loaded scenes), Web Audio for synthesized alarms |
 | Unit tests | Vitest (`src/**/*.test.ts`), with fake timers for time-based logic |
 | E2E tests | Playwright on Chromium, WebKit and a mobile viewport (`e2e/`), plus an offline check against the production build |
 | CI / deploy | Every push runs the tests; pushes to `main` deploy to GitHub Pages only if they pass |
@@ -71,7 +72,7 @@ The plan and roadmap live in [`PLAN.md`](PLAN.md), and conventions for contribut
 
 ## Roadmap
 
-Up next: three.js backgrounds, ambient sounds and haptics. See [`PLAN.md`](PLAN.md).
+Up next: ambient sounds, haptics and a pop-out mini timer. See [`PLAN.md`](PLAN.md).
 
 ## Credits
 
