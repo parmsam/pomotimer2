@@ -288,6 +288,19 @@ export function createSettingsPanel(settings: Store<Settings>, dataActions: Data
 
   const shortcutsBtn = el('button', { className: 'btn', type: 'button' }, 'View shortcuts');
   shortcutsBtn.addEventListener('click', () => document.getElementById('shortcuts-open')?.click());
+  const tipsAgain = el('button', { className: 'btn', type: 'button' }, 'Show tips again');
+  tipsAgain.addEventListener('click', () => {
+    update({ showTips: true, shortcutsHintSeen: false, mobileTipSeen: false });
+    tipsAgain.textContent = 'Tips will show again';
+    setTimeout(() => (tipsAgain.textContent = 'Show tips again'), 2500);
+  });
+  const messagesSection = section(
+    'Messages',
+    toggle('showTips', 'Show tips', 'One-time hints, e.g. keyboard shortcuts or phone settings'),
+    toggle('celebrateGoal', 'Celebrate the daily goal'),
+    el('div', { className: 'row' }, el('span', { className: 'label' }, 'Seen the tips already?'), tipsAgain),
+  );
+
   const helpSection = section(
     'Keyboard',
     el('div', { className: 'row' }, el('span', { className: 'label' }, 'Press ? anytime to see every shortcut.'), shortcutsBtn),
@@ -302,7 +315,7 @@ export function createSettingsPanel(settings: Store<Settings>, dataActions: Data
     </p>`;
   const aboutSection = section('About', about);
 
-  body.append(timerSection, appearanceSection, soundSection, behaviorSection, helpSection, dataSection, aboutSection);
+  body.append(timerSection, appearanceSection, soundSection, behaviorSection, messagesSection, helpSection, dataSection, aboutSection);
 
   const sync = (s: Settings) => syncers.forEach((fn) => fn(s));
   sync(settings.get());

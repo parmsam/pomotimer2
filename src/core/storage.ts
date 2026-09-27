@@ -30,6 +30,8 @@ export const DEFAULT_SETTINGS: Settings = {
   trackInterruptions: false,
   dailyGoal: 8,
   focusModeOnStart: false,
+  showTips: true,
+  celebrateGoal: true,
   shortcutsHintSeen: false,
 };
 

@@ -1,4 +1,4 @@
-import { blur, expect, open, stored, storedSettings, test } from './helpers';
+import { blur, expect, focusInProgress, open, stored, storedSettings, test } from './helpers';
 
 test('settings save and apply', async ({ page }) => {
   await open(page);
@@ -79,4 +79,35 @@ test('the whole switch is clickable, not just a corner (Safari regression)', asy
     expect(await sw.evaluate((el) => el.tagName)).toBe('LABEL'); // clicking anywhere on a label toggles its input
     expect(await input.evaluate((el) => getComputedStyle(el).appearance)).toBe('none'); // lets the input fill the switch
   }
+});
+
+test.describe('messages', () => {
+  test('tips can be turned off, and replayed', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'the shortcuts tip is for keyboard users');
+    await open(page, { settings: { shortcutsHintSeen: false, showTips: false } });
+    await page.waitForTimeout(3200);
+    await expect(page.getByRole('status').filter({ hasText: 'keyboard shortcuts' })).toHaveCount(0);
+
+    await page.locator('#settings-open').click();
+    await page.getByRole('button', { name: 'Show tips again' }).click();
+    const s = await storedSettings(page);
+    expect(s).toMatchObject({ showTips: true, shortcutsHintSeen: false, mobileTipSeen: false });
+    await page.reload();
+    await expect(page.getByRole('status').filter({ hasText: 'keyboard shortcuts' })).toBeVisible({ timeout: 5000 });
+  });
+
+  test('the daily-goal celebration offers “Don’t show again”', async ({ page }) => {
+    const now = Date.now();
+    const seed = {
+      ...focusInProgress(0),
+      history: [{ mode: 'focus', endedAt: now - 60_000, durationMs: 1_500_000, focusedMs: 1_500_000 }],
+    };
+    seed.timer.endsAt = now + 1500;
+    await open(page, { data: seed, settings: { dailyGoal: 2 } });
+    const cheer = page.getByRole('status').filter({ hasText: 'Daily goal reached' });
+    await expect(cheer).toBeVisible({ timeout: 5000 });
+    await cheer.getByRole('button', { name: 'Don’t show again' }).click();
+    expect((await storedSettings(page)).celebrateGoal).toBe(false);
+    await expect(page.getByRole('status').filter({ hasText: 'Goal celebrations off' })).toBeVisible();
+  });
 });

@@ -5,7 +5,7 @@ import { toast } from './toast';
  * Registers the service worker (offline + installable). New versions wait for the user:
  * reloading on its own could cut into a running session.
  */
-export function setupPwa(isBusy: () => boolean) {
+export function setupPwa(isBusy: () => boolean, showTips: () => boolean) {
   if (!('serviceWorker' in navigator)) return;
   const updateSW = registerSW({
     onNeedRefresh() {
@@ -15,7 +15,7 @@ export function setupPwa(isBusy: () => boolean) {
       });
     },
     onOfflineReady() {
-      toast('pomo now works offline', { duration: 4000 });
+      if (showTips()) toast('pomo now works offline', { duration: 4000 });
     },
   });
 }

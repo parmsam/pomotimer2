@@ -154,7 +154,17 @@ function checkGoal() {
   const today = dayKey(Date.now());
   if (!goal.reached || data.get().goalCelebratedOn === today) return;
   data.set({ goalCelebratedOn: today });
-  toast(`Daily goal reached — ${goal.done} pomodoros today 🎉`, { duration: 5000 });
+  if (!settings.get().celebrateGoal) return;
+  toast(`Daily goal reached — ${goal.done} pomodoros today 🎉`, {
+    duration: 6000,
+    action: {
+      label: 'Don’t show again',
+      run: () => {
+        settings.set({ celebrateGoal: false });
+        setTimeout(() => toast('Goal celebrations off. Turn them back on in Settings'), 300);
+      },
+    },
+  });
   setTimeout(() => celebrate($('#burst'), $('.dial')), 450);
 }
 
@@ -327,7 +337,7 @@ const interruptions = createInterruptionLogger(data, settings, timer, (title) =>
 // Phones: alarms and background timers are easy to miss. Say so once, when it matters.
 function maybeShowMobileTip() {
   const touch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-  if (!touch || settings.get().mobileTipSeen) return;
+  if (!touch || settings.get().mobileTipSeen || !settings.get().showTips) return;
   settings.set({ mobileTipSeen: true });
   const standalone = window.matchMedia('(display-mode: standalone)').matches;
   const parts = [
@@ -469,7 +479,7 @@ bindShortcuts(SHORTCUTS, {
 });
 
 // First visit on a device with a keyboard: point people at the cheat sheet once.
-if (!settings.get().shortcutsHintSeen && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+if (settings.get().showTips && !settings.get().shortcutsHintSeen && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
   setTimeout(() => {
     if (settings.get().shortcutsHintSeen) return;
     toast('Tip: press ? to see keyboard shortcuts', {
@@ -496,5 +506,5 @@ driftBlobs();
 entrance();
 requestAnimationFrame(frame);
 setInterval(secondTick, 200);
-setupPwa(() => data.get().timer.status === 'running');
+setupPwa(() => data.get().timer.status === 'running', () => settings.get().showTips);
 syncAmbient();

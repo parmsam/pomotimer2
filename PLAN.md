@@ -83,7 +83,7 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 #### Customization (kept lean)
 - [x] Interval presets quick-pick (25/5/15 · 50/10/20 · 90/15/30)
 - [x] Per-mode colors (short/long break too, not just focus)
-- Everything else is reserved for Phase 4 (see "Customization ideas")
+- Everything else is reserved for Phase 4 (see "Backburner")
 
 ### Phase 3 — Eye candy
 - [x] three.js scenes: fireflies, aurora (shader), rain. (Low-poly tomato skipped: the Tomato clock face covers it)
@@ -166,8 +166,8 @@ Basics already exist (Space, R, S, `,`, Esc).
 #### Greeting
 - [ ] Optional name + time-of-day greeting (e.g. "Good morning, Sam"; "Welcome back" after a gap). Off by default; the name is stored locally only
 
-#### Customization ideas (reserved)
-Only pick these up if there's real demand. Several overlap with Phase 3 clock themes and background options, so build those first and reuse them.
+#### Backburner (revisit if there's demand)
+Not planned. Pick these up only if people ask for them. Several overlap with Phase 3 clock themes and background options, so build those first and reuse them.
 - [ ] Timer style: ring / minimal (digits only) / progress bar
 - [ ] Clock font (a few curated Google Fonts, loaded on demand) and weight
 - [ ] Custom theme builder: tweak background, blobs and text colours; save as "My theme"
@@ -177,7 +177,6 @@ Only pick these up if there's real demand. Several overlap with Phase 3 clock th
 - [ ] Custom mode names and subtitle messages
 - [ ] Custom background photos (IndexedDB, a few images, never leave the device)
 - [ ] Per-scene controls: speed, density/intensity, color follows theme vs. mode
-- [ ] More clock faces: flip clock, hourglass, analog kitchen clock, growing plant, burning candle, minimal LCD
 - [ ] Remap keyboard shortcuts in settings
 
 ## Reference notes
@@ -212,3 +211,5 @@ Only pick these up if there's real demand. Several overlap with Phase 3 clock th
 - 2026-09-27 — Clock faces are modules in src/faces (ring, tomato, tamagotchi) that render from the same timer state; digits stay real text. Face artwork avoids CSS transform-origin in px (the ring bug), using transform-box: fill-box or SVG transform attributes.
 - 2026-09-27 — three.js loads lazily only when a scene is chosen (own ~130 KB gz chunk). It's precached by the PWA, so a chosen scene also works offline.
 - 2026-09-27 — Moved custom photos, per-scene controls, extra clock faces and key remapping to the Phase 4 reserve (keep customization lean).
+- 2026-09-27 — No speculative clock faces in the plan; new ones will come from specific requests.
+- 2026-09-27 — Messages: tips can be turned off (and replayed), the goal celebration has "Don't show again"; confirmations of user actions and update prompts always show.

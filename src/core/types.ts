@@ -44,6 +44,10 @@ export interface Settings {
   dailyGoal: number;
   /** Enter focus mode automatically when a focus session starts. */
   focusModeOnStart: boolean;
+  /** One-time tips (shortcuts, phones, offline). */
+  showTips: boolean;
+  /** The daily-goal toast + confetti. */
+  celebrateGoal: boolean;
   /** The one-time "press ? for shortcuts" tip has been shown. */
   shortcutsHintSeen: boolean;
 }
