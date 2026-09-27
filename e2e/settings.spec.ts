@@ -51,6 +51,7 @@ test('rolling digits is off by default and can be enabled', async ({ page }) => 
 
 test('GitHub link and version are shown in the footer and in About', async ({ page }) => {
   await open(page);
+  await expect(page.locator('.app-foot').getByRole('link', { name: /The Pomodoro Technique/ })).toHaveAttribute('href', 'https://en.wikipedia.org/wiki/Pomodoro_Technique');
   const link = page.locator('.app-foot').getByRole('link', { name: 'Source on GitHub' });
   await expect(link).toHaveAttribute('href', 'https://github.com/parmsam/pomotimer2');
   await expect(link).toHaveAttribute('target', '_blank');
