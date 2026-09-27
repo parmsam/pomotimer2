@@ -27,6 +27,7 @@ CI (`.github/workflows/ci.yml`) runs typecheck, unit and e2e tests on every bran
 - **E2E tests** live in `e2e/`. Use `open(page, seed)` from `e2e/helpers.ts` to start from a known localStorage state (e.g. `focusInProgress(20)` for a session 20 min in) instead of waiting in real time. Import `test` from the helpers, which fail on any uncaught page error.
 - New behavior needs tests. Every bug fix needs a regression test that fails without the fix.
 - Prefer role/label locators (`getByRole`) over CSS classes where practical, which also exercises accessibility.
+- CI runs WebKit on **Linux**, which differs from macOS WebKit (e.g. no `navigator.audioSession`, slightly different rendering). Keep assertions platform-agnostic: check behavior against feature detection, and use pixel tolerances of a few px. After merging to `main`, confirm the deploy run passed.
 
 ## Conventions
 - **Timer logic**: never count down with `setInterval`. Store `endsAt` (epoch ms) and derive remaining time from `Date.now()`.
