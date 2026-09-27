@@ -206,12 +206,7 @@ svg {
 .ring-progress {
   stroke: var(--mode);
   stroke-width: 8;
-  transform: rotate(-90deg);
-  transform-origin: 110px 110px;
   filter: drop-shadow(0 0 10px color-mix(in oklab, var(--mode) 55%, transparent));
-}
-.ring-head-wrap {
-  transform-origin: 110px 110px;
 }
 .ring-head {
   fill: var(--text);

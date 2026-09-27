@@ -32,7 +32,8 @@ export function createTimerView(root: HTMLElement): TimerView {
   function setProgress(p: number) {
     progress = p;
     progressEl.style.strokeDashoffset = String(CIRCUMFERENCE * (1 - p));
-    headEl.style.transform = `rotate(${p * 360}deg)`;
+    // SVG transform attribute (not CSS) so the pivot is in viewBox units in every browser.
+    headEl.setAttribute('transform', `rotate(${p * 360} 110 110)`);
     headEl.style.opacity = p > 0.002 ? '1' : '0';
   }
 
