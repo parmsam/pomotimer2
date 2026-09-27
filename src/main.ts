@@ -9,7 +9,11 @@ import { createTimer } from './core/timer';
 import { MODE_LABELS, type Mode } from './core/types';
 import { celebrate, driftBlobs, entrance, press, slidePill, swapText } from './fx/anims';
 import { applyTheme } from './themes/presets';
+import { dialogOpen } from './ui/dialog';
+import { createInterruptionLogger } from './ui/interruptions';
+import { createSessionActions } from './ui/sessionActions';
 import { createSettingsPanel } from './ui/settingsPanel';
+import { createTasksPanel } from './ui/tasks';
 import { createTimerView, formatTime } from './ui/timerView';
 
 const $ = <T extends HTMLElement = HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
@@ -38,12 +42,14 @@ const COMPLETE_MESSAGES: Record<Mode, string> = {
 };
 
 // ---- Timer
-const timer = createTimer(data, settings, ({ finished, next, missed }) => {
-  if (!missed) {
+const timer = createTimer(data, settings, ({ finished, next, missed, early }) => {
+  if (!missed && !early) {
     const s = settings.get();
     playAlarm(s.alarm, s.volume);
     celebrate($('#burst'), $('.dial'));
     if (s.notifications) notify(`${MODE_LABELS[finished]} complete`, COMPLETE_MESSAGES[finished]);
+  } else if (early) {
+    celebrate($('#burst'), $('.dial'));
   }
   liveEl.textContent = `${MODE_LABELS[finished]} complete. Next: ${MODE_LABELS[next]}.`;
 });
@@ -56,16 +62,19 @@ function renderMode(instant = false) {
   slidePill(pill, modeTabs.find((b) => b.dataset.mode === mode)!, instant);
 }
 
+const strictStop = () => settings.get().strictMode && data.get().timer.mode === 'focus' && data.get().timer.status === 'running';
+
 function renderStatus() {
   const { status, mode, cycleCount } = data.get().timer;
-  const label = status === 'running' ? 'Pause' : status === 'paused' ? 'Resume' : 'Start';
+  const label = strictStop() ? 'Stop' : status === 'running' ? 'Pause' : status === 'paused' ? 'Resume' : 'Start';
   swapText(toggleLabel, label);
   toggleBtn.setAttribute('aria-label', `${label} (Space)`);
 
   const round = cycleCount + (mode === 'focus' ? 1 : 0);
+  const task = data.get().tasks.find((x) => x.id === data.get().activeTaskId);
   const sub =
     mode === 'focus'
-      ? `#${Math.max(1, round)} · ${status === 'running' ? 'Stay with it' : 'Time to focus'}`
+      ? `#${Math.max(1, round)} · ${task ? task.title : status === 'running' ? 'Stay with it' : 'Time to focus'}`
       : mode === 'short'
         ? 'Stretch, sip, breathe'
         : 'Step away for a while';
@@ -104,6 +113,7 @@ function secondTick() {
   if (second === lastSecond) return;
   lastSecond = second;
   renderTitle(remaining);
+  tasks.tick();
   const s = settings.get();
   const { status, mode } = data.get().timer;
   if (s.tick && status === 'running' && mode === 'focus' && remaining > 0) playTick(s.volume);
@@ -114,7 +124,7 @@ data.subscribe((d, prev) => {
   const t = d.timer;
   const p = prev.timer;
   if (t.mode !== p.mode) renderMode();
-  if (t.status !== p.status || t.mode !== p.mode || t.cycleCount !== p.cycleCount) {
+  if (t.status !== p.status || t.mode !== p.mode || t.cycleCount !== p.cycleCount || d.activeTaskId !== prev.activeTaskId || d.tasks !== prev.tasks) {
     renderStatus();
     renderCycle();
   }
@@ -128,6 +138,7 @@ data.subscribe((d, prev) => {
 settings.subscribe((s, prev) => {
   if (s.theme !== prev.theme || s.accent !== prev.accent) applyTheme(s.theme, s.accent);
   if (s.longBreakEvery !== prev.longBreakEvery) renderCycle();
+  if (s.strictMode !== prev.strictMode) renderStatus();
   if (s.durations !== prev.durations && data.get().timer.status !== 'idle') view.render(timer.remaining(), timer.duration());
   renderTitle(timer.remaining());
 });
@@ -139,33 +150,32 @@ const panel = createSettingsPanel(settings, () => {
   data.set(defaultAppData(settings.get()));
 });
 
+const actions = createSessionActions(data, timer);
+const tasks = createTasksPanel(data, settings, timer);
+const interruptions = createInterruptionLogger(data, timer, (title) => tasks.add(title));
+
 toggleBtn.addEventListener('click', () => {
   unlockAudio();
   press(toggleBtn);
-  timer.toggle();
+  if (strictStop()) actions.reset('Stop');
+  else timer.toggle();
 });
 $('#reset').addEventListener('click', (e) => {
   press(e.currentTarget as HTMLElement);
-  timer.reset();
+  void actions.reset();
 });
 $('#skip').addEventListener('click', (e) => {
   press(e.currentTarget as HTMLElement);
-  timer.skip();
+  void actions.skip();
 });
-modeTabs.forEach((b) =>
-  b.addEventListener('click', () => {
-    const mode = b.dataset.mode as Mode;
-    if (mode === data.get().timer.mode) return;
-    if (data.get().timer.status === 'running' && !confirm('Switch modes? The current session will be reset.')) return;
-    timer.setMode(mode);
-  }),
-);
+modeTabs.forEach((b) => b.addEventListener('click', () => void actions.switchTo(b.dataset.mode as Mode)));
+$('#tasks-toggle').addEventListener('click', () => tasks.toggleVisible());
 
 document.addEventListener('keydown', (e) => {
-  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.metaKey || e.ctrlKey || e.altKey || dialogOpen()) return;
   if (e.key === 'Escape' && panel.isOpen()) return panel.close();
   const target = e.target as HTMLElement;
-  if (panel.isOpen() || target.closest('input, select, textarea')) return;
+  if (panel.isOpen() || interruptions.isOpen() || target.closest('input, select, textarea')) return;
   const key = e.key.toLowerCase();
   if (key === ' ' && !target.closest('button')) {
     e.preventDefault();
@@ -173,6 +183,11 @@ document.addEventListener('keydown', (e) => {
   } else if (key === 'r') $('#reset').click();
   else if (key === 's') $('#skip').click();
   else if (key === ',') panel.open();
+  else if (key === 't') tasks.toggleVisible();
+  else if (key === 'n') {
+    e.preventDefault();
+    tasks.focusInput();
+  } else if (key === 'i') interruptions.open();
 });
 
 window.addEventListener('resize', () => renderMode(true));

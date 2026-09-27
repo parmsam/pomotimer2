@@ -22,12 +22,18 @@
     <div class="app">
       <header class="topbar">
         <div class="brand"><span class="brand-dot"></span>pomo</div>
+        <div class="topbar-actions">
+        <button id="tasks-toggle" class="icon-btn" aria-label="Show tasks (T)" title="Tasks (T)" aria-pressed="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/></svg>
+        </button>
         <button id="settings-open" class="icon-btn" aria-label="Settings (,)" title="Settings">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
         </button>
+        </div>
       </header>
 
       <main class="stage">
+        <div class="timer-col">
         <div class="modes" role="tablist" aria-label="Session type">
           <span class="mode-pill" aria-hidden="true"></span>
           <button role="tab" data-mode="focus">Focus</button>
@@ -61,6 +67,41 @@
         </div>
 
         <div class="cycle" id="cycle"></div>
+
+        <div class="interrupt" id="interrupt" hidden>
+          <button class="interrupt-btn" type="button" aria-expanded="false" aria-haspopup="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3 5 13h6l-1 8 8-10h-6l1-8Z"/></svg>
+            Interrupted?
+            <span class="interrupt-count" hidden></span>
+          </button>
+          <div class="interrupt-pop" role="dialog" aria-label="Log an interruption" hidden>
+            <p class="interrupt-q">What pulled you away?</p>
+            <input type="text" maxlength="120" placeholder="Jot it down for later (optional)" aria-label="Note — saved as a task" />
+            <div class="interrupt-kinds">
+              <button type="button" class="btn" data-kind="internal"><strong>Internal</strong><small>My own urge</small></button>
+              <button type="button" class="btn" data-kind="external"><strong>External</strong><small>Someone or something</small></button>
+            </div>
+          </div>
+        </div>
+        </div>
+
+        <section class="tasks-panel" id="tasks" aria-labelledby="tasks-title">
+          <header class="tasks-head">
+            <h2 id="tasks-title">Today</h2>
+            <span class="tasks-meta" id="tasks-meta"></span>
+          </header>
+          <form class="task-add" autocomplete="off">
+            <input name="title" maxlength="120" placeholder="What are you working on?" aria-label="New task" />
+            <label class="est" title="Estimated pomodoros">🍅<input name="estimate" type="number" min="1" max="20" value="1" aria-label="Estimated pomodoros" /></label>
+            <button class="btn solid" type="submit">Add</button>
+          </form>
+          <p class="tasks-empty">Add a task, then tap it to track your focus time against it.</p>
+          <ul class="task-list"></ul>
+          <footer class="tasks-foot">
+            <span id="tasks-foot"></span>
+            <button class="link-btn" id="tasks-clear" type="button" hidden>Clear finished</button>
+          </footer>
+        </section>
       </main>
 
       <p class="sr-only" aria-live="polite" id="live"></p>

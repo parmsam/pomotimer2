@@ -15,6 +15,8 @@ export const DEFAULT_SETTINGS: Settings = {
   tick: false,
   notifications: false,
   titleCountdown: true,
+  strictMode: false,
+  showTasks: true,
 };
 
 export function defaultAppData(settings: Settings): AppData {
@@ -25,8 +27,13 @@ export function defaultAppData(settings: Settings): AppData {
       endsAt: null,
       remainingMs: settings.durations.focus * 60_000,
       cycleCount: 0,
+      segmentStart: null,
+      focusedMs: 0,
+      interruptions: { internal: 0, external: 0 },
     },
     history: [],
+    tasks: [],
+    activeTaskId: null,
   };
 }
 
@@ -79,5 +86,7 @@ export function loadAppData(settings: Settings): AppData {
   return {
     timer: isObject(stored.timer) ? { ...fallback.timer, ...stored.timer } : fallback.timer,
     history: Array.isArray(stored.history) ? (stored.history as AppData['history']) : [],
+    tasks: Array.isArray(stored.tasks) ? (stored.tasks as AppData['tasks']) : [],
+    activeTaskId: typeof stored.activeTaskId === 'string' ? stored.activeTaskId : null,
   };
 }

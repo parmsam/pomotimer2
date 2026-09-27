@@ -115,9 +115,15 @@ export function celebrate(burst: HTMLElement, dial: HTMLElement): void {
     );
 }
 
+/**
+ * Drawer state lives in data-state ('open' | 'closing' | closed when absent) so an
+ * open can interrupt a close that's still animating, and vice versa.
+ */
 export function openDrawer(drawer: HTMLElement, scrim: HTMLElement): void {
+  drawer.dataset.state = 'open';
   drawer.hidden = false;
   scrim.hidden = false;
+  scrim.style.pointerEvents = drawer.style.pointerEvents = '';
   if (reducedMotion()) return;
   animate(scrim, { opacity: [0, 1], duration: 300, ease: 'out(2)' });
   animate(drawer, { x: ['100%', '0%'], duration: 600, ease: 'out(4)' });
@@ -131,7 +137,13 @@ export function openDrawer(drawer: HTMLElement, scrim: HTMLElement): void {
 }
 
 export function closeDrawer(drawer: HTMLElement, scrim: HTMLElement): void {
+  drawer.dataset.state = 'closing';
+  // Let clicks through right away (e.g. on the settings button to reopen).
+  scrim.style.pointerEvents = drawer.style.pointerEvents = 'none';
   const done = () => {
+    if (drawer.dataset.state !== 'closing') return; // reopened mid-animation
+    delete drawer.dataset.state;
+    drawer.style.pointerEvents = '';
     drawer.hidden = true;
     scrim.hidden = true;
   };
@@ -142,7 +154,7 @@ export function closeDrawer(drawer: HTMLElement, scrim: HTMLElement): void {
 
 export function entrance(): void {
   if (reducedMotion()) return;
-  animate('.topbar, .modes, .dial, .controls, .cycle', {
+  animate('.topbar, .modes, .dial, .controls, .cycle, .tasks-panel', {
     y: [24, 0],
     opacity: [0, 1],
     duration: 900,

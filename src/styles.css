@@ -116,7 +116,7 @@ svg {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 720px;
+  max-width: 1180px;
   margin: 0 auto;
 }
 
@@ -136,14 +136,39 @@ svg {
   box-shadow: 0 0 16px var(--mode);
 }
 
+.topbar-actions {
+  display: flex;
+  gap: 10px;
+}
+#tasks-toggle[aria-pressed='true'] {
+  color: var(--text);
+}
+
 .stage {
   flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  align-content: center;
+  gap: 40px;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 0;
+}
+
+.timer-col {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: clamp(20px, 4vh, 36px);
-  padding: 24px 0;
+}
+
+@media (min-width: 1000px) {
+  .stage.with-tasks {
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
+    align-items: center;
+  }
 }
 
 /* ---------- Mode tabs ---------- */
@@ -547,6 +572,384 @@ input[type='range'] {
 .btn.danger {
   color: #ef6b6b;
   border-color: color-mix(in oklab, #ef6b6b 40%, transparent);
+}
+.btn.solid {
+  color: var(--on-accent);
+  background: var(--mode);
+  border-color: transparent;
+  font-weight: 600;
+}
+.btn.solid:hover {
+  background: color-mix(in oklab, var(--mode) 88%, var(--text));
+}
+.btn.danger.solid {
+  color: #fff;
+  background: #e05555;
+}
+
+.link-btn {
+  padding: 4px 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.link-btn:hover {
+  color: var(--text);
+}
+
+/* ---------- Interruptions ---------- */
+
+.interrupt {
+  position: relative;
+  margin-top: -8px;
+}
+.interrupt[hidden] {
+  display: none;
+}
+.interrupt-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+}
+.interrupt-btn:hover {
+  color: var(--text);
+}
+.interrupt-btn svg {
+  width: 15px;
+  height: 15px;
+}
+.interrupt-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--on-accent);
+  background: var(--mode);
+}
+.interrupt-pop {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  translate: -50% 0;
+  width: min(320px, calc(100vw - 32px));
+  padding: 14px;
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 50px rgb(0 0 0 / 0.3);
+}
+.interrupt-q {
+  margin: 0 0 10px;
+  font-weight: 500;
+}
+.interrupt-pop input {
+  width: 100%;
+  margin-bottom: 10px;
+}
+.interrupt-kinds {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.interrupt-kinds .btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  white-space: normal;
+  text-align: left;
+}
+.interrupt-kinds small {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+/* ---------- Tasks ---------- */
+
+.tasks-panel {
+  width: 100%;
+  max-width: 520px;
+  padding: 18px;
+  border-radius: 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(18px);
+}
+.tasks-panel[hidden] {
+  display: none;
+}
+
+.tasks-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.tasks-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.tasks-meta {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.task-add,
+.task-editor {
+  display: flex;
+  gap: 8px;
+}
+.task-add {
+  margin-bottom: 8px;
+}
+.task-add input[name='title'],
+.task-editor input[name='title'],
+.interrupt-pop input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.est {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-left: 8px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 0.85rem;
+}
+.est input[type='number'] {
+  width: 44px;
+  padding: 10px 4px;
+  border: 0;
+  background: none;
+  text-align: center;
+}
+
+.tasks-empty {
+  margin: 14px 4px 6px;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.tasks-empty[hidden] {
+  display: none;
+}
+
+.task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: min(46vh, 440px);
+  overflow-y: auto;
+}
+
+.task {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin-top: 6px;
+  padding: 8px 8px 8px 10px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  overflow: hidden;
+  transition:
+    background 0.25s,
+    border-color 0.25s;
+}
+.task:hover {
+  background: color-mix(in oklab, var(--text) 5%, transparent);
+}
+.task.active {
+  border-color: color-mix(in oklab, var(--mode) 60%, transparent);
+  background: color-mix(in oklab, var(--mode) 12%, transparent);
+}
+
+.task-check {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--muted);
+  color: transparent;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+.task-check svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 3;
+}
+.task-check:hover {
+  border-color: var(--mode);
+}
+.task.done .task-check {
+  background: var(--mode);
+  border-color: var(--mode);
+  color: var(--on-accent);
+}
+
+.task-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 2px 0;
+  text-align: left;
+}
+.task-title {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  transition: color 0.2s;
+}
+.task.done .task-title {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+.task.done .task-main {
+  cursor: default;
+}
+.task-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.task-meta {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.task-badge {
+  display: none;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--on-accent);
+  background: var(--mode);
+}
+.task.active .task-badge {
+  display: inline-block;
+}
+
+.task-actions {
+  display: flex;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.task:hover .task-actions,
+.task:focus-within .task-actions {
+  opacity: 1;
+}
+@media (hover: none) {
+  .task-actions {
+    opacity: 1;
+  }
+}
+.icon-sm {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  color: var(--muted);
+}
+.icon-sm:hover {
+  color: var(--text);
+  background: color-mix(in oklab, var(--text) 8%, transparent);
+}
+.icon-sm svg {
+  width: 17px;
+  height: 17px;
+}
+
+.task.editing > :not(.task-editor) {
+  display: none;
+}
+.task-editor {
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+}
+.task-editor input[name='title'] {
+  flex: 1 1 180px;
+}
+
+.tasks-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.tasks-foot:empty {
+  display: none;
+}
+
+/* ---------- Dialog ---------- */
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(0 0 0 / 0.4);
+  backdrop-filter: blur(3px);
+}
+.dialog {
+  width: min(400px, 100%);
+  padding: 22px;
+  border-radius: 22px;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  box-shadow: 0 30px 80px rgb(0 0 0 / 0.35);
+}
+.dialog h2 {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+.dialog p {
+  margin: 0 0 20px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .hint {

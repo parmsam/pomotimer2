@@ -78,6 +78,7 @@ export function createSettingsPanel(settings: Store<Settings>, onResetAll: () =>
     el('div', { className: 'row' }, el('label', { htmlFor: longEvery.id }, 'Long break every', el('small', {}, 'focus sessions')), longEvery),
     toggle('autoStartBreaks', 'Auto-start breaks'),
     toggle('autoStartFocus', 'Auto-start focus', 'After a break ends'),
+    toggle('strictMode', 'Strict mode', 'No pausing — stopping a pomodoro abandons it'),
   );
 
   // --- Appearance
@@ -179,7 +180,7 @@ export function createSettingsPanel(settings: Store<Settings>, onResetAll: () =>
   settings.subscribe(sync);
 
   let lastFocus: HTMLElement | null = null;
-  const isOpen = () => !drawer.hidden;
+  const isOpen = () => drawer.dataset.state === 'open';
   const open = () => {
     if (isOpen()) return;
     lastFocus = document.activeElement as HTMLElement | null;

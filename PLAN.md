@@ -58,20 +58,20 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [x] First deploy to GitHub Pages (merge to `main`, enable Pages → GitHub Actions)
 
 ### Phase 2 — Polish
-- [ ] Task list (est. pomodoros, active task linked to sessions)
+- [x] Task list (est. pomodoros, active task linked to sessions)
 - [ ] Stats (daily sessions, streak, 7-day chart)
 - [x] Keyboard shortcuts
 - [ ] Focus mode
 - [ ] Export/import data (reset is done)
-- [ ] Record abandoned pomodoros (reset/skip mid-focus) in history — "a pomodoro is indivisible"
-- [ ] Interruption log: one-tap internal/external interruption marks during focus, with a quick note to "schedule" it as a task
-- [ ] Optional strict mode (no pause; stopping = abandoning)
-- [ ] "To Do Today" framing for the task list
-- [ ] Nuanced stop/skip/switch dialogs (replace `confirm()`): abandoning keeps focused minutes in today's total; past the halfway mark it still counts as a session
+- [x] Record abandoned pomodoros (reset/skip mid-focus) in history — "a pomodoro is indivisible"
+- [x] Interruption log: one-tap internal/external interruption marks during focus, with a quick note to "schedule" it as a task
+- [x] Optional strict mode (no pause; stopping = abandoning)
+- [x] "To Do Today" framing for the task list
+- [x] Nuanced stop/skip/switch dialogs (replace `confirm()`): abandoning keeps focused minutes in today's total; past the halfway mark it still counts as a session
 - [ ] Per-mode completed counters on the mode tabs
 - [ ] Streak in header (🔥 n): 1 session or N focused minutes keeps it alive; best streak; total focus
 - [ ] Daily focus goal ("challenge") with a celebration on completion
-- [ ] Per-task time tracking: the focused task accrues minutes, clamped to the session, survives reload
+- [x] Per-task time tracking: the focused task accrues minutes, clamped to the session, survives reload
 - [ ] Cross-tab sync via the `storage` event
 - [ ] Rotating break tips + editable motivational quote
 - [ ] Optional name + time-of-day greeting
@@ -103,6 +103,14 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [ ] Per-scene controls: speed, density/intensity, color follows theme vs. mode
 - [ ] Scenes react to the timer (e.g. calmer during breaks, subtle pulse on completion)
 - [ ] Auto-pause heavy scenes when the tab is hidden or on battery saver; always off under reduced motion
+
+#### Clock themes
+Whole-timer "faces" that go beyond the Phase 2 timer styles (ring / minimal / bar). Each face is a module that renders from the same `remaining / duration / mode / status` state, so the engine doesn't change.
+- [ ] Face picker in settings with live previews
+- [ ] **Tomato**: Cirillo's original kitchen timer. A tomato dial that twists back as time runs down, with a wind-up animation on start and an optional mechanical tick. Leaves wilt slightly on breaks, and it wobbles and "rings" at the end
+- [ ] **Tamagotchi**: an egg-shaped LCD device with pixel digits and a small pixel pet. The pet works alongside you during focus and plays or naps on breaks. It grows or evolves with completed pomodoros and your streak, and looks a bit sad after abandoned sessions (never punishing)
+- [ ] Other candidates: flip clock, hourglass (sand falls with time), analog kitchen clock, growing plant, burning candle, minimal LCD
+- [ ] Faces follow the theme colours, respect reduced motion, and stay accessible (time always available to screen readers)
 
 #### Markdown export
 - [ ] Export session history as Markdown (per-day headings, sessions with times and durations, daily totals)
@@ -138,3 +146,4 @@ Basics already exist (Space, R, S, `,`, Esc).
 - 2026-09-27 — From the Wikipedia article: pomodoros are indivisible and interruptions get logged → Phase 2 items for abandoned sessions, interruption log, strict mode.
 - 2026-09-27 — Rolling digits off by default (felt busy); kept as an Appearance toggle.
 - 2026-09-27 — Phase 3 adds richer background animation options and Markdown export of sessions/tasks (JSON export/import stays in Phase 2 for backup).
+- 2026-09-27 — Clock themes (Tomato kitchen timer, Tamagotchi, and others) planned for Phase 3 as swappable timer faces on the same engine.

@@ -18,6 +18,9 @@ export interface Settings {
   tick: boolean;
   notifications: boolean;
   titleCountdown: boolean;
+  /** No pausing: stopping a focus session abandons it. */
+  strictMode: boolean;
+  showTasks: boolean;
 }
 
 export interface TimerState {
@@ -29,17 +32,51 @@ export interface TimerState {
   remainingMs: number;
   /** Focus sessions completed toward the next long break. */
   cycleCount: number;
+  /** Start of the current uninterrupted running stretch (focus only). */
+  segmentStart: number | null;
+  /** Focus time accumulated in this session across pauses, excluding the open segment. */
+  focusedMs: number;
+  interruptions: Interruptions;
+}
+
+export interface Interruptions {
+  /** Your own urge to switch (Cirillo's '). */
+  internal: number;
+  /** Someone or something else (Cirillo's -). */
+  external: number;
 }
 
 export interface SessionRecord {
   mode: Mode;
   endedAt: number;
+  /** Planned length. */
   durationMs: number;
+  /** Time actually spent focusing (focus sessions only). */
+  focusedMs?: number;
+  /** Stopped before it counted. */
+  abandoned?: boolean;
+  taskId?: string | null;
+  interruptions?: Interruptions;
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  /** Estimated pomodoros. */
+  estimate: number;
+  /** Completed pomodoros credited to this task. */
+  pomodoros: number;
+  trackedMs: number;
+  done: boolean;
+  createdAt: number;
+  doneAt: number | null;
 }
 
 export interface AppData {
   timer: TimerState;
   history: SessionRecord[];
+  tasks: Task[];
+  activeTaskId: string | null;
 }
 
 export const MODE_LABELS: Record<Mode, string> = {
