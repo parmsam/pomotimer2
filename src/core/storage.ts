@@ -8,7 +8,7 @@ export const DEFAULT_SETTINGS: Settings = {
   autoStartBreaks: false,
   autoStartFocus: false,
   theme: 'lofi-dusk',
-  accent: null,
+  modeColors: { focus: null, short: null, long: null },
   rollingDigits: false,
   alarm: 'bell',
   volume: 0.6,
@@ -20,6 +20,7 @@ export const DEFAULT_SETTINGS: Settings = {
   muted: false,
   trackInterruptions: false,
   dailyGoal: 8,
+  focusModeOnStart: false,
   shortcutsHintSeen: false,
 };
 
@@ -74,20 +75,30 @@ function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
 
-/** Shallow-merges stored values over defaults so new settings keys get sane values. */
-export function loadSettings(): Settings {
-  const stored = read('settings');
+/**
+ * Merges stored values over defaults so new settings get sane values, and migrates
+ * older shapes. Also used to validate imported backups.
+ */
+export function normalizeSettings(stored: unknown): Settings {
   if (!isObject(stored)) return structuredClone(DEFAULT_SETTINGS);
+  const { accent, ...rest } = stored;
+  const modeColors = { ...DEFAULT_SETTINGS.modeColors, ...(isObject(stored.modeColors) ? stored.modeColors : {}) };
+  // v1 had a single focus "accent" color.
+  if (typeof accent === 'string' && !isObject(stored.modeColors)) modeColors.focus = accent;
   return {
     ...structuredClone(DEFAULT_SETTINGS),
-    ...stored,
+    ...rest,
     durations: { ...DEFAULT_SETTINGS.durations, ...(isObject(stored.durations) ? stored.durations : {}) },
+    modeColors,
   } as Settings;
 }
 
-export function loadAppData(settings: Settings): AppData {
+export const loadSettings = (): Settings => normalizeSettings(read('settings'));
+
+export const loadAppData = (settings: Settings): AppData => normalizeAppData(read('data'), settings);
+
+export function normalizeAppData(stored: unknown, settings: Settings): AppData {
   const fallback = defaultAppData(settings);
-  const stored = read('data');
   if (!isObject(stored)) return fallback;
   return {
     timer: isObject(stored.timer) ? { ...fallback.timer, ...stored.timer } : fallback.timer,

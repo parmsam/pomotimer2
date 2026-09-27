@@ -73,7 +73,7 @@ export const THEMES: Theme[] = [
 
 export const getTheme = (id: string): Theme => THEMES.find((t) => t.id === id) ?? THEMES[0];
 
-export function applyTheme(id: string, accent: string | null): Theme {
+export function applyTheme(id: string, modeColors: Record<Mode, string | null>): Theme {
   const theme = getTheme(id);
   const root = document.documentElement;
   const vars: Record<string, string> = {
@@ -84,9 +84,9 @@ export function applyTheme(id: string, accent: string | null): Theme {
     '--blob3': theme.blobs[2],
     '--text': theme.text,
     '--on-accent': theme.onAccent,
-    '--focus': accent ?? theme.modes.focus,
-    '--short': theme.modes.short,
-    '--long': theme.modes.long,
+    '--focus': modeColors.focus ?? theme.modes.focus,
+    '--short': modeColors.short ?? theme.modes.short,
+    '--long': modeColors.long ?? theme.modes.long,
   };
   for (const [k, v] of Object.entries(vars)) root.style.setProperty(k, v);
   root.dataset.scheme = theme.scheme;

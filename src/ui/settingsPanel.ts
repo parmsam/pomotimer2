@@ -3,6 +3,7 @@ import { notificationsSupported, requestNotifications } from '../core/notify';
 import type { Store } from '../core/store';
 import type { AlarmSound, Mode, Settings } from '../core/types';
 import { closeDrawer, openDrawer } from '../fx/anims';
+import { ask } from './dialog';
 import { THEMES, getTheme } from '../themes/presets';
 
 type BoolKey = { [K in keyof Settings]: Settings[K] extends boolean ? K : never }[keyof Settings];
@@ -29,7 +30,13 @@ export interface SettingsPanel {
   isOpen(): boolean;
 }
 
-export function createSettingsPanel(settings: Store<Settings>, onResetAll: () => void): SettingsPanel {
+export interface DataActions {
+  resetAll(): void;
+  exportBackup(): void;
+  importBackup(file: File): Promise<void>;
+}
+
+export function createSettingsPanel(settings: Store<Settings>, dataActions: DataActions): SettingsPanel {
   const drawer = document.getElementById('settings')!;
   const scrim = document.getElementById('scrim')!;
   const body = document.getElementById('settings-body')!;
@@ -76,8 +83,25 @@ export function createSettingsPanel(settings: Store<Settings>, onResetAll: () =>
   const goalInput = numberRow(1, 24, (s) => s.dailyGoal, (n) => update({ dailyGoal: n }));
   goalInput.id = 'set-daily-goal';
 
+  const PRESETS: [number, number, number][] = [
+    [25, 5, 15],
+    [50, 10, 20],
+    [90, 15, 30],
+  ];
+  const presetBtns = PRESETS.map(([focus, short, long]) => {
+    const b = el('button', { className: 'btn preset', type: 'button' }, `${focus} / ${short} / ${long}`);
+    b.setAttribute('aria-label', `${focus} minute focus, ${short} minute short break, ${long} minute long break`);
+    b.addEventListener('click', () => update({ durations: { focus, short, long } }));
+    syncers.push((s) => {
+      const d = s.durations;
+      b.setAttribute('aria-pressed', String(d.focus === focus && d.short === short && d.long === long));
+    });
+    return b;
+  });
+
   const timerSection = section(
     'Timer',
+    el('div', { className: 'presets', role: 'group', ariaLabel: 'Interval presets' }, ...presetBtns),
     el('div', { className: 'durations' }, ...durationFields),
     el('div', { className: 'row' }, el('label', { htmlFor: longEvery.id }, 'Long break every', el('small', {}, 'focus sessions')), longEvery),
     el('div', { className: 'row' }, el('label', { htmlFor: goalInput.id }, 'Daily goal', el('small', {}, 'pomodoros per day')), goalInput),
@@ -107,24 +131,22 @@ export function createSettingsPanel(settings: Store<Settings>, onResetAll: () =>
     return btn;
   });
 
-  const accentInput = el('input', { type: 'color', id: 'set-accent', ariaLabel: 'Focus accent color' });
-  accentInput.addEventListener('input', () => update({ accent: accentInput.value }));
-  const accentReset = el('button', { className: 'btn', type: 'button' }, 'Use theme');
-  accentReset.addEventListener('click', () => update({ accent: null }));
-  syncers.push((s) => {
-    accentInput.value = s.accent ?? getTheme(s.theme).modes.focus;
-    accentReset.hidden = s.accent === null;
+  const colorPickers = (['focus', 'short', 'long'] as Mode[]).map((mode) => {
+    const name = { focus: 'Focus', short: 'Short break', long: 'Long break' }[mode];
+    const input = el('input', { type: 'color', id: `set-color-${mode}`, ariaLabel: `${name} color` });
+    input.addEventListener('input', () => update({ modeColors: { ...settings.get().modeColors, [mode]: input.value } }));
+    syncers.push((s) => (input.value = s.modeColors[mode] ?? getTheme(s.theme).modes[mode]));
+    return el('label', { className: 'color-pick' }, input, name);
   });
+  const colorsReset = el('button', { className: 'btn', type: 'button' }, 'Use theme colors');
+  colorsReset.addEventListener('click', () => update({ modeColors: { focus: null, short: null, long: null } }));
+  syncers.push((s) => (colorsReset.hidden = Object.values(s.modeColors).every((c) => c === null)));
 
   const appearanceSection = section(
     'Appearance',
     el('div', { className: 'themes' }, ...swatches),
-    el(
-      'div',
-      { className: 'row accent-row' },
-      el('label', { htmlFor: accentInput.id }, 'Focus color'),
-      el('div', { className: 'row' }, accentReset, accentInput),
-    ),
+    el('div', { className: 'mode-colors' }, ...colorPickers),
+    colorsReset,
     toggle('rollingDigits', 'Rolling digits', 'Animate the clock as each digit changes'),
   );
 
@@ -168,16 +190,35 @@ export function createSettingsPanel(settings: Store<Settings>, onResetAll: () =>
     }),
     notifHint,
     toggle('titleCountdown', 'Countdown in tab title'),
+    toggle('focusModeOnStart', 'Focus mode on start', 'Hide everything but the timer during focus (F)'),
   );
 
   // --- Data
+  const exportBtn = el('button', { className: 'btn', type: 'button' }, 'Export backup');
+  exportBtn.addEventListener('click', () => dataActions.exportBackup());
+  const fileInput = el('input', { type: 'file', accept: 'application/json,.json', hidden: true, id: 'import-file' });
+  fileInput.setAttribute('aria-label', 'Choose a backup file');
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files?.[0];
+    fileInput.value = '';
+    if (file) void dataActions.importBackup(file);
+  });
+  const importBtn = el('button', { className: 'btn', type: 'button' }, 'Import backup');
+  importBtn.addEventListener('click', () => fileInput.click());
   const resetBtn = el('button', { className: 'btn danger', type: 'button' }, 'Reset everything');
-  resetBtn.addEventListener('click', () => {
-    if (confirm('Reset all settings and history? This can’t be undone.')) onResetAll();
+  resetBtn.addEventListener('click', async () => {
+    const r = await ask({
+      title: 'Reset everything?',
+      body: 'This deletes your settings, tasks and history in this browser. Export a backup first if you might want them back.',
+      confirm: 'Reset',
+      danger: true,
+    });
+    if (r === 'confirm') dataActions.resetAll();
   });
   const dataSection = section(
     'Data',
-    el('div', { className: 'row' }, el('span', { className: 'label' }, 'Settings & history are saved in this browser.'), resetBtn),
+    el('p', { className: 'hint' }, 'Everything is saved only in this browser. Back it up to move to another device or browser.'),
+    el('div', { className: 'data-actions' }, exportBtn, importBtn, fileInput, resetBtn),
   );
 
   const shortcutsBtn = el('button', { className: 'btn', type: 'button' }, 'View shortcuts');

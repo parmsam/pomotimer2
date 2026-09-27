@@ -69,3 +69,17 @@ describe('write / clearAll', () => {
     expect(localStorage.getItem('other-app')).toBe('keep');
   });
 });
+
+describe('settings migration', () => {
+  it('moves the old single accent color to the focus mode color', () => {
+    localStorage.setItem('pomo:v1:settings', JSON.stringify({ accent: '#00ff88' }));
+    const s = loadSettings();
+    expect(s.modeColors).toEqual({ focus: '#00ff88', short: null, long: null });
+    expect(s).not.toHaveProperty('accent');
+  });
+
+  it('keeps per-mode colors and fills missing ones', () => {
+    localStorage.setItem('pomo:v1:settings', JSON.stringify({ modeColors: { short: '#123456' } }));
+    expect(loadSettings().modeColors).toEqual({ focus: null, short: '#123456', long: null });
+  });
+});

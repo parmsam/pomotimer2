@@ -10,9 +10,12 @@ import { createTimer } from './core/timer';
 import { MODE_LABELS, type Mode } from './core/types';
 import { celebrate, driftBlobs, entrance, press, slidePill, swapText } from './fx/anims';
 import { applyTheme } from './themes/presets';
+import { backupFilename, makeBackup, parseBackup } from './core/backup';
 import { dayKey } from './core/stats';
+import { breakTip } from './core/tips';
 import { onceAcrossTabs, syncAcrossTabs } from './core/sync';
-import { dialogOpen } from './ui/dialog';
+import { ask, dialogOpen } from './ui/dialog';
+import { createFocusMode } from './ui/focusMode';
 import { createStatsView } from './ui/stats';
 import { bindShortcuts, createShortcutsHelp, type Shortcut } from './ui/shortcuts';
 import { toast } from './ui/toast';
@@ -95,9 +98,7 @@ function renderStatus() {
   const sub =
     mode === 'focus'
       ? `#${Math.max(1, round)} · ${task ? task.title : status === 'running' ? 'Stay with it' : 'Time to focus'}`
-      : mode === 'short'
-        ? 'Stretch, sip, breathe'
-        : 'Step away for a while';
+      : breakTip(mode, data.get().history.length);
   swapText(subEl, sub);
 }
 
@@ -153,11 +154,15 @@ data.subscribe((d, prev) => {
   if (t.status === 'idle' && (p.status !== 'idle' || t.mode !== p.mode || t.remainingMs !== p.remainingMs)) {
     view.refill(t.remainingMs, timer.duration());
   }
-  if (t.status === 'paused') renderTitle(timer.remaining());
+  if (t.status === 'paused') {
+    renderTitle(timer.remaining());
+    // e.g. a paused session restored from a backup or synced from another tab
+    if (p.status !== 'paused' || t.remainingMs !== p.remainingMs) view.refill(t.remainingMs, timer.duration());
+  }
 });
 
 settings.subscribe((s, prev) => {
-  if (s.theme !== prev.theme || s.accent !== prev.accent) applyTheme(s.theme, s.accent);
+  if (s.theme !== prev.theme || s.modeColors !== prev.modeColors) applyTheme(s.theme, s.modeColors);
   if (s.longBreakEvery !== prev.longBreakEvery) renderCycle();
   if (s.strictMode !== prev.strictMode) renderStatus();
   if (s.durations !== prev.durations && data.get().timer.status !== 'idle') view.render(timer.remaining(), timer.duration());
@@ -165,14 +170,48 @@ settings.subscribe((s, prev) => {
 });
 
 // ---- Controls
-const panel = createSettingsPanel(settings, () => {
-  clearAll();
-  settings.set(structuredClone(DEFAULT_SETTINGS));
-  data.set(defaultAppData(settings.get()));
+const panel = createSettingsPanel(settings, {
+  resetAll() {
+    clearAll();
+    settings.set(structuredClone(DEFAULT_SETTINGS));
+    data.set(defaultAppData(settings.get()));
+    toast('Everything has been reset');
+  },
+  exportBackup() {
+    const blob = new Blob([JSON.stringify(makeBackup(settings.get(), data.get()), null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = backupFilename();
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    toast('Backup downloaded');
+  },
+  async importBackup(file) {
+    let backup: ReturnType<typeof parseBackup>;
+    try {
+      backup = parseBackup(await file.text());
+    } catch (err) {
+      toast((err as Error).message, { duration: 5000 });
+      return;
+    }
+    const when = backup.exportedAt ? new Date(backup.exportedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'an unknown date';
+    const focusCount = backup.data.history.filter((h) => h.mode === 'focus' && !h.abandoned).length;
+    const r = await ask({
+      title: 'Replace your data with this backup?',
+      body: `Backup from ${when}: ${backup.data.tasks.length} tasks and ${focusCount} pomodoros. Your current settings, tasks and history will be replaced.`,
+      confirm: 'Replace',
+      danger: true,
+    });
+    if (r !== 'confirm') return;
+    settings.set(backup.settings);
+    data.set(backup.data);
+    toast('Backup restored');
+  },
 });
 
 const actions = createSessionActions(data, timer);
 const stats = createStatsView(data, settings, timer);
+const focusMode = createFocusMode(data, settings, () => renderMode(true));
 const tasks = createTasksPanel(data, settings, timer);
 const interruptions = createInterruptionLogger(data, settings, timer, (title) => tasks.add(title));
 
@@ -241,6 +280,7 @@ const SHORTCUTS: Shortcut[] = [
   { keys: ['E'], label: 'Edit', group: 'Tasks' },
   { keys: ['Del'], label: 'Delete', group: 'Tasks' },
   { keys: ['Alt', '↑/↓'], label: 'Reorder', group: 'Tasks' },
+  { keys: ['F'], label: 'Focus mode (hide everything but the timer)', group: 'General', match: (k) => k === 'f', run: () => focusMode.toggle() },
   { keys: ['M'], label: 'Mute / unmute sounds', group: 'General', match: (k) => k === 'm', run: toggleMute },
   { keys: [','], label: 'Open / close settings', group: 'General', inSettings: true, match: (k) => k === ',', run: () => panel.toggle() },
   { keys: ['?'], label: 'Show these shortcuts', group: 'General', inSettings: true, match: (k) => k === '?', run: () => openHelp() },
@@ -255,9 +295,11 @@ const openHelp = () => {
 };
 $('#shortcuts-open').addEventListener('click', openHelp);
 
-// Esc closes settings even from inside one of its inputs.
+// Esc closes settings even from inside one of its inputs, otherwise leaves focus mode.
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && panel.isOpen() && !dialogOpen() && !help.isOpen()) panel.close();
+  if (e.key !== 'Escape' || e.defaultPrevented || dialogOpen() || help.isOpen() || stats.isOpen() || interruptions.isOpen()) return;
+  if (panel.isOpen()) panel.close();
+  else if (focusMode.isOn()) focusMode.exit();
 });
 bindShortcuts(SHORTCUTS, {
   modalOpen: () => dialogOpen() || help.isOpen() || interruptions.isOpen() || stats.isOpen(),
@@ -282,7 +324,7 @@ new ResizeObserver(() => renderMode(true)).observe(document.querySelector('.mode
 modeTabs.forEach((b) => new ResizeObserver(() => renderMode(true)).observe(b));
 
 // ---- Boot
-applyTheme(settings.get().theme, settings.get().accent);
+applyTheme(settings.get().theme, settings.get().modeColors);
 renderMode(true);
 renderStatus();
 renderCycle();

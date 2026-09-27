@@ -66,8 +66,8 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [x] Task list (est. pomodoros, active task linked to sessions)
 - [x] Stats (daily sessions, streak, 7-day chart)
 - [x] Keyboard shortcuts
-- [ ] Focus mode
-- [ ] Export/import data (reset is done)
+- [x] Focus mode
+- [x] Export/import data (reset is done)
 - [x] Record abandoned pomodoros (reset/skip mid-focus) in history — "a pomodoro is indivisible"
 - [x] Interruption log: one-tap internal/external interruption marks during focus, with a quick note to "schedule" it as a task
 - [x] Optional strict mode (no pause; stopping = abandoning)
@@ -78,19 +78,13 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [x] Daily focus goal ("challenge") with a celebration on completion
 - [x] Per-task time tracking: the focused task accrues minutes, clamped to the session, survives reload
 - [x] Cross-tab sync via the `storage` event
-- [ ] Rotating break tips (quotes moved to Phase 4)
+- [x] Rotating break tips (quotes moved to Phase 4)
 - [ ] Optional name + time-of-day greeting
 
-#### Customization
-- [ ] Timer style: ring / minimal (digits only) / progress bar
-- [ ] Clock font choice (a few curated Google Fonts) + weight
-- [ ] Per-mode colors (short/long break too, not just focus)
-- [ ] Custom theme builder: tweak bg, blobs, text; save as "My theme"
-- [ ] Background controls: blob intensity/speed, grain on/off, solid color option
-- [ ] Alarm per mode (e.g. gentle chime to end a break) + alarm repeat count
-- [ ] Toggle UI elements: cycle dots, subtitle, tab counters, quote
-- [ ] Custom mode names and subtitle messages
-- [ ] Preset intervals quick-pick (25/5/15 · 50/10/20 · 90/15/30)
+#### Customization (kept lean)
+- [x] Interval presets quick-pick (25/5/15 · 50/10/20 · 90/15/30)
+- [x] Per-mode colors (short/long break too, not just focus)
+- Everything else is reserved for Phase 4 (see "Customization ideas")
 
 ### Phase 3 — Eye candy
 - [ ] three.js scenes (particles/fireflies, shader gradient mesh, rain on glass, low-poly tomato)
@@ -155,7 +149,7 @@ Basics already exist (Space, R, S, `,`, Esc).
 - [ ] Swipe gestures on touch screens: swipe left/right on the dial to change mode, tap the dial to start/pause, long-press to reset, swipe up for tasks
 - [ ] Gestures ignore scrolling areas and follow the same confirm rules as buttons (e.g. abandoning a focus session)
 
-### Phase 4 — Quotes
+### Phase 4 — Quotes & extra customization
 - [ ] Settings toggle: show a quote (off by default), e.g. under the timer or on breaks, rotating per session
 - [ ] Source: **Default list** (~100 quotes) or **My quotes** (one or more of the user's own, added/edited/removed in settings, stored locally)
 - [ ] Default list: ~100 productivity/work/learning quotes from scientists (e.g. Feynman, Curie, Einstein) and other accomplished people
@@ -169,6 +163,16 @@ Basics already exist (Space, R, S, `,`, Esc).
   - Unit test the parser, and add a test that every entry has text and an author and there are no duplicates
 - [ ] Rotation: random without repeats until the list is exhausted; don't change mid-session
 - [ ] Accessible: quote text is real text (not an image), muted styling, and it can be hidden entirely
+
+#### Customization ideas (reserved)
+Only pick these up if there's real demand. Several overlap with Phase 3 clock themes and background options, so build those first and reuse them.
+- [ ] Timer style: ring / minimal (digits only) / progress bar
+- [ ] Clock font (a few curated Google Fonts, loaded on demand) and weight
+- [ ] Custom theme builder: tweak background, blobs and text colours; save as "My theme"
+- [ ] Background controls: blob intensity and speed, grain on/off, solid colour
+- [ ] Separate alarm sound for the end of a break, plus an alarm repeat count
+- [ ] Show/hide individual UI elements (cycle dots, goal meter, tab counts, streak chip, subtitle)
+- [ ] Custom mode names and subtitle messages
 
 ## Reference notes
 **pomodorotimer.online** (studied 2026-09-27; captured into `ref/`, which is gitignored). A Nuxt PWA with no backend; data lives in localStorage and IndexedDB. What stood out:
@@ -195,3 +199,4 @@ Basics already exist (Space, R, S, `,`, Esc).
 - 2026-09-27 — Interruption tracking made opt-in; notes kept in a separate 'Noted for later' list instead of auto-creating tasks.
 - 2026-09-27 — Streak rule: a day counts with one counted pomodoro or 25 focused minutes. Stats are derived from session history (no separate counters to drift).
 - 2026-09-27 — Quotes become their own Phase 4: optional, default list maintained as Markdown in the repo, or user-provided list.
+- 2026-09-27 — Customization trimmed to presets + per-mode colors in Phase 2; the other ideas are reserved in Phase 4.

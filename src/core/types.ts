@@ -9,8 +9,8 @@ export interface Settings {
   autoStartBreaks: boolean;
   autoStartFocus: boolean;
   theme: string;
-  /** Overrides the theme's focus color when set. */
-  accent: string | null;
+  /** Per-mode color overrides; null uses the theme's color. */
+  modeColors: Record<Mode, string | null>;
   /** Roll each digit in as the clock changes. */
   rollingDigits: boolean;
   alarm: AlarmSound;
@@ -26,6 +26,8 @@ export interface Settings {
   trackInterruptions: boolean;
   /** Pomodoros per day to aim for. */
   dailyGoal: number;
+  /** Enter focus mode automatically when a focus session starts. */
+  focusModeOnStart: boolean;
   /** The one-time "press ? for shortcuts" tip has been shown. */
   shortcutsHintSeen: boolean;
 }
