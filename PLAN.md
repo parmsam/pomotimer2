@@ -79,7 +79,6 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [x] Per-task time tracking: the focused task accrues minutes, clamped to the session, survives reload
 - [x] Cross-tab sync via the `storage` event
 - [x] Rotating break tips (quotes moved to Phase 4)
-- [ ] Optional name + time-of-day greeting
 
 #### Customization (kept lean)
 - [x] Interval presets quick-pick (25/5/15 · 50/10/20 · 90/15/30)
@@ -149,7 +148,7 @@ Basics already exist (Space, R, S, `,`, Esc).
 - [ ] Swipe gestures on touch screens: swipe left/right on the dial to change mode, tap the dial to start/pause, long-press to reset, swipe up for tasks
 - [ ] Gestures ignore scrolling areas and follow the same confirm rules as buttons (e.g. abandoning a focus session)
 
-### Phase 4 — Quotes & extra customization
+### Phase 4 — Quotes, greeting & extra customization
 - [ ] Settings toggle: show a quote (off by default), e.g. under the timer or on breaks, rotating per session
 - [ ] Source: **Default list** (~100 quotes) or **My quotes** (one or more of the user's own, added/edited/removed in settings, stored locally)
 - [ ] Default list: ~100 productivity/work/learning quotes from scientists (e.g. Feynman, Curie, Einstein) and other accomplished people
@@ -163,6 +162,9 @@ Basics already exist (Space, R, S, `,`, Esc).
   - Unit test the parser, and add a test that every entry has text and an author and there are no duplicates
 - [ ] Rotation: random without repeats until the list is exhausted; don't change mid-session
 - [ ] Accessible: quote text is real text (not an image), muted styling, and it can be hidden entirely
+
+#### Greeting
+- [ ] Optional name + time-of-day greeting (e.g. "Good morning, Sam"; "Welcome back" after a gap). Off by default; the name is stored locally only
 
 #### Customization ideas (reserved)
 Only pick these up if there's real demand. Several overlap with Phase 3 clock themes and background options, so build those first and reuse them.
@@ -200,3 +202,4 @@ Only pick these up if there's real demand. Several overlap with Phase 3 clock th
 - 2026-09-27 — Streak rule: a day counts with one counted pomodoro or 25 focused minutes. Stats are derived from session history (no separate counters to drift).
 - 2026-09-27 — Quotes become their own Phase 4: optional, default list maintained as Markdown in the repo, or user-provided list.
 - 2026-09-27 — Customization trimmed to presets + per-mode colors in Phase 2; the other ideas are reserved in Phase 4.
+- 2026-09-27 — Phase 2 complete; the name greeting moved to Phase 4 alongside quotes.
