@@ -78,7 +78,7 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [x] Daily focus goal ("challenge") with a celebration on completion
 - [x] Per-task time tracking: the focused task accrues minutes, clamped to the session, survives reload
 - [x] Cross-tab sync via the `storage` event
-- [ ] Rotating break tips + editable motivational quote
+- [ ] Rotating break tips (quotes moved to Phase 4)
 - [ ] Optional name + time-of-day greeting
 
 #### Customization
@@ -155,6 +155,21 @@ Basics already exist (Space, R, S, `,`, Esc).
 - [ ] Swipe gestures on touch screens: swipe left/right on the dial to change mode, tap the dial to start/pause, long-press to reset, swipe up for tasks
 - [ ] Gestures ignore scrolling areas and follow the same confirm rules as buttons (e.g. abandoning a focus session)
 
+### Phase 4 — Quotes
+- [ ] Settings toggle: show a quote (off by default), e.g. under the timer or on breaks, rotating per session
+- [ ] Source: **Default list** (~100 quotes) or **My quotes** (one or more of the user's own, added/edited/removed in settings, stored locally)
+- [ ] Default list: ~100 productivity/work/learning quotes from scientists (e.g. Feynman, Curie, Einstein) and other accomplished people
+  - Kept in a Markdown file in the repo (`src/content/quotes.md`) so it's easy to review and update in a PR. Imported at build time with Vite `?raw` and parsed, with no runtime fetch
+  - Proposed format, one quote per blockquote, attribution after an em dash:
+    ```
+    > The first principle is that you must not fool yourself — and you are the easiest person to fool.
+    > — Richard Feynman, *Cargo Cult Science* (1974)
+    ```
+  - **Accuracy rule:** only well-sourced attributions (misattributed quotes are rampant). Include a source where possible, and drop anything that's apocryphal
+  - Unit test the parser, and add a test that every entry has text and an author and there are no duplicates
+- [ ] Rotation: random without repeats until the list is exhausted; don't change mid-session
+- [ ] Accessible: quote text is real text (not an image), muted styling, and it can be hidden entirely
+
 ## Reference notes
 **pomodorotimer.online** (studied 2026-09-27; captured into `ref/`, which is gitignored). A Nuxt PWA with no backend; data lives in localStorage and IndexedDB. What stood out:
 - Timer uses a wall-clock deadline in a Web Worker; sessions that finish while the tab is closed still count. (We already do the deadline and missed-completion credit.)
@@ -179,3 +194,4 @@ Basics already exist (Space, R, S, `,`, Esc).
 - 2026-09-27 — Added Vitest + Playwright test suites and CI gating deploys, after bugs (ring offset, settings drawer) slipped past ad-hoc checks.
 - 2026-09-27 — Interruption tracking made opt-in; notes kept in a separate 'Noted for later' list instead of auto-creating tasks.
 - 2026-09-27 — Streak rule: a day counts with one counted pomodoro or 25 focused minutes. Stats are derived from session history (no separate counters to drift).
+- 2026-09-27 — Quotes become their own Phase 4: optional, default list maintained as Markdown in the repo, or user-provided list.
