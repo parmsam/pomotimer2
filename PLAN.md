@@ -110,6 +110,14 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [ ] Export options: date range, include tasks / sessions / stats summary
 - [ ] Download as `.md` + copy to clipboard (for pasting into Obsidian, Notion, GitHub)
 
+#### Keyboard & gesture shortcuts
+Basics already exist (Space, R, S, `,`, Esc).
+- [ ] More keys: `1`/`2`/`3` switch mode, `T` tasks, `F` focus mode, `M` mute, `+`/`-` add or remove a minute, `P` pop-out timer
+- [ ] `?` opens a shortcuts cheat-sheet overlay
+- [ ] Optional: remap keys in settings
+- [ ] Swipe gestures on touch screens: swipe left/right on the dial to change mode, tap the dial to start/pause, long-press to reset, swipe up for tasks
+- [ ] Gestures ignore scrolling areas and follow the same confirm rules as buttons (e.g. abandoning a focus session)
+
 ## Reference notes
 **pomodorotimer.online** (studied 2026-09-27; captured into `ref/`, which is gitignored). A Nuxt PWA with no backend; data lives in localStorage and IndexedDB. What stood out:
 - Timer uses a wall-clock deadline in a Web Worker; sessions that finish while the tab is closed still count. (We already do the deadline and missed-completion credit.)
