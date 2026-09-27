@@ -25,6 +25,7 @@ const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(mi
 export interface SettingsPanel {
   open(): void;
   close(): void;
+  toggle(): void;
   isOpen(): boolean;
 }
 
@@ -145,6 +146,7 @@ export function createSettingsPanel(settings: Store<Settings>, onResetAll: () =>
     el('div', { className: 'row' }, el('label', { htmlFor: alarmSelect.id }, 'Alarm'), alarmSelect, testBtn),
     el('div', { className: 'row' }, el('label', { htmlFor: volume.id }, 'Volume'), volume),
     toggle('tick', 'Ticking', 'Soft tick every second during focus'),
+    toggle('muted', 'Mute all sounds', 'Shortcut: M'),
   );
 
   // --- Behavior
@@ -173,7 +175,14 @@ export function createSettingsPanel(settings: Store<Settings>, onResetAll: () =>
     el('div', { className: 'row' }, el('span', { className: 'label' }, 'Settings & history are saved in this browser.'), resetBtn),
   );
 
-  body.append(timerSection, appearanceSection, soundSection, behaviorSection, dataSection);
+  const shortcutsBtn = el('button', { className: 'btn', type: 'button' }, 'View shortcuts');
+  shortcutsBtn.addEventListener('click', () => document.getElementById('shortcuts-open')?.click());
+  const helpSection = section(
+    'Keyboard',
+    el('div', { className: 'row' }, el('span', { className: 'label' }, 'Press ? anytime to see every shortcut.'), shortcutsBtn),
+  );
+
+  body.append(timerSection, appearanceSection, soundSection, behaviorSection, helpSection, dataSection);
 
   const sync = (s: Settings) => syncers.forEach((fn) => fn(s));
   sync(settings.get());
@@ -197,5 +206,5 @@ export function createSettingsPanel(settings: Store<Settings>, onResetAll: () =>
   document.getElementById('settings-close')!.addEventListener('click', close);
   scrim.addEventListener('click', close);
 
-  return { open, close, isOpen };
+  return { open, close, toggle: () => (isOpen() ? close() : open()), isOpen };
 }

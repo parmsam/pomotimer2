@@ -17,6 +17,8 @@ export const DEFAULT_SETTINGS: Settings = {
   titleCountdown: true,
   strictMode: false,
   showTasks: true,
+  muted: false,
+  shortcutsHintSeen: false,
 };
 
 export function defaultAppData(settings: Settings): AppData {

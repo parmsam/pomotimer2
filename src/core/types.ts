@@ -21,6 +21,9 @@ export interface Settings {
   /** No pausing: stopping a focus session abandons it. */
   strictMode: boolean;
   showTasks: boolean;
+  muted: boolean;
+  /** The one-time "press ? for shortcuts" tip has been shown. */
+  shortcutsHintSeen: boolean;
 }
 
 export interface TimerState {

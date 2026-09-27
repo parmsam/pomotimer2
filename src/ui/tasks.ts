@@ -73,6 +73,25 @@ export function createTasksPanel(data: Store<AppData>, settings: Store<Settings>
     );
   }
 
+  async function confirmRemove(id: string) {
+    const task = tasks().find((x) => x.id === id);
+    if (!task) return;
+    if (task.pomodoros > 0 || task.trackedMs > 60_000) {
+      const r = await ask({ title: 'Delete this task?', body: `“${task.title}” and its tracked time will be removed.`, confirm: 'Delete', danger: true });
+      if (r !== 'confirm') return;
+    }
+    // Keep keyboard focus in the list: move to the neighbour before removing.
+    const ids = tasks().map((t) => t.id);
+    const i = ids.indexOf(id);
+    const next = ids[i + 1] ?? ids[i - 1];
+    remove(id);
+    if (next) focusRow(next);
+    else input.focus();
+  }
+
+  // Store updates render synchronously, so rows are already in place here.
+  const focusRow = (id: string) => rows.get(id)?.querySelector<HTMLElement>('.task-main')?.focus();
+
   function move(id: string, delta: number) {
     const ts = [...tasks()];
     const i = ts.findIndex((t) => t.id === id);
@@ -80,7 +99,7 @@ export function createTasksPanel(data: Store<AppData>, settings: Store<Settings>
     if (i < 0 || j < 0 || j >= ts.length) return;
     [ts[i], ts[j]] = [ts[j], ts[i]];
     setTasks(() => ts);
-    requestAnimationFrame(() => rows.get(id)?.querySelector<HTMLElement>('.task-main')?.focus());
+    focusRow(id);
   }
 
   // ---- Rendering
@@ -116,23 +135,8 @@ export function createTasksPanel(data: Store<AppData>, settings: Store<Settings>
       const task = tasks().find((x) => x.id === t.id);
       if (task && !task.done) setActive(data.get().activeTaskId === t.id ? null : t.id);
     });
-    li.querySelector('.task-main')!.addEventListener('keydown', (e) => {
-      const ke = e as KeyboardEvent;
-      if (ke.altKey && (ke.key === 'ArrowUp' || ke.key === 'ArrowDown')) {
-        ke.preventDefault();
-        move(t.id, ke.key === 'ArrowUp' ? -1 : 1);
-      }
-    });
     li.querySelector('.task-edit')!.addEventListener('click', () => startEdit(t.id));
-    li.querySelector('.task-delete')!.addEventListener('click', async () => {
-      const task = tasks().find((x) => x.id === t.id);
-      if (!task) return;
-      if (task.pomodoros > 0 || task.trackedMs > 60_000) {
-        const r = await ask({ title: 'Delete this task?', body: `“${task.title}” and its tracked time will be removed.`, confirm: 'Delete', danger: true });
-        if (r !== 'confirm') return;
-      }
-      remove(t.id);
-    });
+    li.querySelector('.task-delete')!.addEventListener('click', () => void confirmRemove(t.id));
     return li;
   }
 
@@ -206,7 +210,7 @@ export function createTasksPanel(data: Store<AppData>, settings: Store<Settings>
       }
     }
 
-    ts.forEach((t) => {
+    ts.forEach((t, i) => {
       let li = rows.get(t.id);
       const isNew = !li;
       if (!li) {
@@ -214,7 +218,14 @@ export function createTasksPanel(data: Store<AppData>, settings: Store<Settings>
         rows.set(t.id, li);
       }
       if (editing !== t.id) updateRow(li, t, t.id === activeTaskId);
-      list.append(li); // keeps DOM order in sync (moves existing nodes)
+      // Only move rows that are out of place: moving a node drops its keyboard focus.
+      const want = i === 0 ? list.firstElementChild : rows.get(ts[i - 1].id)!.nextElementSibling;
+      if (want !== li) {
+        const hadFocus = li.contains(document.activeElement);
+        const focused = document.activeElement as HTMLElement | null;
+        list.insertBefore(li, i === 0 ? list.firstChild : rows.get(ts[i - 1].id)!.nextSibling);
+        if (hadFocus) focused?.focus();
+      }
       if (isNew && !reducedMotion()) animate(li, { opacity: [0, 1], y: [-10, 0], duration: 420, ease: 'out(3)' });
     });
 
@@ -240,6 +251,56 @@ export function createTasksPanel(data: Store<AppData>, settings: Store<Settings>
     const time = finish.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
     footEl.textContent = `${left} 🍅 to go · done around ${time}`;
   }
+
+  // ---- Keyboard
+
+  /**
+   * List navigation, roving between rows: ↑/↓ Home/End move, Alt+↑/↓ reorder,
+   * Enter/Space set the current task (native button click), X done, E edit, Del delete.
+   */
+  list.addEventListener('keydown', (e) => {
+    const li = (e.target as HTMLElement).closest<HTMLLIElement>('.task');
+    if (!li || li.classList.contains('editing') || e.metaKey || e.ctrlKey) return;
+    const id = li.dataset.id!;
+    const ids = tasks().map((t) => t.id);
+    const i = ids.indexOf(id);
+    const handled = () => e.preventDefault(); // also tells global shortcuts to stand down
+    const key = e.key.toLowerCase();
+    if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      handled();
+      move(id, e.key === 'ArrowUp' ? -1 : 1);
+    } else if (e.altKey) {
+      return;
+    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      handled();
+      const j = i + (e.key === 'ArrowDown' ? 1 : -1);
+      if (j >= 0 && j < ids.length) focusRow(ids[j]);
+      else if (j < 0) input.focus();
+    } else if (e.key === 'Home' || e.key === 'End') {
+      handled();
+      focusRow(e.key === 'Home' ? ids[0] : ids[ids.length - 1]);
+    } else if (key === 'x') {
+      handled();
+      li.querySelector<HTMLElement>('.task-check')!.click();
+      focusRow(id);
+    } else if (key === 'e' || e.key === 'F2') {
+      handled();
+      startEdit(id);
+    } else if (e.key === 'Delete' || e.key === 'Backspace') {
+      handled();
+      void confirmRemove(id);
+    }
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' && tasks().length) {
+      e.preventDefault();
+      focusRow(tasks()[0].id);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      input.blur();
+    }
+  });
 
   // ---- Wiring
 

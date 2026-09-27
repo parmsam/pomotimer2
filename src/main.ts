@@ -11,6 +11,8 @@ import { MODE_LABELS, type Mode } from './core/types';
 import { celebrate, driftBlobs, entrance, press, slidePill, swapText } from './fx/anims';
 import { applyTheme } from './themes/presets';
 import { dialogOpen } from './ui/dialog';
+import { bindShortcuts, createShortcutsHelp, type Shortcut } from './ui/shortcuts';
+import { toast } from './ui/toast';
 import { createInterruptionLogger } from './ui/interruptions';
 import { createSessionActions } from './ui/sessionActions';
 import { createSettingsPanel } from './ui/settingsPanel';
@@ -46,7 +48,7 @@ const COMPLETE_MESSAGES: Record<Mode, string> = {
 const timer = createTimer(data, settings, ({ finished, next, missed, early }) => {
   if (!missed && !early) {
     const s = settings.get();
-    playAlarm(s.alarm, s.volume);
+    if (!s.muted) playAlarm(s.alarm, s.volume);
     celebrate($('#burst'), $('.dial'));
     if (s.notifications) notify(`${MODE_LABELS[finished]} complete`, COMPLETE_MESSAGES[finished]);
   } else if (early) {
@@ -117,7 +119,7 @@ function secondTick() {
   tasks.tick();
   const s = settings.get();
   const { status, mode } = data.get().timer;
-  if (s.tick && status === 'running' && mode === 'focus' && remaining > 0) playTick(s.volume);
+  if (s.tick && !s.muted && status === 'running' && mode === 'focus' && remaining > 0) playTick(s.volume);
 }
 
 // Timer state transitions drive the animated renders.
@@ -172,24 +174,88 @@ $('#skip').addEventListener('click', (e) => {
 modeTabs.forEach((b) => b.addEventListener('click', () => void actions.switchTo(b.dataset.mode as Mode)));
 $('#tasks-toggle').addEventListener('click', () => tasks.toggleVisible());
 
+const toggleMute = () => {
+  const muted = !settings.get().muted;
+  settings.set({ muted });
+  toast(muted ? 'Sound off' : 'Sound on');
+};
+
+// One table drives both the key handling and the "?" cheat sheet.
+const SHORTCUTS: Shortcut[] = [
+  {
+    keys: ['Space'],
+    label: 'Start / pause',
+    group: 'Timer',
+    match: (k) => k === ' ',
+    run: (e) => {
+      if ((e.target as HTMLElement).closest('button')) return; // let a focused button handle its own Space
+      e.preventDefault();
+      toggleBtn.click();
+    },
+  },
+  { keys: ['R'], label: 'Restart session', group: 'Timer', match: (k) => k === 'r', run: () => $('#reset').click() },
+  { keys: ['S'], label: 'Skip to next session', group: 'Timer', match: (k) => k === 's', run: () => $('#skip').click() },
+  {
+    keys: ['1', '2', '3'],
+    label: 'Focus / short break / long break',
+    group: 'Timer',
+    match: (k) => k === '1' || k === '2' || k === '3',
+    run: (e) => void actions.switchTo((['focus', 'short', 'long'] as Mode[])[Number(e.key) - 1]),
+  },
+  { keys: ['I'], label: 'Log an interruption', group: 'Timer', match: (k) => k === 'i', run: () => interruptions.open() },
+  { keys: ['T'], label: 'Show / hide tasks', group: 'Tasks', match: (k) => k === 't', run: () => tasks.toggleVisible() },
+  {
+    keys: ['N'],
+    label: 'New task',
+    group: 'Tasks',
+    match: (k) => k === 'n',
+    run: (e) => {
+      e.preventDefault();
+      tasks.focusInput();
+    },
+  },
+  // Handled by the task list itself when a task has focus:
+  { keys: ['↑', '↓'], label: 'Move between tasks (↓ from the new-task field)', group: 'Tasks' },
+  { keys: ['Enter'], label: 'Make it the current task', group: 'Tasks' },
+  { keys: ['X'], label: 'Mark done / not done', group: 'Tasks' },
+  { keys: ['E'], label: 'Edit', group: 'Tasks' },
+  { keys: ['Del'], label: 'Delete', group: 'Tasks' },
+  { keys: ['Alt', '↑/↓'], label: 'Reorder', group: 'Tasks' },
+  { keys: ['M'], label: 'Mute / unmute sounds', group: 'General', match: (k) => k === 'm', run: toggleMute },
+  { keys: [','], label: 'Open / close settings', group: 'General', inSettings: true, match: (k) => k === ',', run: () => panel.toggle() },
+  { keys: ['?'], label: 'Show these shortcuts', group: 'General', inSettings: true, match: (k) => k === '?', run: () => openHelp() },
+  { keys: ['Esc'], label: 'Close any panel or dialog', group: 'General' },
+];
+
+const help = createShortcutsHelp(SHORTCUTS);
+const openHelp = () => {
+  if (panel.isOpen()) panel.close();
+  help.open();
+  if (!settings.get().shortcutsHintSeen) settings.set({ shortcutsHintSeen: true });
+};
+$('#shortcuts-open').addEventListener('click', openHelp);
+
+// Esc closes settings even from inside one of its inputs.
 document.addEventListener('keydown', (e) => {
-  if (e.metaKey || e.ctrlKey || e.altKey || dialogOpen()) return;
-  if (e.key === 'Escape' && panel.isOpen()) return panel.close();
-  const target = e.target as HTMLElement;
-  if (panel.isOpen() || interruptions.isOpen() || target.closest('input, select, textarea')) return;
-  const key = e.key.toLowerCase();
-  if (key === ' ' && !target.closest('button')) {
-    e.preventDefault();
-    toggleBtn.click();
-  } else if (key === 'r') $('#reset').click();
-  else if (key === 's') $('#skip').click();
-  else if (key === ',') panel.open();
-  else if (key === 't') tasks.toggleVisible();
-  else if (key === 'n') {
-    e.preventDefault();
-    tasks.focusInput();
-  } else if (key === 'i') interruptions.open();
+  if (e.key === 'Escape' && panel.isOpen() && !dialogOpen() && !help.isOpen()) panel.close();
 });
+bindShortcuts(SHORTCUTS, {
+  modalOpen: () => dialogOpen() || help.isOpen(),
+  settingsOpen: () => panel.isOpen(),
+  popoverOpen: () => interruptions.isOpen(),
+});
+
+// First visit on a device with a keyboard: point people at the cheat sheet once.
+if (!settings.get().shortcutsHintSeen && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  setTimeout(() => {
+    if (settings.get().shortcutsHintSeen) return;
+    toast('Tip: press ? to see keyboard shortcuts', {
+      duration: 9000,
+      action: { label: 'Show', run: openHelp },
+      onDismiss: () => settings.set({ shortcutsHintSeen: true }),
+    });
+  }, 2500);
+}
 
 window.addEventListener('resize', () => renderMode(true));
 

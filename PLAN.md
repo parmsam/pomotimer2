@@ -121,16 +121,28 @@ Whole-timer "faces" that go beyond the Phase 2 timer styles (ring / minimal / ba
 - [ ] Other candidates: flip clock, hourglass (sand falls with time), analog kitchen clock, growing plant, burning candle, minimal LCD
 - [ ] Faces follow the theme colours, respect reduced motion, and stay accessible (time always available to screen readers)
 
-#### Markdown export
+#### Markdown export, import & bulk add
 - [ ] Export session history as Markdown (per-day headings, sessions with times and durations, daily totals)
+- [ ] One-click "Copy as Markdown" for today's tasks and outcomes (done/open, pomodoros, tracked time, interruptions)
+- [ ] Import / bulk-add tasks from Markdown, pasted into the new-task field or an import dialog, with a preview before adding. Proposed syntax, one task per line:
+  ```
+  - [ ] Write report 🍅3        # open task, estimate 3
+  - [x] Review PRs 🍅1          # already done
+  - Plan sprint (2)             # (n) also sets the estimate
+  Email Sam                     # plain lines work too; estimate defaults to 1
+  ## Work                       # headings are kept as optional list/group labels (future)
+  ```
+- [ ] Round-trip: exported task Markdown re-imports cleanly (same syntax both ways)
 - [ ] Export tasks as a Markdown checklist (`- [x]`), with pomodoros and tracked time per task
 - [ ] Export options: date range, include tasks / sessions / stats summary
 - [ ] Download as `.md` + copy to clipboard (for pasting into Obsidian, Notion, GitHub)
 
 #### Keyboard & gesture shortcuts
 Basics already exist (Space, R, S, `,`, Esc).
-- [ ] More keys: `1`/`2`/`3` switch mode, `T` tasks, `F` focus mode, `M` mute, `+`/`-` add or remove a minute, `P` pop-out timer
-- [ ] `?` opens a shortcuts cheat-sheet overlay
+- [x] `1`/`2`/`3` switch mode, `M` mute, `,` toggles settings (pulled into Phase 2)
+- [x] `?` cheat-sheet overlay, keyboard button in the top bar, one-time tip for new visitors (pulled into Phase 2)
+- [x] Task list keyboard control: ↑/↓ Home/End, Enter current, X done, E edit, Del delete, Alt+↑/↓ reorder
+- [ ] More keys: `F` focus mode, `+`/`-` add or remove a minute, `P` pop-out timer
 - [ ] Optional: remap keys in settings
 - [ ] Swipe gestures on touch screens: swipe left/right on the dial to change mode, tap the dial to start/pause, long-press to reset, swipe up for tasks
 - [ ] Gestures ignore scrolling areas and follow the same confirm rules as buttons (e.g. abandoning a focus session)

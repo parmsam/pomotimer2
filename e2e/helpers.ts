@@ -22,7 +22,9 @@ export async function open(page: Page, seed?: { data?: unknown; settings?: unkno
   await page.evaluate((seed) => {
     localStorage.clear();
     if (seed?.data) localStorage.setItem('pomo:v1:data', JSON.stringify(seed.data));
-    if (seed?.settings) localStorage.setItem('pomo:v1:settings', JSON.stringify(seed.settings));
+    // The one-time shortcuts tip is off unless a test asks for it.
+    const settings = { shortcutsHintSeen: true, ...(seed?.settings as object) };
+    localStorage.setItem('pomo:v1:settings', JSON.stringify(settings));
   }, seed);
   await page.reload();
   await expect(page.locator('#time')).not.toBeEmpty();
