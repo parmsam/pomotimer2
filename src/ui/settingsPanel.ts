@@ -1,9 +1,10 @@
-import { ALARM_OPTIONS, playAlarm, unlockAudio } from '../core/audio';
+import { ALARM_OPTIONS, canPlayThroughSilentMode, playAlarm, unlockAudio } from '../core/audio';
 import { notificationsSupported, requestNotifications } from '../core/notify';
 import type { Store } from '../core/store';
 import type { AlarmSound, Mode, Settings } from '../core/types';
 import { closeDrawer, openDrawer } from '../fx/anims';
 import { ask } from './dialog';
+import { FACE_LIST } from '../faces';
 import { THEMES, getTheme } from '../themes/presets';
 
 type BoolKey = { [K in keyof Settings]: Settings[K] extends boolean ? K : never }[keyof Settings];
@@ -144,8 +145,19 @@ export function createSettingsPanel(settings: Store<Settings>, dataActions: Data
   colorsReset.addEventListener('click', () => update({ modeColors: { focus: null, short: null, long: null } }));
   syncers.push((s) => (colorsReset.hidden = Object.values(s.modeColors).every((c) => c === null)));
 
+  const faceBtns = FACE_LIST.map((f) => {
+    const btn = el('button', { className: 'face-option', type: 'button' });
+    btn.innerHTML = `${f.preview}<span>${f.label}</span>`;
+    btn.addEventListener('click', () => update({ clockFace: f.id }));
+    syncers.push((s) => btn.setAttribute('aria-pressed', String(s.clockFace === f.id)));
+    return btn;
+  });
+
   const appearanceSection = section(
     'Appearance',
+    el('p', { className: 'sub-h' }, 'Clock'),
+    el('div', { className: 'faces', role: 'group', ariaLabel: 'Clock face' }, ...faceBtns),
+    el('p', { className: 'sub-h' }, 'Theme'),
     el('div', { className: 'themes' }, ...swatches),
     el('div', { className: 'mode-colors' }, ...colorPickers),
     colorsReset,
@@ -156,12 +168,12 @@ export function createSettingsPanel(settings: Store<Settings>, dataActions: Data
   const alarmSelect = el('select', { id: 'set-alarm' }, ...ALARM_OPTIONS.map((o) => el('option', { value: o.id }, o.label)));
   alarmSelect.addEventListener('change', () => {
     update({ alarm: alarmSelect.value as AlarmSound });
-    playAlarm(settings.get().alarm, settings.get().volume);
+    playAlarm(settings.get().alarm, settings.get().volume, { ignoreSilentMode: settings.get().alarmIgnoresSilent });
   });
   const testBtn = el('button', { className: 'btn', type: 'button' }, 'Test');
   testBtn.addEventListener('click', () => {
     unlockAudio();
-    playAlarm(settings.get().alarm, settings.get().volume);
+    playAlarm(settings.get().alarm, settings.get().volume, { ignoreSilentMode: settings.get().alarmIgnoresSilent });
   });
   const volume = el('input', { type: 'range', min: '0', max: '1', step: '0.05', id: 'set-volume' });
   volume.addEventListener('input', () => update({ volume: Number(volume.value) }));
@@ -176,6 +188,9 @@ export function createSettingsPanel(settings: Store<Settings>, dataActions: Data
     el('div', { className: 'row' }, el('label', { htmlFor: volume.id }, 'Volume'), volume),
     toggle('tick', 'Ticking', 'Soft tick every second during focus'),
     toggle('muted', 'Mute all sounds', 'Shortcut: M'),
+    ...(canPlayThroughSilentMode()
+      ? [toggle('alarmIgnoresSilent', 'Alarm ignores silent mode', 'Rings even with the silent switch on. May briefly pause other audio')]
+      : []),
   );
 
   // --- Behavior

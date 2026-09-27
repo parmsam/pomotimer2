@@ -94,7 +94,7 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [ ] Custom background photos (IndexedDB, a few images, never leave the device)
 - [ ] Lofi / vinyl-crackle ambient option
 - [x] PWA "new version available" prompt
-- [ ] Mobile notice: background timers/alarms are unreliable on mobile browsers
+- [x] Mobile notice: background timers/alarms are unreliable on mobile browsers
 
 #### Background animation options
 - [ ] Background picker in settings: blobs (current) / three.js scenes / custom photo / solid
@@ -106,6 +106,10 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [x] README: what it is, screenshot/GIF, live link, features, keyboard shortcuts, privacy note (data stays in the browser), local dev + testing commands, credits (Cirillo, inspirations)
 - [x] Nicely placed GitHub link in the app: small GitHub icon in the top bar or an "About" footer in settings, opening the repo in a new tab
 
+#### Silent mode (phones)
+- [x] No browser exposes the silent switch. On iOS it mutes Web Audio's default "ambient" session. Safari 17+'s Audio Session API (`navigator.audioSession.type = 'playback'`) lets the alarm ring anyway; switched only for the alarm, then back to `auto`
+- [x] Setting "Alarm ignores silent mode" (default on, shown only where supported), plus a one-time phone tip about volume/silent switch/keeping the tab open or installing
+
 #### Haptic feedback
 - [ ] `haptics.ts` with one `buzz(pattern)` helper and a Settings toggle (on by default on touch devices, off elsewhere)
 - [ ] Android/Chromium: standard `navigator.vibrate()`, e.g. a short tick on start/pause/task done and a longer pattern when a session ends
@@ -116,11 +120,11 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 
 #### Clock themes
 Whole-timer "faces" that go beyond the Phase 2 timer styles (ring / minimal / bar). Each face is a module that renders from the same `remaining / duration / mode / status` state, so the engine doesn't change.
-- [ ] Face picker in settings with live previews
-- [ ] **Tomato**: Cirillo's original kitchen timer. A tomato dial that twists back as time runs down, with a wind-up animation on start and an optional mechanical tick. Leaves wilt slightly on breaks, and it wobbles and "rings" at the end
-- [ ] **Tamagotchi**: an egg-shaped LCD device with pixel digits and a small pixel pet. The pet works alongside you during focus and plays or naps on breaks. It grows or evolves with completed pomodoros and your streak, and looks a bit sad after abandoned sessions (never punishing)
+- [x] Face picker in settings with live previews
+- [x] **Tomato**: Cirillo's original kitchen timer. A tomato dial that twists back as time runs down, with a wind-up animation on start and an optional mechanical tick. Leaves wilt slightly on breaks, and it wobbles and "rings" at the end
+- [x] **Tamagotchi**: an egg-shaped LCD device with pixel digits and a small pixel pet. The pet works alongside you during focus and plays or naps on breaks. It grows or evolves with completed pomodoros and your streak, and looks a bit sad after abandoned sessions (never punishing)
 - [ ] Other candidates: flip clock, hourglass (sand falls with time), analog kitchen clock, growing plant, burning candle, minimal LCD
-- [ ] Faces follow the theme colours, respect reduced motion, and stay accessible (time always available to screen readers)
+- [x] Faces follow the theme colours, respect reduced motion, and stay accessible (time always available to screen readers)
 
 #### Markdown export, import & bulk add
 - [x] Export session history as Markdown (per-day headings, sessions with times and durations, daily totals)
@@ -205,3 +209,4 @@ Only pick these up if there's real demand. Several overlap with Phase 3 clock th
 - 2026-09-27 — Phase 2 complete; the name greeting moved to Phase 4 alongside quotes.
 - 2026-09-27 — Safari fix: settings switches are <label>s with `appearance: none` checkboxes. Some WebKit builds shrink native checkboxes to 12x12, which made most of each switch unclickable.
 - 2026-09-27 — PWA via vite-plugin-pwa with registerType 'prompt': updates wait for the user so a running session is never reloaded. The PWA e2e project runs against a production preview.
+- 2026-09-27 — Clock faces are modules in src/faces (ring, tomato, tamagotchi) that render from the same timer state; digits stay real text. Face artwork avoids CSS transform-origin in px (the ring bug), using transform-box: fill-box or SVG transform attributes.

@@ -18,8 +18,10 @@ An aesthetic, customizable Pomodoro timer with smooth [anime.js](https://animejs
 - **Honest sessions.** Following Cirillo's rule that a pomodoro is indivisible, stopping early abandons it, but your focused minutes still count toward today. Past the halfway mark you can still count it.
 - **Progress.** A daily streak, a daily goal, per-mode counts, and a 7-day focus chart.
 - **Optional extras:** strict mode (no pausing), interruption tracking (internal/external, with notes saved for later), and focus mode, which hides everything but the timer.
+- **Clock faces.** The classic ring, a **tomato** kitchen timer whose dial turns back as time runs down, or a **Tamagotchi** whose pixel pet works alongside you, naps on breaks and grows up as you complete pomodoros.
 - **Make it yours.** Five themes, per-mode colors, interval presets (25/5/15 · 50/10/20 · 90/15/30), alarm sounds, and an optional tick.
 - **Works with multiple tabs.** Open tabs stay in sync, and only one of them rings.
+- **Alarms on phones.** On iPhone the alarm can ring even with the silent switch on (Safari 17+).
 - **Installable and offline.** Install it from the address bar (or Add to Home Screen) and it works without a connection. Updates wait until you choose to reload.
 - **Your data stays local.** No account, no server, no tracking. Export a JSON backup to move between browsers.
 - **Accessible.** Full keyboard control, screen-reader labels, and it respects "reduce motion".
@@ -69,7 +71,7 @@ The plan and roadmap live in [`PLAN.md`](PLAN.md), and conventions for contribut
 
 ## Roadmap
 
-Up next: clock themes (a tomato kitchen timer, a Tamagotchi), three.js backgrounds, ambient sounds and haptics. See [`PLAN.md`](PLAN.md).
+Up next: three.js backgrounds, ambient sounds and haptics. See [`PLAN.md`](PLAN.md).
 
 ## Credits
 

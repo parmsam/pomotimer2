@@ -1,35 +1,35 @@
 import type { JSAnimation } from 'animejs';
 import { formatTime } from '../core/format';
+import { FACES, type Face, type FaceContext, type FaceEvent, type FaceId } from '../faces';
 import { rollChar, tweenProgress } from '../fx/anims';
-
-const RADIUS = 100;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export interface TimerView {
   /** Per-frame update while running. */
   render(remainingMs: number, durationMs: number): void;
   /** Animated jump, e.g. on reset or mode change. */
   refill(remainingMs: number, durationMs: number): void;
+  setFace(id: FaceId): void;
+  /** Let the face react to a moment (start, complete, …). */
+  event(e: FaceEvent): void;
 }
 
-export function createTimerView(root: HTMLElement, rollingDigits: () => boolean): TimerView {
-  const progressEl = root.querySelector<SVGCircleElement>('.ring-progress')!;
-  const headEl = root.querySelector<SVGGElement>('.ring-head-wrap')!;
+/**
+ * Owns the clock digits (real, accessible text) and the progress value, and delegates
+ * the artwork to the active face.
+ */
+export function createTimerView(root: HTMLElement, opts: { rollingDigits: () => boolean; context: () => FaceContext }): TimerView {
+  const layer = root.querySelector<HTMLElement>('.face-layer')!;
   const timeEl = root.querySelector<HTMLElement>('#time')!;
 
-  progressEl.style.strokeDasharray = String(CIRCUMFERENCE);
-
+  let face: Face | null = null;
   let shown = '';
   let progress = 1;
   let tween: JSAnimation | null = null;
 
-  function setProgress(p: number) {
+  const setProgress = (p: number) => {
     progress = p;
-    progressEl.style.strokeDashoffset = String(CIRCUMFERENCE * (1 - p));
-    // SVG transform attribute (not CSS) so the pivot is in viewBox units in every browser.
-    headEl.setAttribute('transform', `rotate(${p * 360} 110 110)`);
-    headEl.style.opacity = p > 0.002 ? '1' : '0';
-  }
+    face?.setProgress(p, opts.context());
+  };
 
   function setTime(text: string, direction: 1 | -1) {
     if (text === shown) return;
@@ -47,7 +47,7 @@ export function createTimerView(root: HTMLElement, rollingDigits: () => boolean)
         if (c !== shown[i]) {
           const span = timeEl.children[i] as HTMLElement;
           span.textContent = c;
-          if (rollingDigits()) rollChar(span, direction);
+          if (opts.rollingDigits()) rollChar(span, direction);
         }
       });
     }
@@ -69,6 +69,17 @@ export function createTimerView(root: HTMLElement, rollingDigits: () => boolean)
       t?.then(() => {
         if (tween === t) tween = null;
       });
+    },
+    setFace(id) {
+      if (face?.id === id) return;
+      face?.unmount();
+      face = (FACES[id] ?? FACES.ring)();
+      root.dataset.face = face.id;
+      face.mount(layer, opts.context());
+      face.setProgress(progress, opts.context());
+    },
+    event(e) {
+      face?.event?.(e, opts.context());
     },
   };
 }

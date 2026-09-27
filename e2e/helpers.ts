@@ -46,9 +46,9 @@ export function focusInProgress(elapsedMin: number, extra: Record<string, unknow
   const now = Date.now();
   return {
     timer: {
-      mode: 'focus',
-      status: 'running',
-      endsAt: now + (25 - elapsedMin) * MIN,
+      mode: 'focus' as string,
+      status: 'running' as string,
+      endsAt: (now + (25 - elapsedMin) * MIN) as number | null,
       remainingMs: 0,
       cycleCount: 0,
       segmentStart: now - elapsedMin * MIN,

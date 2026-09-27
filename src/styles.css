@@ -1637,3 +1637,179 @@ body.focus-mode .app-foot {
   width: auto;
   flex: none;
 }
+
+/* ---------- Clock faces ---------- */
+
+.face-layer {
+  position: absolute;
+  inset: 0;
+}
+.face-layer > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  /* The global svg rule strokes icons; face artwork opts in to strokes per shape instead. */
+  stroke: none;
+}
+.dial {
+  container-type: inline-size;
+}
+
+/* Tomato */
+.tomato .tb-light {
+  stop-color: color-mix(in oklab, var(--mode) 70%, white);
+}
+.tomato .tb-mid {
+  stop-color: var(--mode);
+}
+.tomato .tb-dark {
+  stop-color: color-mix(in oklab, var(--mode) 65%, black);
+}
+.tomato-wobble {
+  transform-box: fill-box;
+  transform-origin: 50% 60%;
+}
+.tomato-shadow {
+  fill: rgb(0 0 0 / 0.18);
+}
+.tomato-body {
+  filter: drop-shadow(0 10px 24px color-mix(in oklab, var(--mode) 40%, transparent));
+}
+.tomato-shine {
+  fill: white;
+  opacity: 0.22;
+}
+.tomato .tick {
+  stroke: color-mix(in oklab, var(--on-accent) 55%, transparent);
+  stroke-width: 1;
+}
+.tomato .tick.major {
+  stroke: var(--on-accent);
+  stroke-width: 2;
+}
+.tomato .tick-label {
+  fill: var(--on-accent);
+  font: 600 9px var(--font);
+  text-anchor: middle;
+  dominant-baseline: central;
+  opacity: 0.8;
+}
+.tomato-pointer {
+  fill: var(--text);
+}
+.tomato-leaves {
+  fill: #6bbf7a;
+  transition: transform 0.6s var(--ease);
+}
+.tomato-stem {
+  fill: none;
+  stroke: #4f9a5d;
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+.dial[data-face='tomato'] .dial-center {
+  margin-top: 13%;
+  color: var(--on-accent);
+}
+.dial[data-face='tomato'] .time {
+  font-size: 12cqw;
+  font-weight: 500;
+}
+.dial[data-face='tomato'] .sub {
+  margin-top: 4px;
+  max-width: 40cqw;
+  color: color-mix(in oklab, var(--on-accent) 80%, transparent);
+  font-size: 3.6cqw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Tamagotchi */
+.tama .ts-light {
+  stop-color: color-mix(in oklab, var(--mode) 65%, white);
+}
+.tama .ts-dark {
+  stop-color: color-mix(in oklab, var(--mode) 80%, black);
+}
+.tama-shake {
+  transform-box: fill-box;
+  transform-origin: 50% 90%;
+}
+.tama-shell {
+  filter: drop-shadow(0 12px 28px color-mix(in oklab, var(--mode) 35%, transparent));
+}
+.tama-bezel {
+  fill: color-mix(in oklab, var(--mode) 55%, black);
+  opacity: 0.35;
+}
+.tama-screen {
+  fill: #b9c7a5;
+}
+.tama-pet {
+  fill: #28331f;
+}
+.tama-btn {
+  fill: color-mix(in oklab, var(--mode) 60%, black);
+  opacity: 0.45;
+}
+.dial[data-face='tamagotchi'] .dial-center {
+  position: absolute;
+  top: 50.5%;
+  left: 0;
+  right: 0;
+}
+.dial[data-face='tamagotchi'] .time {
+  font-family: 'VT323', ui-monospace, monospace;
+  font-size: 12.5cqw;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: #28331f;
+}
+.dial[data-face='tamagotchi'] .sub {
+  margin-top: 11cqw;
+  max-width: 52cqw;
+  margin-inline: auto;
+  color: color-mix(in oklab, var(--on-accent) 85%, transparent);
+  font-size: 3.4cqw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dial[data-face='tamagotchi'] {
+  aspect-ratio: 1;
+}
+
+/* Picker */
+.sub-h {
+  margin: 4px 0 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.faces {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.face-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 6px;
+  border-radius: 14px;
+  border: 2px solid transparent;
+  background: var(--surface);
+  font-size: 0.82rem;
+}
+.face-option svg {
+  width: 44px;
+  height: 44px;
+  color: var(--text);
+}
+.face-option[aria-pressed='true'] {
+  border-color: var(--mode);
+}

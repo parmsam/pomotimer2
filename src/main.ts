@@ -1,7 +1,7 @@
 import './themes/tokens.css';
 import './styles.css';
 
-import { playAlarm, playTick, unlockAudio } from './core/audio';
+import { canPlayThroughSilentMode, playAlarm, playTick, unlockAudio } from './core/audio';
 import { formatTime } from './core/format';
 import { notify } from './core/notify';
 import { clearAll, defaultAppData, DEFAULT_SETTINGS, loadAppData, loadSettings, write } from './core/storage';
@@ -48,7 +48,19 @@ const cycleEl = $('#cycle');
 const liveEl = $('#live');
 const pill = $('.mode-pill');
 const modeTabs = [...document.querySelectorAll<HTMLButtonElement>('.modes button')];
-const view = createTimerView($('.dial'), () => settings.get().rollingDigits);
+const view = createTimerView($('.dial'), {
+  rollingDigits: () => settings.get().rollingDigits,
+  context: () => {
+    const t = data.get().timer;
+    return {
+      mode: t.mode,
+      status: t.status,
+      remainingMs: timer.remaining(),
+      durationMs: timer.duration(),
+      totalPomodoros: data.get().history.filter((h) => h.mode === 'focus' && !h.abandoned).length,
+    };
+  },
+});
 
 const COMPLETE_MESSAGES: Record<Mode, string> = {
   focus: 'Nice work — time for a break.',
@@ -62,7 +74,7 @@ const timer = createTimer(data, settings, ({ finished, next, missed, early }) =>
     const s = settings.get();
     // With several tabs open, only one rings and notifies.
     onceAcrossTabs('pomo-session-end', () => {
-      if (!s.muted) playAlarm(s.alarm, s.volume);
+      if (!s.muted) playAlarm(s.alarm, s.volume, { ignoreSilentMode: s.alarmIgnoresSilent });
       if (s.notifications) notify(`${MODE_LABELS[finished]} complete`, COMPLETE_MESSAGES[finished]);
     });
     celebrate($('#burst'), $('.dial'));
@@ -70,6 +82,7 @@ const timer = createTimer(data, settings, ({ finished, next, missed, early }) =>
     celebrate($('#burst'), $('.dial'));
   }
   if (finished === 'focus') queueMicrotask(checkGoal);
+  queueMicrotask(() => view.event('complete'));
   liveEl.textContent = `${MODE_LABELS[finished]} complete. Next: ${MODE_LABELS[next]}.`;
 });
 
@@ -150,7 +163,13 @@ function secondTick() {
 data.subscribe((d, prev) => {
   const t = d.timer;
   const p = prev.timer;
-  if (t.mode !== p.mode) renderMode();
+  if (t.mode !== p.mode) {
+    renderMode();
+    view.event('mode');
+  }
+  if (t.status === 'running' && p.status !== 'running') view.event('start');
+  if (t.status === 'paused' && p.status === 'running') view.event('pause');
+  if (d.history.length > prev.history.length && d.history.at(-1)?.abandoned) view.event('abandon');
   if (t.status !== p.status || t.mode !== p.mode || t.cycleCount !== p.cycleCount || d.activeTaskId !== prev.activeTaskId || d.tasks !== prev.tasks) {
     renderStatus();
     renderCycle();
@@ -168,6 +187,7 @@ data.subscribe((d, prev) => {
 
 settings.subscribe((s, prev) => {
   if (s.theme !== prev.theme || s.modeColors !== prev.modeColors) applyTheme(s.theme, s.modeColors);
+  if (s.clockFace !== prev.clockFace) view.setFace(s.clockFace);
   if (s.longBreakEvery !== prev.longBreakEvery) renderCycle();
   if (s.strictMode !== prev.strictMode) renderStatus();
   if (s.durations !== prev.durations && data.get().timer.status !== 'idle') view.render(timer.remaining(), timer.duration());
@@ -227,8 +247,22 @@ const focusMode = createFocusMode(data, settings, () => renderMode(true));
 const tasks = createTasksPanel(data, settings, timer);
 const interruptions = createInterruptionLogger(data, settings, timer, (title) => tasks.add(title));
 
+// Phones: alarms and background timers are easy to miss. Say so once, when it matters.
+function maybeShowMobileTip() {
+  const touch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  if (!touch || settings.get().mobileTipSeen) return;
+  settings.set({ mobileTipSeen: true });
+  const standalone = window.matchMedia('(display-mode: standalone)').matches;
+  const parts = [
+    canPlayThroughSilentMode() ? 'Turn your volume up' : 'Check your volume and silent switch. Silent mode can mute alarms',
+    standalone ? 'keep pomo open' : 'keep this tab open (or Add to Home Screen for notifications)',
+  ];
+  toast(`On phones: ${parts.join(', and ')}.`, { duration: 9000 });
+}
+
 toggleBtn.addEventListener('click', () => {
   unlockAudio();
+  maybeShowMobileTip();
   press(toggleBtn);
   if (strictStop()) actions.reset('Stop');
   else timer.toggle();
@@ -354,6 +388,7 @@ modeTabs.forEach((b) => new ResizeObserver(() => renderMode(true)).observe(b));
 // ---- Boot
 $('.app-version').textContent = `v${__APP_VERSION__}`;
 applyTheme(settings.get().theme, settings.get().modeColors);
+view.setFace(settings.get().clockFace);
 renderMode(true);
 renderStatus();
 renderCycle();

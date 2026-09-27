@@ -65,8 +65,32 @@ export const ALARM_OPTIONS: { id: AlarmSound; label: string }[] = [
   { id: 'none', label: 'Silent' },
 ];
 
-export function playAlarm(sound: AlarmSound, volume: number): void {
-  if (sound !== 'none') play(SOUNDS[sound], volume);
+/**
+ * Audio Session API (Safari 17+). No browser reveals the silent switch, but on iOS the
+ * default "ambient" session is muted by it. A "playback" session is not, like a
+ * real timer app. It may pause other audio while it's active, so we only switch for
+ * the alarm itself and hand control back afterwards.
+ */
+type AudioSession = { type: string };
+const audioSession = (): AudioSession | undefined => (navigator as Navigator & { audioSession?: AudioSession }).audioSession;
+export const canPlayThroughSilentMode = () => !!audioSession();
+
+let sessionReset: number | undefined;
+
+export function playAlarm(sound: AlarmSound, volume: number, opts: { ignoreSilentMode?: boolean } = {}): void {
+  if (sound === 'none') return;
+  const session = audioSession();
+  if (opts.ignoreSilentMode && session) {
+    try {
+      session.type = 'playback';
+      clearTimeout(sessionReset);
+      const lengthMs = Math.max(...SOUNDS[sound].map((n) => n.at + n.dur)) * 1000;
+      sessionReset = window.setTimeout(() => (session.type = 'auto'), lengthMs + 500);
+    } catch {
+      // Unsupported value in this browser: fall back to the default session.
+    }
+  }
+  play(SOUNDS[sound], volume);
 }
 
 export function playTick(volume: number): void {

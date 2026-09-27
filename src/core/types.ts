@@ -11,6 +11,8 @@ export interface Settings {
   theme: string;
   /** Per-mode color overrides; null uses the theme's color. */
   modeColors: Record<Mode, string | null>;
+  /** Timer face: ring, tomato, tamagotchi. */
+  clockFace: 'ring' | 'tomato' | 'tamagotchi';
   /** Roll each digit in as the clock changes. */
   rollingDigits: boolean;
   alarm: AlarmSound;
@@ -22,6 +24,10 @@ export interface Settings {
   strictMode: boolean;
   showTasks: boolean;
   muted: boolean;
+  /** iOS: let the alarm sound even when the phone's silent switch is on. */
+  alarmIgnoresSilent: boolean;
+  /** The one-time tip about phone audio/notifications has been shown. */
+  mobileTipSeen: boolean;
   /** Show the interruption logger during focus (Cirillo's internal/external marks). */
   trackInterruptions: boolean;
   /** Pomodoros per day to aim for. */
