@@ -1,7 +1,9 @@
 import './themes/tokens.css';
 import './styles.css';
 
+import { createAmbientPlayer } from './core/ambient';
 import { canPlayThroughSilentMode, playAlarm, playTick, unlockAudio } from './core/audio';
+import { buzz, type Buzz } from './core/haptics';
 import { formatTime } from './core/format';
 import { notify } from './core/notify';
 import { clearAll, defaultAppData, DEFAULT_SETTINGS, loadAppData, loadSettings, write } from './core/storage';
@@ -63,6 +65,36 @@ const view = createTimerView($('.dial'), {
   },
 });
 
+const haptic = (kind: Buzz) => settings.get().haptics && buzz(kind);
+
+// ---- Ambient sound: plays while a session runs (focus only unless enabled for breaks).
+const ambient = createAmbientPlayer();
+let ambientPreview: number | undefined;
+function syncAmbient() {
+  const s = settings.get();
+  const t = data.get().timer;
+  const wanted = !s.muted && t.status === 'running' && (t.mode === 'focus' || s.ambientOnBreaks) ? s.ambient : 'off';
+  if (ambientPreview && wanted === 'off') return; // let a settings preview finish
+  ambient.setVolume(s.ambientVolume);
+  ambient.play(wanted);
+  document.body.dataset.ambient = ambient.playing();
+}
+function previewAmbient() {
+  clearTimeout(ambientPreview);
+  const s = settings.get();
+  if (s.ambient === 'off' || s.muted) {
+    ambientPreview = undefined;
+    return syncAmbient();
+  }
+  ambient.setVolume(s.ambientVolume);
+  ambient.play(s.ambient);
+  document.body.dataset.ambient = ambient.playing();
+  ambientPreview = window.setTimeout(() => {
+    ambientPreview = undefined;
+    syncAmbient();
+  }, 4000);
+}
+
 const COMPLETE_MESSAGES: Record<Mode, string> = {
   focus: 'Nice work — time for a break.',
   short: 'Break’s over — back to focus.',
@@ -79,6 +111,7 @@ const timer = createTimer(data, settings, ({ finished, next, missed, early }) =>
       if (s.notifications) notify(`${MODE_LABELS[finished]} complete`, COMPLETE_MESSAGES[finished]);
     });
     celebrate($('#burst'), $('.dial'));
+    haptic('success');
   } else if (early) {
     celebrate($('#burst'), $('.dial'));
   }
@@ -171,6 +204,7 @@ data.subscribe((d, prev) => {
     renderMode();
     view.event('mode');
   }
+  if (t.status !== p.status || t.mode !== p.mode) syncAmbient();
   if (t.status === 'running' && p.status !== 'running') view.event('start');
   if (t.status === 'paused' && p.status === 'running') view.event('pause');
   if (d.history.length > prev.history.length && d.history.at(-1)?.abandoned) view.event('abandon');
@@ -194,6 +228,8 @@ settings.subscribe((s, prev) => {
   if (s.clockFace !== prev.clockFace) view.setFace(s.clockFace);
   if (s.longBreakEvery !== prev.longBreakEvery) renderCycle();
   if (s.strictMode !== prev.strictMode) renderStatus();
+  if (s.ambient !== prev.ambient) previewAmbient();
+  else if (s.ambientVolume !== prev.ambientVolume || s.muted !== prev.muted || s.ambientOnBreaks !== prev.ambientOnBreaks) syncAmbient();
   if (s.durations !== prev.durations && data.get().timer.status !== 'idle') view.render(timer.remaining(), timer.duration());
   renderTitle(timer.remaining());
 });
@@ -268,19 +304,27 @@ function maybeShowMobileTip() {
 toggleBtn.addEventListener('click', () => {
   unlockAudio();
   maybeShowMobileTip();
+  haptic('tap');
   press(toggleBtn);
   if (strictStop()) actions.reset('Stop');
   else timer.toggle();
 });
 $('#reset').addEventListener('click', (e) => {
   press(e.currentTarget as HTMLElement);
+  haptic('tap');
   void actions.reset();
 });
 $('#skip').addEventListener('click', (e) => {
   press(e.currentTarget as HTMLElement);
+  haptic('tap');
   void actions.skip();
 });
-modeTabs.forEach((b) => b.addEventListener('click', () => void actions.switchTo(b.dataset.mode as Mode)));
+modeTabs.forEach((b) =>
+  b.addEventListener('click', () => {
+    haptic('tap');
+    void actions.switchTo(b.dataset.mode as Mode);
+  }),
+);
 $('#tasks-toggle').addEventListener('click', () => tasks.toggleVisible());
 
 const toggleMute = () => {
@@ -403,3 +447,4 @@ entrance();
 requestAnimationFrame(frame);
 setInterval(secondTick, 200);
 setupPwa(() => data.get().timer.status === 'running');
+syncAmbient();

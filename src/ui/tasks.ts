@@ -1,5 +1,6 @@
 import { animate } from 'animejs';
 import { formatDuration } from '../core/format';
+import { buzz } from '../core/haptics';
 import type { ParsedTask } from '../core/markdown';
 import { openImportDialog } from './importTasks';
 import { toast } from './toast';
@@ -154,6 +155,7 @@ export function createTasksPanel(data: Store<AppData>, settings: Store<Settings>
         <button class="task-delete icon-sm" type="button" aria-label="Delete task">${ICONS.trash}</button>
       </div>`;
     li.querySelector('.task-check')!.addEventListener('click', () => {
+      if (settings.get().haptics) buzz('tap');
       toggleDone(t.id);
       if (!reducedMotion()) animate(li.querySelector('.task-check')!, { scale: [0.7, 1], duration: 500, ease: 'outElastic(1, .5)' });
     });

@@ -22,6 +22,7 @@ An aesthetic, customizable Pomodoro timer with smooth [anime.js](https://animejs
 - **Living backgrounds.** Soft CSS color blobs, or three.js scenes (fireflies, aurora, rain) that follow your theme, calm down on breaks and pulse when a session ends. three.js only loads if you pick one.
 - **Make it yours.** Five themes, per-mode colors, interval presets (25/5/15 · 50/10/20 · 90/15/30), alarm sounds, and an optional tick.
 - **Works with multiple tabs.** Open tabs stay in sync, and only one of them rings.
+- **Ambient sound.** Optional rain, brown noise, pink noise or vinyl crackle while you focus (generated in code, no audio files).
 - **Alarms on phones.** On iPhone the alarm can ring even with the silent switch on (Safari 17+).
 - **Installable and offline.** Install it from the address bar (or Add to Home Screen) and it works without a connection. Updates wait until you choose to reload.
 - **Your data stays local.** No account, no server, no tracking. Export a JSON backup to move between browsers.
@@ -72,7 +73,7 @@ The plan and roadmap live in [`PLAN.md`](PLAN.md), and conventions for contribut
 
 ## Roadmap
 
-Up next: ambient sounds, haptics and a pop-out mini timer. See [`PLAN.md`](PLAN.md).
+Up next: a pop-out mini timer, keep-awake and swipe gestures. See [`PLAN.md`](PLAN.md).
 
 ## Credits
 

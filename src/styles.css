@@ -1837,3 +1837,13 @@ body.focus-mode .app-foot {
   gap: 8px;
   margin-bottom: 14px;
 }
+
+.haptic-switch {
+  position: fixed;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}

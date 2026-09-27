@@ -26,6 +26,12 @@ export interface Settings {
   strictMode: boolean;
   showTasks: boolean;
   muted: boolean;
+  ambient: 'off' | 'rain' | 'brown' | 'pink' | 'vinyl';
+  ambientVolume: number;
+  /** Keep the ambient sound playing during breaks too (default: focus only). */
+  ambientOnBreaks: boolean;
+  /** Vibrate on phones (start/pause, task done, session end). */
+  haptics: boolean;
   /** iOS: let the alarm sound even when the phone's silent switch is on. */
   alarmIgnoresSilent: boolean;
   /** The one-time tip about phone audio/notifications has been shown. */

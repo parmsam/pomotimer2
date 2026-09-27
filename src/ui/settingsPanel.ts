@@ -1,4 +1,6 @@
+import { AMBIENT_OPTIONS } from '../core/ambient';
 import { ALARM_OPTIONS, canPlayThroughSilentMode, playAlarm, unlockAudio } from '../core/audio';
+import { isTouchDevice } from '../core/haptics';
 import { notificationsSupported, requestNotifications } from '../core/notify';
 import type { Store } from '../core/store';
 import type { AlarmSound, Mode, Settings } from '../core/types';
@@ -197,11 +199,26 @@ export function createSettingsPanel(settings: Store<Settings>, dataActions: Data
     volume.value = String(s.volume);
   });
 
+  const ambientSelect = el('select', { id: 'set-ambient' }, ...AMBIENT_OPTIONS.map((o) => el('option', { value: o.id }, o.label)));
+  ambientSelect.addEventListener('change', () => {
+    unlockAudio();
+    update({ ambient: ambientSelect.value as Settings['ambient'] });
+  });
+  const ambientVolume = el('input', { type: 'range', min: '0', max: '1', step: '0.05', id: 'set-ambient-volume' });
+  ambientVolume.addEventListener('input', () => update({ ambientVolume: Number(ambientVolume.value) }));
+  syncers.push((s) => {
+    ambientSelect.value = s.ambient;
+    ambientVolume.value = String(s.ambientVolume);
+  });
+
   const soundSection = section(
     'Sound',
     el('div', { className: 'row' }, el('label', { htmlFor: alarmSelect.id }, 'Alarm'), alarmSelect, testBtn),
     el('div', { className: 'row' }, el('label', { htmlFor: volume.id }, 'Volume'), volume),
     toggle('tick', 'Ticking', 'Soft tick every second during focus'),
+    el('div', { className: 'row' }, el('label', { htmlFor: ambientSelect.id }, 'Ambient sound', el('small', {}, 'While a session runs')), ambientSelect),
+    el('div', { className: 'row' }, el('label', { htmlFor: ambientVolume.id }, 'Ambient volume'), ambientVolume),
+    toggle('ambientOnBreaks', 'Ambient during breaks too'),
     toggle('muted', 'Mute all sounds', 'Shortcut: M'),
     ...(canPlayThroughSilentMode()
       ? [toggle('alarmIgnoresSilent', 'Alarm ignores silent mode', 'Rings even with the silent switch on. May briefly pause other audio')]
@@ -223,6 +240,7 @@ export function createSettingsPanel(settings: Store<Settings>, dataActions: Data
     notifHint,
     toggle('titleCountdown', 'Countdown in tab title'),
     toggle('focusModeOnStart', 'Focus mode on start', 'Hide everything but the timer during focus (F)'),
+    ...(isTouchDevice() ? [toggle('haptics', 'Vibration', 'Tap feedback, and a buzz when a session ends')] : []),
   );
 
   // --- Data

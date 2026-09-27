@@ -87,18 +87,16 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 
 ### Phase 3 — Eye candy
 - [x] three.js scenes: fireflies, aurora (shader), rain. (Low-poly tomato skipped: the Tomato clock face covers it)
-- [ ] Ambient audio loops
+- [x] Ambient sound: rain, brown noise, pink noise, generated in code (no audio files); focus-only by default, fades, preview in settings
 - [x] PWA (offline, installable)
 - [ ] Wake Lock, progress favicon
 - [ ] Pop-out mini timer via Document Picture-in-Picture (Chromium; hide the button elsewhere)
-- [ ] Custom background photos (IndexedDB, a few images, never leave the device)
-- [ ] Lofi / vinyl-crackle ambient option
+- [x] Vinyl-crackle ambient option (real lo-fi music would need licensed tracks, so it's skipped)
 - [x] PWA "new version available" prompt
 - [x] Mobile notice: background timers/alarms are unreliable on mobile browsers
 
 #### Background animation options
 - [x] Background picker in settings: blobs (current) / three.js scenes / custom photo / solid
-- [ ] Per-scene controls: speed, density/intensity, color follows theme vs. mode
 - [x] Scenes react to the timer (e.g. calmer during breaks, subtle pulse on completion)
 - [x] Auto-pause heavy scenes when the tab is hidden or on battery saver; always off under reduced motion
 
@@ -111,19 +109,18 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [x] Setting "Alarm ignores silent mode" (default on, shown only where supported), plus a one-time phone tip about volume/silent switch/keeping the tab open or installing
 
 #### Haptic feedback
-- [ ] `haptics.ts` with one `buzz(pattern)` helper and a Settings toggle (on by default on touch devices, off elsewhere)
-- [ ] Android/Chromium: standard `navigator.vibrate()`, e.g. a short tick on start/pause/task done and a longer pattern when a session ends
-- [ ] iOS 18+ Safari: no `navigator.vibrate()`. Workaround: a hidden `<input type="checkbox" switch>` with a `<label>`, toggled programmatically, which fires the system switch haptic
+- [x] `haptics.ts` with one `buzz(pattern)` helper and a Settings toggle (on by default on touch devices, off elsewhere)
+- [x] Android/Chromium: standard `navigator.vibrate()`, e.g. a short tick on start/pause/task done and a longer pattern when a session ends
+- [x] iOS 18+ Safari: no `navigator.vibrate()`. Workaround: a hidden `<input type="checkbox" switch>` with a `<label>`, toggled programmatically, which fires the system switch haptic
   - Caveat: it probably only fires inside a real user gesture (tap), so it suits tap feedback (start, pause, mark done, mode switch). It likely **can't** buzz when a session ends on its own. Verify on a device; the end-of-session alert stays sound + notification on iOS
   - Feature-detect and fail silently; keep the hack isolated in one module so it's easy to remove if Apple changes behaviour
-- [ ] Respect reduced-motion/"reduce haptics" preferences and the mute setting
+- [x] Own on/off setting (touch devices only). There's no web API for the OS "reduce haptics" preference
 
 #### Clock themes
 Whole-timer "faces" that go beyond the Phase 2 timer styles (ring / minimal / bar). Each face is a module that renders from the same `remaining / duration / mode / status` state, so the engine doesn't change.
 - [x] Face picker in settings with live previews
 - [x] **Tomato**: Cirillo's original kitchen timer. A tomato dial that twists back as time runs down, with a wind-up animation on start and an optional mechanical tick. Leaves wilt slightly on breaks, and it wobbles and "rings" at the end
 - [x] **Tamagotchi**: an egg-shaped LCD device with pixel digits and a small pixel pet. The pet works alongside you during focus and plays or naps on breaks. It grows or evolves with completed pomodoros and your streak, and looks a bit sad after abandoned sessions (never punishing)
-- [ ] Other candidates: flip clock, hourglass (sand falls with time), analog kitchen clock, growing plant, burning candle, minimal LCD
 - [x] Faces follow the theme colours, respect reduced motion, and stay accessible (time always available to screen readers)
 
 #### Markdown export, import & bulk add
@@ -148,7 +145,6 @@ Basics already exist (Space, R, S, `,`, Esc).
 - [x] `?` cheat-sheet overlay, keyboard button in the top bar, one-time tip for new visitors (pulled into Phase 2)
 - [x] Task list keyboard control: ↑/↓ Home/End, Enter current, X done, E edit, Del delete, Alt+↑/↓ reorder
 - [ ] More keys: `F` focus mode, `+`/`-` add or remove a minute, `P` pop-out timer
-- [ ] Optional: remap keys in settings
 - [ ] Swipe gestures on touch screens: swipe left/right on the dial to change mode, tap the dial to start/pause, long-press to reset, swipe up for tasks
 - [ ] Gestures ignore scrolling areas and follow the same confirm rules as buttons (e.g. abandoning a focus session)
 
@@ -179,6 +175,10 @@ Only pick these up if there's real demand. Several overlap with Phase 3 clock th
 - [ ] Separate alarm sound for the end of a break, plus an alarm repeat count
 - [ ] Show/hide individual UI elements (cycle dots, goal meter, tab counts, streak chip, subtitle)
 - [ ] Custom mode names and subtitle messages
+- [ ] Custom background photos (IndexedDB, a few images, never leave the device)
+- [ ] Per-scene controls: speed, density/intensity, color follows theme vs. mode
+- [ ] More clock faces: flip clock, hourglass, analog kitchen clock, growing plant, burning candle, minimal LCD
+- [ ] Remap keyboard shortcuts in settings
 
 ## Reference notes
 **pomodorotimer.online** (studied 2026-09-27; captured into `ref/`, which is gitignored). A Nuxt PWA with no backend; data lives in localStorage and IndexedDB. What stood out:
@@ -211,3 +211,4 @@ Only pick these up if there's real demand. Several overlap with Phase 3 clock th
 - 2026-09-27 — PWA via vite-plugin-pwa with registerType 'prompt': updates wait for the user so a running session is never reloaded. The PWA e2e project runs against a production preview.
 - 2026-09-27 — Clock faces are modules in src/faces (ring, tomato, tamagotchi) that render from the same timer state; digits stay real text. Face artwork avoids CSS transform-origin in px (the ring bug), using transform-box: fill-box or SVG transform attributes.
 - 2026-09-27 — three.js loads lazily only when a scene is chosen (own ~130 KB gz chunk). It's precached by the PWA, so a chosen scene also works offline.
+- 2026-09-27 — Moved custom photos, per-scene controls, extra clock faces and key remapping to the Phase 4 reserve (keep customization lean).

@@ -2,6 +2,9 @@ import type { AlarmSound } from './types';
 
 let ctx: AudioContext | null = null;
 
+/** The shared context (created on first unlock). */
+export const audioContext = (): AudioContext | null => ctx;
+
 /** Call from a user gesture so browsers allow playback later. */
 export function unlockAudio(): void {
   try {
