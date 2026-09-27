@@ -103,8 +103,8 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [ ] Auto-pause heavy scenes when the tab is hidden or on battery saver; always off under reduced motion
 
 #### Repo & discoverability
-- [ ] README: what it is, screenshot/GIF, live link, features, keyboard shortcuts, privacy note (data stays in the browser), local dev + testing commands, credits (Cirillo, inspirations)
-- [ ] Nicely placed GitHub link in the app: small GitHub icon in the top bar or an "About" footer in settings, opening the repo in a new tab
+- [x] README: what it is, screenshot/GIF, live link, features, keyboard shortcuts, privacy note (data stays in the browser), local dev + testing commands, credits (Cirillo, inspirations)
+- [x] Nicely placed GitHub link in the app: small GitHub icon in the top bar or an "About" footer in settings, opening the repo in a new tab
 
 #### Haptic feedback
 - [ ] `haptics.ts` with one `buzz(pattern)` helper and a Settings toggle (on by default on touch devices, off elsewhere)

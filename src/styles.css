@@ -1449,3 +1449,66 @@ body.focus-mode .dial {
 .data-actions .danger {
   margin-left: auto;
 }
+
+/* ---------- Footer & about ---------- */
+
+svg.gh {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  stroke: none;
+  flex: none;
+}
+
+.app-foot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0 4px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  opacity: 0.8;
+  transition:
+    opacity 0.5s var(--ease),
+    visibility 0.5s;
+}
+.app-foot a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 6px;
+}
+.app-foot a:hover {
+  color: var(--text);
+}
+.app-foot a:hover span {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+body.focus-mode .app-foot {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.about p {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.about strong {
+  color: var(--text);
+}
+.about-links {
+  display: flex;
+  gap: 16px;
+}
+.about-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+  text-underline-offset: 3px;
+}

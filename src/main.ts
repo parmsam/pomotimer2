@@ -324,6 +324,7 @@ new ResizeObserver(() => renderMode(true)).observe(document.querySelector('.mode
 modeTabs.forEach((b) => new ResizeObserver(() => renderMode(true)).observe(b));
 
 // ---- Boot
+$('.app-version').textContent = `v${__APP_VERSION__}`;
 applyTheme(settings.get().theme, settings.get().modeColors);
 renderMode(true);
 renderStatus();

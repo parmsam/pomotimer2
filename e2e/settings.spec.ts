@@ -48,3 +48,14 @@ test('rolling digits is off by default and can be enabled', async ({ page }) => 
   expect(await animated()).toBe(false);
   expect((await stored(page)).timer.status).toBe('running');
 });
+
+test('GitHub link and version are shown in the footer and in About', async ({ page }) => {
+  await open(page);
+  const link = page.locator('.app-foot').getByRole('link', { name: 'Source on GitHub' });
+  await expect(link).toHaveAttribute('href', 'https://github.com/parmsam/pomotimer2');
+  await expect(link).toHaveAttribute('target', '_blank');
+  await expect(page.locator('.app-version')).toHaveText(/^v\d+\.\d+\.\d+$/);
+  await page.locator('#settings-open').click();
+  const about = page.getByRole('complementary', { name: 'Settings' }).locator('.about');
+  await expect(about.getByRole('link', { name: 'Report an issue' })).toHaveAttribute('href', /\/issues\/new$/);
+});
