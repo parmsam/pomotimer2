@@ -27,5 +27,8 @@ Aesthetic Pomodoro timer. Static site on GitHub Pages; no backend. All persisten
 - **Assets**: reference with paths relative to Vite's `base` (`/pomotimer2/`); sounds live in `public/sounds/` and must be CC0 or otherwise redistributable.
 - Keep bundles lean: don't add dependencies for things a few lines of TS can do.
 
+## Reference material
+`ref/` is gitignored and holds captures of other Pomodoro sites (e.g. `ref/pomodorotimer.online/`) for studying features and UX. Use it to learn behavior, then write our own implementation. Never copy their code, copy text or assets into `src/`. Summaries of what we learned go in `PLAN.md` → Reference notes.
+
 ## Deployment
 Push to `main` → GitHub Actions (`.github/workflows/deploy.yml`) builds and publishes to GitHub Pages. Pages source must be set to "GitHub Actions" in repo settings.

@@ -1,0 +1,74 @@
+import type { AlarmSound } from './types';
+
+let ctx: AudioContext | null = null;
+
+/** Call from a user gesture so browsers allow playback later. */
+export function unlockAudio(): void {
+  try {
+    ctx ??= new AudioContext();
+    if (ctx.state === 'suspended') void ctx.resume();
+  } catch {
+    ctx = null;
+  }
+}
+
+interface Note {
+  freq: number;
+  at: number;
+  dur: number;
+  type?: OscillatorType;
+  gain?: number;
+  /** Extra partials as frequency multipliers, for bell-like tones. */
+  partials?: number[];
+}
+
+function play(notes: Note[], volume: number): void {
+  unlockAudio();
+  if (!ctx || volume <= 0) return;
+  const now = ctx.currentTime + 0.02;
+  const master = ctx.createGain();
+  master.gain.value = volume;
+  master.connect(ctx.destination);
+
+  for (const n of notes) {
+    for (const [i, mult] of [1, ...(n.partials ?? [])].entries()) {
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.type = n.type ?? 'sine';
+      osc.frequency.value = n.freq * mult;
+      const peak = (n.gain ?? 0.4) / (i + 1);
+      const t0 = now + n.at;
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(peak, t0 + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + n.dur);
+      osc.connect(g).connect(master);
+      osc.start(t0);
+      osc.stop(t0 + n.dur + 0.05);
+    }
+  }
+}
+
+const bellStrike = (at: number, freq = 880): Note => ({ freq, at, dur: 2.2, partials: [2.76, 5.4], gain: 0.35 });
+
+const SOUNDS: Record<Exclude<AlarmSound, 'none'>, Note[]> = {
+  bell: [bellStrike(0), bellStrike(0.9), bellStrike(1.8)],
+  chime: [523.25, 659.25, 783.99, 1046.5].map((freq, i) => ({ freq, at: i * 0.18, dur: 1.4, type: 'triangle' as const, gain: 0.3 })),
+  digital: [0, 0.16, 0.6, 0.76, 1.2, 1.36].map((at) => ({ freq: 1760, at, dur: 0.1, type: 'square' as const, gain: 0.12 })),
+  marimba: [392, 523.25, 659.25, 523.25, 783.99].map((freq, i) => ({ freq, at: i * 0.14, dur: 0.5, partials: [4], gain: 0.4 })),
+};
+
+export const ALARM_OPTIONS: { id: AlarmSound; label: string }[] = [
+  { id: 'bell', label: 'Bell' },
+  { id: 'chime', label: 'Chime' },
+  { id: 'digital', label: 'Digital' },
+  { id: 'marimba', label: 'Marimba' },
+  { id: 'none', label: 'Silent' },
+];
+
+export function playAlarm(sound: AlarmSound, volume: number): void {
+  if (sound !== 'none') play(SOUNDS[sound], volume);
+}
+
+export function playTick(volume: number): void {
+  play([{ freq: 2000, at: 0, dur: 0.03, type: 'square', gain: 0.04 }], volume);
+}

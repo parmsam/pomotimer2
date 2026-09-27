@@ -1,0 +1,24 @@
+{
+  "name": "pomotimer2",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An aesthetic, customizable Pomodoro timer with anime.js motion and optional three.js backgrounds.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parmsam/pomotimer2.git"
+  },
+  "homepage": "https://parmsam.github.io/pomotimer2/",
+  "dependencies": {
+    "animejs": "^4.5.0"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1"
+  }
+}

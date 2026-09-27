@@ -1,0 +1,67 @@
+/* Registered so color changes (theme or mode switch) transition smoothly. */
+@property --mode {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ff8e7f;
+}
+@property --bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1c1930;
+}
+@property --bg2 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #2d2144;
+}
+@property --text {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f5eeff;
+}
+
+:root {
+  /* Theme tokens; overwritten at runtime by applyTheme(). Defaults = Lofi Dusk. */
+  --bg: #1c1930;
+  --bg2: #2d2144;
+  --blob1: #ff9a8b;
+  --blob2: #8b6cf0;
+  --blob3: #f6c177;
+  --text: #f5eeff;
+  --on-accent: #1c1930;
+  --focus: #ff8e7f;
+  --short: #7dd3c0;
+  --long: #a5b4fc;
+
+  /* The active mode's color. */
+  --mode: var(--focus);
+
+  --muted: color-mix(in oklab, var(--text) 62%, transparent);
+  --faint: color-mix(in oklab, var(--text) 14%, transparent);
+  --surface: color-mix(in oklab, var(--bg) 55%, transparent);
+  --surface-strong: color-mix(in oklab, var(--bg) 88%, var(--text) 4%);
+  --border: color-mix(in oklab, var(--text) 12%, transparent);
+
+  --radius: 18px;
+  --font: 'Outfit', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  transition:
+    --mode 0.9s var(--ease),
+    --bg 0.9s var(--ease),
+    --bg2 0.9s var(--ease),
+    --text 0.6s var(--ease);
+}
+
+:root[data-mode='short'] {
+  --mode: var(--short);
+}
+:root[data-mode='long'] {
+  --mode: var(--long);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    transition: none;
+  }
+}

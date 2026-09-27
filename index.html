@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en" data-mode="focus">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="An aesthetic, customizable Pomodoro timer." />
+    <meta name="theme-color" content="#1c1930" />
+    <title>pomo</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="bg" aria-hidden="true">
+      <div class="blob b1"></div>
+      <div class="blob b2"></div>
+      <div class="blob b3"></div>
+      <div class="grain"></div>
+    </div>
+
+    <div class="app">
+      <header class="topbar">
+        <div class="brand"><span class="brand-dot"></span>pomo</div>
+        <button id="settings-open" class="icon-btn" aria-label="Settings (,)" title="Settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+        </button>
+      </header>
+
+      <main class="stage">
+        <div class="modes" role="tablist" aria-label="Session type">
+          <span class="mode-pill" aria-hidden="true"></span>
+          <button role="tab" data-mode="focus">Focus</button>
+          <button role="tab" data-mode="short">Short Break</button>
+          <button role="tab" data-mode="long">Long Break</button>
+        </div>
+
+        <div class="dial">
+          <svg class="ring" viewBox="0 0 220 220" aria-hidden="true">
+            <circle class="ring-track" cx="110" cy="110" r="100" />
+            <circle class="ring-progress" cx="110" cy="110" r="100" />
+            <g class="ring-head-wrap"><circle class="ring-head" cx="110" cy="10" r="6" /></g>
+          </svg>
+          <div class="dial-center">
+            <div class="time" id="time" role="timer" aria-live="off"></div>
+            <div class="sub" id="sub"></div>
+          </div>
+          <div class="burst" id="burst" aria-hidden="true"></div>
+        </div>
+
+        <div class="controls">
+          <button id="reset" class="icon-btn" aria-label="Reset (R)" title="Reset (R)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+          </button>
+          <button id="toggle" class="primary" aria-label="Start (Space)">
+            <span class="primary-label">Start</span>
+          </button>
+          <button id="skip" class="icon-btn" aria-label="Skip (S)" title="Skip (S)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 4 10 8-10 8V4Z"/><path d="M19 5v14"/></svg>
+          </button>
+        </div>
+
+        <div class="cycle" id="cycle"></div>
+      </main>
+
+      <p class="sr-only" aria-live="polite" id="live"></p>
+    </div>
+
+    <div class="scrim" id="scrim" hidden></div>
+    <aside class="drawer" id="settings" aria-label="Settings" hidden>
+      <header class="drawer-head">
+        <h2>Settings</h2>
+        <button id="settings-close" class="icon-btn" aria-label="Close settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </header>
+      <div class="drawer-body" id="settings-body"></div>
+    </aside>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -45,29 +45,62 @@ public/sounds/
 Keep this checklist current: tick items as they land, add new ones as scope changes.
 
 ### Phase 1 — MVP
-- [ ] Vite + TS scaffold, GitHub Pages deploy workflow
-- [ ] Timer engine (timestamp-based, survives reload)
-- [ ] Store + versioned localStorage
-- [ ] Ring UI + anime.js transitions
-- [ ] Core settings panel (durations, auto-start, long-break interval)
-- [ ] Theme presets + custom accent
-- [ ] Alarm sounds + volume
-- [ ] Notifications, title countdown
+- [x] Vite + TS scaffold, GitHub Pages deploy workflow
+- [x] Timer engine (timestamp-based, survives reload)
+- [x] Store + versioned localStorage
+- [x] Ring UI + anime.js transitions
+- [x] Core settings panel (durations, auto-start, long-break interval)
+- [x] Theme presets + custom accent
+- [x] Alarm sounds + volume
+- [x] Notifications, title countdown
+- [x] Favicon (SVG tomato)
+- [ ] First deploy to GitHub Pages (merge to `main`, enable Pages → GitHub Actions)
 
 ### Phase 2 — Polish
 - [ ] Task list (est. pomodoros, active task linked to sessions)
 - [ ] Stats (daily sessions, streak, 7-day chart)
-- [ ] Keyboard shortcuts
+- [x] Keyboard shortcuts
 - [ ] Focus mode
-- [ ] Export/import/reset data
+- [ ] Export/import data (reset is done)
+- [ ] Record abandoned pomodoros (reset/skip mid-focus) in history — "a pomodoro is indivisible"
+- [ ] Interruption log: one-tap internal/external interruption marks during focus, with a quick note to "schedule" it as a task
+- [ ] Optional strict mode (no pause; stopping = abandoning)
+- [ ] "To Do Today" framing for the task list
+- [ ] Nuanced stop/skip/switch dialogs (replace `confirm()`): abandoning keeps focused minutes in today's total; past the halfway mark it still counts as a session
+- [ ] Per-mode completed counters on the mode tabs
+- [ ] Streak in header (🔥 n): 1 session or N focused minutes keeps it alive; best streak; total focus
+- [ ] Daily focus goal ("challenge") with a celebration on completion
+- [ ] Per-task time tracking: the focused task accrues minutes, clamped to the session, survives reload
+- [ ] Cross-tab sync via the `storage` event
+- [ ] Rotating break tips + editable motivational quote
+- [ ] Optional name + time-of-day greeting
 
 ### Phase 3 — Eye candy
 - [ ] three.js scenes (particles/fireflies, shader gradient mesh, rain on glass, low-poly tomato)
 - [ ] Ambient audio loops
 - [ ] PWA (offline, installable)
 - [ ] Wake Lock, progress favicon
+- [ ] Pop-out mini timer via Document Picture-in-Picture (Chromium; hide the button elsewhere)
+- [ ] Custom background photos (IndexedDB, a few images, never leave the device)
+- [ ] Lofi / vinyl-crackle ambient option
+- [ ] PWA "new version available" prompt
+- [ ] Mobile notice: background timers/alarms are unreliable on mobile browsers
+
+## Reference notes
+**pomodorotimer.online** (studied 2026-09-27; captured into `ref/`, which is gitignored). A Nuxt PWA with no backend; data lives in localStorage and IndexedDB. What stood out:
+- Timer uses a wall-clock deadline in a Web Worker; sessions that finish while the tab is closed still count. (We already do the deadline and missed-completion credit.)
+- Abandoning a session is handled gently: focused minutes always count toward today, and past 50% the session still counts. Pausing gets a soft nudge ("A pause breaks your flow").
+- Streaks, daily challenges with rewards, and per-mode counters make the timer feel like it's counting your wins.
+- Tasks are extensive (lists, subtasks, priority, due dates, labels, "plan for today", per-task time that rolls up to parent tasks). We'll take a lean subset.
+- A pop-out picture-in-picture mini timer that controls the real timer.
+- Custom photo backgrounds, lofi music, editable quote, greeting by name.
+
+**Wikipedia: Pomodoro Technique**: 25 / 5 min intervals, and a 20–30 min long break after 4 pomodoros. A pomodoro is indivisible: an interruption means it gets postponed or abandoned (inform → negotiate → schedule → call back). The five stages are planning, tracking, recording, processing and visualizing.
 
 ## Decisions log
 - 2026-09-27 — Vanilla TS over React/Svelte: single-screen app, imperative animation libs.
 - 2026-09-27 — three.js is optional + lazy-loaded; default background is CSS/anime.js.
 - 2026-09-27 — In scope: tasks, stats, ambient sounds, PWA.
+- 2026-09-27 — Alarms are synthesized with Web Audio (no sample files, no licensing concerns).
+- 2026-09-27 — Default long break stays 15 min to match other popular apps (Wikipedia/Cirillo canon is 20–30).
+- 2026-09-27 — From the Wikipedia article: pomodoros are indivisible and interruptions get logged → Phase 2 items for abandoned sessions, interruption log, strict mode.
