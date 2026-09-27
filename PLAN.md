@@ -28,7 +28,7 @@ Static site deployed to GitHub Pages; all data in localStorage.
 - **Data**: export/import JSON, reset
 
 ## Keyboard shortcuts
-Space start/pause · R reset · S skip · F focus mode · `,` settings · T tasks
+See the in-app cheat sheet (`?`), generated from the shortcut table in `src/main.ts`.
 
 ## Structure
 ```
@@ -112,6 +112,14 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 #### Repo & discoverability
 - [ ] README: what it is, screenshot/GIF, live link, features, keyboard shortcuts, privacy note (data stays in the browser), local dev + testing commands, credits (Cirillo, inspirations)
 - [ ] Nicely placed GitHub link in the app: small GitHub icon in the top bar or an "About" footer in settings, opening the repo in a new tab
+
+#### Haptic feedback
+- [ ] `haptics.ts` with one `buzz(pattern)` helper and a Settings toggle (on by default on touch devices, off elsewhere)
+- [ ] Android/Chromium: standard `navigator.vibrate()`, e.g. a short tick on start/pause/task done and a longer pattern when a session ends
+- [ ] iOS 18+ Safari: no `navigator.vibrate()`. Workaround: a hidden `<input type="checkbox" switch>` with a `<label>`, toggled programmatically, which fires the system switch haptic
+  - Caveat: it probably only fires inside a real user gesture (tap), so it suits tap feedback (start, pause, mark done, mode switch). It likely **can't** buzz when a session ends on its own. Verify on a device; the end-of-session alert stays sound + notification on iOS
+  - Feature-detect and fail silently; keep the hack isolated in one module so it's easy to remove if Apple changes behaviour
+- [ ] Respect reduced-motion/"reduce haptics" preferences and the mute setting
 
 #### Clock themes
 Whole-timer "faces" that go beyond the Phase 2 timer styles (ring / minimal / bar). Each face is a module that renders from the same `remaining / duration / mode / status` state, so the engine doesn't change.
