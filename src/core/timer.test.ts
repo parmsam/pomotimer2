@@ -240,3 +240,36 @@ describe('interruptions', () => {
     expect(t().interruptions).toEqual({ internal: 0, external: 0 });
   });
 });
+
+describe('adding and removing time', () => {
+  it('extends and shortens a running session, never below a second', () => {
+    const { timer, t } = setup();
+    timer.start();
+    advance(MIN);
+    timer.addTime(MIN);
+    expect(timer.remaining()).toBe(25 * MIN);
+    timer.addTime(-5 * MIN);
+    expect(timer.remaining()).toBe(20 * MIN);
+    timer.addTime(-60 * MIN);
+    expect(timer.remaining()).toBe(1000);
+    advance(1100);
+    expect(t().mode).toBe('short'); // the shortened session still completes
+  });
+
+  it('adjusts an idle or paused session', () => {
+    const { timer, t } = setup();
+    timer.addTime(5 * MIN);
+    expect(t().remainingMs).toBe(30 * MIN);
+    timer.start();
+    advance(MIN);
+    timer.pause();
+    timer.addTime(-MIN);
+    expect(timer.remaining()).toBe(28 * MIN);
+  });
+
+  it('progress stays within 0..1 when time is added beyond the planned length', () => {
+    const { timer } = setup();
+    timer.addTime(10 * MIN);
+    expect(timer.progress()).toBe(0);
+  });
+});

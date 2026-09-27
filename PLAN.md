@@ -89,8 +89,8 @@ Keep this checklist current: tick items as they land, add new ones as scope chan
 - [x] three.js scenes: fireflies, aurora (shader), rain. (Low-poly tomato skipped: the Tomato clock face covers it)
 - [x] Ambient sound: rain, brown noise, pink noise, generated in code (no audio files); focus-only by default, fades, preview in settings
 - [x] PWA (offline, installable)
-- [ ] Wake Lock, progress favicon
-- [ ] Pop-out mini timer via Document Picture-in-Picture (Chromium; hide the button elsewhere)
+- [x] Wake Lock (keep screen awake while running), progress favicon
+- [x] Pop-out mini timer via Document Picture-in-Picture (Chromium; hide the button elsewhere)
 - [x] Vinyl-crackle ambient option (real lo-fi music would need licensed tracks, so it's skipped)
 - [x] PWA "new version available" prompt
 - [x] Mobile notice: background timers/alarms are unreliable on mobile browsers
@@ -144,7 +144,7 @@ Basics already exist (Space, R, S, `,`, Esc).
 - [x] `1`/`2`/`3` switch mode, `M` mute, `,` toggles settings (pulled into Phase 2)
 - [x] `?` cheat-sheet overlay, keyboard button in the top bar, one-time tip for new visitors (pulled into Phase 2)
 - [x] Task list keyboard control: ↑/↓ Home/End, Enter current, X done, E edit, Del delete, Alt+↑/↓ reorder
-- [ ] More keys: `F` focus mode, `+`/`-` add or remove a minute, `P` pop-out timer
+- [x] More keys: `F` focus mode, `+`/`-` add or remove a minute, `P` pop-out timer
 - [ ] Swipe gestures on touch screens: swipe left/right on the dial to change mode, tap the dial to start/pause, long-press to reset, swipe up for tasks
 - [ ] Gestures ignore scrolling areas and follow the same confirm rules as buttons (e.g. abandoning a focus session)
 

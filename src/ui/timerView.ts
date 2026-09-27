@@ -27,6 +27,7 @@ export function createTimerView(root: HTMLElement, opts: { rollingDigits: () => 
   let tween: JSAnimation | null = null;
 
   const setProgress = (p: number) => {
+    p = Math.min(1, Math.max(0, p)); // adding time can push remaining past the planned length
     progress = p;
     face?.setProgress(p, opts.context());
   };
@@ -62,7 +63,7 @@ export function createTimerView(root: HTMLElement, opts: { rollingDigits: () => 
     },
     refill(remaining, duration) {
       tween?.cancel();
-      const target = duration > 0 ? remaining / duration : 0;
+      const target = duration > 0 ? Math.min(1, remaining / duration) : 0;
       setTime(formatTime(remaining), target >= progress ? -1 : 1);
       const t = tweenProgress(progress, target, setProgress);
       tween = t;

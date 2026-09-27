@@ -17,6 +17,7 @@ export const DEFAULT_SETTINGS: Settings = {
   tick: false,
   notifications: false,
   titleCountdown: true,
+  keepAwake: true,
   strictMode: false,
   showTasks: true,
   muted: false,

@@ -21,6 +21,7 @@ An aesthetic, customizable Pomodoro timer with smooth [anime.js](https://animejs
 - **Clock faces.** The classic ring, a **tomato** kitchen timer whose dial turns back as time runs down, or a **Tamagotchi** whose pixel pet works alongside you, naps on breaks and grows up as you complete pomodoros.
 - **Living backgrounds.** Soft CSS color blobs, or three.js scenes (fireflies, aurora, rain) that follow your theme, calm down on breaks and pulse when a session ends. three.js only loads if you pick one.
 - **Make it yours.** Five themes, per-mode colors, interval presets (25/5/15 · 50/10/20 · 90/15/30), alarm sounds, and an optional tick.
+- **Stays with you.** A pop-out mini timer that floats above other windows (Chrome/Edge), progress in the tab icon, and the screen stays awake while a session runs.
 - **Works with multiple tabs.** Open tabs stay in sync, and only one of them rings.
 - **Ambient sound.** Optional rain, brown noise, pink noise or vinyl crackle while you focus (generated in code, no audio files).
 - **Alarms on phones.** On iPhone the alarm can ring even with the silent switch on (Safari 17+).
@@ -42,6 +43,8 @@ Press <kbd>?</kbd> in the app to see them all.
 | <kbd>Alt</kbd> + <kbd>↑</kbd>/<kbd>↓</kbd> | Reorder a task |
 | <kbd>G</kbd> | Progress, streak & goal |
 | <kbd>F</kbd> | Focus mode |
+| <kbd>+</kbd> / <kbd>−</kbd> | Add / remove a minute |
+| <kbd>P</kbd> | Pop out a mini timer (Chrome, Edge) |
 | <kbd>I</kbd> | Log an interruption (when tracking is on) |
 | <kbd>M</kbd> | Mute |
 | <kbd>,</kbd> | Settings |
@@ -73,7 +76,7 @@ The plan and roadmap live in [`PLAN.md`](PLAN.md), and conventions for contribut
 
 ## Roadmap
 
-Up next: a pop-out mini timer, keep-awake and swipe gestures. See [`PLAN.md`](PLAN.md).
+Up next: swipe gestures on phones. See [`PLAN.md`](PLAN.md).
 
 ## Credits
 

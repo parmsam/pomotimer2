@@ -24,6 +24,9 @@ import { ask, dialogOpen } from './ui/dialog';
 import { createFocusMode } from './ui/focusMode';
 import { setupPwa } from './ui/pwa';
 import { createBackground } from './ui/background';
+import { createProgressFavicon } from './ui/favicon';
+import { createPip, pipSupported } from './ui/pip';
+import { createWakeLock } from './ui/wakeLock';
 import { createStatsView } from './ui/stats';
 import { bindShortcuts, createShortcutsHelp, type Shortcut } from './ui/shortcuts';
 import { toast } from './ui/toast';
@@ -66,6 +69,28 @@ const view = createTimerView($('.dial'), {
 });
 
 const haptic = (kind: Buzz) => settings.get().haptics && buzz(kind);
+const favicon = createProgressFavicon();
+const wakeLock = createWakeLock();
+const pip = createPip({
+  getState: () => {
+    const t = data.get().timer;
+    const task = data.get().tasks.find((x) => x.id === data.get().activeTaskId);
+    return {
+      time: formatTime(timer.remaining()),
+      label: t.mode === 'focus' && task ? task.title : MODE_LABELS[t.mode],
+      progress: timer.remaining() / timer.duration(),
+      running: t.status === 'running',
+    };
+  },
+  toggle: () => toggleBtn.click(),
+  skip: () => $('#skip').click(),
+  onClose: () => $('#pip-open').setAttribute('aria-pressed', 'false'),
+});
+const togglePip = () => {
+  if (!pipSupported()) return toast('The pop-out timer works in Chrome and Edge');
+  pip.toggle();
+  $('#pip-open').setAttribute('aria-pressed', String(!pip.isOpen()));
+};
 
 // ---- Ambient sound: plays while a session runs (focus only unless enabled for breaks).
 const ambient = createAmbientPlayer();
@@ -85,6 +110,7 @@ function previewAmbient() {
   if (s.ambient === 'off' || s.muted) {
     ambientPreview = undefined;
     return syncAmbient();
+wakeLock.set(settings.get().keepAwake && data.get().timer.status === 'running');
   }
   ambient.setVolume(s.ambientVolume);
   ambient.play(s.ambient);
@@ -179,6 +205,7 @@ function renderTitle(remaining: number) {
 // Smooth ring + digits; rAF pauses in hidden tabs, which is fine for visuals.
 function frame() {
   if (data.get().timer.status === 'running') view.render(timer.remaining(), timer.duration());
+  pip.update();
   requestAnimationFrame(frame);
 }
 
@@ -189,10 +216,12 @@ function secondTick() {
   if (second === lastSecond) return;
   lastSecond = second;
   renderTitle(remaining);
+  const { status } = data.get().timer;
+  favicon.update(settings.get().titleCountdown && status !== 'idle' ? remaining / timer.duration() : null);
   tasks.tick();
   stats.refresh();
   const s = settings.get();
-  const { status, mode } = data.get().timer;
+  const { mode } = data.get().timer;
   if (s.tick && !s.muted && status === 'running' && mode === 'focus' && remaining > 0) playTick(s.volume);
 }
 
@@ -204,7 +233,12 @@ data.subscribe((d, prev) => {
     renderMode();
     view.event('mode');
   }
-  if (t.status !== p.status || t.mode !== p.mode) syncAmbient();
+  if (t.status !== p.status || t.mode !== p.mode) {
+    lastSecond = -1; // title and tab icon must refresh even if the displayed second didn't change
+    syncAmbient();
+    wakeLock.set(settings.get().keepAwake && t.status === 'running');
+    pip.update();
+  }
   if (t.status === 'running' && p.status !== 'running') view.event('start');
   if (t.status === 'paused' && p.status === 'running') view.event('pause');
   if (d.history.length > prev.history.length && d.history.at(-1)?.abandoned) view.event('abandon');
@@ -228,6 +262,8 @@ settings.subscribe((s, prev) => {
   if (s.clockFace !== prev.clockFace) view.setFace(s.clockFace);
   if (s.longBreakEvery !== prev.longBreakEvery) renderCycle();
   if (s.strictMode !== prev.strictMode) renderStatus();
+  if (s.keepAwake !== prev.keepAwake) wakeLock.set(s.keepAwake && data.get().timer.status === 'running');
+  if (s.theme !== prev.theme || s.modeColors !== prev.modeColors) setTimeout(() => pip.syncTheme(), 1000);
   if (s.ambient !== prev.ambient) previewAmbient();
   else if (s.ambientVolume !== prev.ambientVolume || s.muted !== prev.muted || s.ambientOnBreaks !== prev.ambientOnBreaks) syncAmbient();
   if (s.durations !== prev.durations && data.get().timer.status !== 'idle') view.render(timer.remaining(), timer.duration());
@@ -375,6 +411,18 @@ const SHORTCUTS: Shortcut[] = [
   { keys: ['E'], label: 'Edit', group: 'Tasks' },
   { keys: ['Del'], label: 'Delete', group: 'Tasks' },
   { keys: ['Alt', '↑/↓'], label: 'Reorder', group: 'Tasks' },
+  {
+    keys: ['+', '−'],
+    label: 'Add / remove a minute',
+    group: 'Timer',
+    match: (k) => k === '+' || k === '=' || k === '-',
+    run: (e) => {
+      const add = e.key !== '-';
+      timer.addTime(add ? 60_000 : -60_000);
+      toast(`${add ? '+1' : '−1'} minute · ${formatTime(timer.remaining())}`, { duration: 1500 });
+    },
+  },
+  { keys: ['P'], label: 'Pop out a mini timer (Chrome, Edge)', group: 'General', match: (k) => k === 'p', run: () => togglePip() },
   { keys: ['F'], label: 'Focus mode (hide everything but the timer)', group: 'General', match: (k) => k === 'f', run: () => focusMode.toggle() },
   { keys: ['M'], label: 'Mute / unmute sounds', group: 'General', match: (k) => k === 'm', run: toggleMute },
   { keys: [','], label: 'Open / close settings', group: 'General', inSettings: true, match: (k) => k === ',', run: () => panel.toggle() },
@@ -405,6 +453,8 @@ const openHelp = () => {
   if (!settings.get().shortcutsHintSeen) settings.set({ shortcutsHintSeen: true });
 };
 $('#shortcuts-open').addEventListener('click', openHelp);
+$('#pip-open').hidden = !pipSupported();
+$('#pip-open').addEventListener('click', togglePip);
 
 // Esc closes settings even from inside one of its inputs, otherwise leaves focus mode.
 document.addEventListener('keydown', (e) => {

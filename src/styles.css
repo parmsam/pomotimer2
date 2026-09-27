@@ -10,6 +10,11 @@ body {
   height: 100%;
 }
 
+/* Author display rules (e.g. .icon-btn { display: grid }) would otherwise beat [hidden]. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   font-family: var(--font);
   color: var(--text);

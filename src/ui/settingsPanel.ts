@@ -1,6 +1,7 @@
 import { AMBIENT_OPTIONS } from '../core/ambient';
 import { ALARM_OPTIONS, canPlayThroughSilentMode, playAlarm, unlockAudio } from '../core/audio';
 import { isTouchDevice } from '../core/haptics';
+import { wakeLockSupported } from './wakeLock';
 import { notificationsSupported, requestNotifications } from '../core/notify';
 import type { Store } from '../core/store';
 import type { AlarmSound, Mode, Settings } from '../core/types';
@@ -238,7 +239,8 @@ export function createSettingsPanel(settings: Store<Settings>, dataActions: Data
       return ok;
     }),
     notifHint,
-    toggle('titleCountdown', 'Countdown in tab title'),
+    toggle('titleCountdown', 'Countdown in tab title and icon'),
+    ...(wakeLockSupported() ? [toggle('keepAwake', 'Keep screen awake', 'While a session is running')] : []),
     toggle('focusModeOnStart', 'Focus mode on start', 'Hide everything but the timer during focus (F)'),
     ...(isTouchDevice() ? [toggle('haptics', 'Vibration', 'Tap feedback, and a buzz when a session ends')] : []),
   );

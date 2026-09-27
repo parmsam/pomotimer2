@@ -31,6 +31,8 @@ export interface Timer {
   /** Close the open focus segment so time is credited to the task active until now. */
   splitSegment(): void;
   interrupt(kind: keyof Interruptions): void;
+  /** Add (or with a negative value, remove) time from the current session. */
+  addTime(ms: number): void;
   /** Milliseconds left in the current session, derived from the clock while running. */
   remaining(): number;
   duration(mode?: Mode): number;
@@ -210,6 +212,15 @@ export function createTimer(
     splitSegment: () => {
       if (t().segmentStart !== null) closeSegment(true);
     },
+    addTime(ms) {
+      const s = t();
+      if (s.status === 'running' && s.endsAt !== null) {
+        setTimer({ endsAt: Math.max(Date.now() + 1000, s.endsAt + ms) });
+        schedule();
+      } else {
+        setTimer({ remainingMs: Math.max(1000, remaining() + ms) });
+      }
+    },
     interrupt: (kind) => {
       if (t().mode !== 'focus' || t().status === 'idle') return;
       setTimer({ interruptions: { ...t().interruptions, [kind]: t().interruptions[kind] + 1 } });
@@ -218,7 +229,7 @@ export function createTimer(
     duration,
     progress: () => {
       const d = duration();
-      return d > 0 ? 1 - remaining() / d : 0;
+      return d > 0 ? Math.min(1, Math.max(0, 1 - remaining() / d)) : 0;
     },
     focusedMs: () => t().focusedMs + openSegmentMs(),
     inProgress: () => t().status !== 'idle',

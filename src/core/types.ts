@@ -22,6 +22,8 @@ export interface Settings {
   tick: boolean;
   notifications: boolean;
   titleCountdown: boolean;
+  /** Keep the screen on while a session runs. */
+  keepAwake: boolean;
   /** No pausing: stopping a focus session abandons it. */
   strictMode: boolean;
   showTasks: boolean;
