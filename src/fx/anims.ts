@@ -30,14 +30,19 @@ export function driftBlobs(): void {
   reducedQuery.addEventListener('change', run);
 }
 
+const sliding = new WeakSet<HTMLElement>();
+
 export function slidePill(pill: HTMLElement, target: HTMLElement, instant = false): void {
   const x = target.offsetLeft;
   const width = target.offsetWidth;
-  if (instant || reducedMotion()) {
+  // A running slide would overwrite an instant set with its stale target (e.g. when a tab
+  // count appears mid-slide after a completion), so retarget the slide instead.
+  if (reducedMotion() || (instant && !sliding.has(pill))) {
     utils.set(pill, { x, width });
     return;
   }
-  animate(pill, { x, width, duration: 650, ease: 'out(4)' });
+  sliding.add(pill);
+  animate(pill, { x, width, duration: 650, ease: 'out(4)', onComplete: () => sliding.delete(pill) });
 }
 
 export function press(el: HTMLElement): void {

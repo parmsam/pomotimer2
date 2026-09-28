@@ -38,6 +38,23 @@ test('a finished focus session moves to a short break and fills a cycle dot', as
   expect(d.history).toHaveLength(1);
 });
 
+test('the mode pill lands on the new tab after the first completion adds a tab count', async ({ page }) => {
+  const seed = focusInProgress(0);
+  seed.timer.endsAt = Date.now() + 1500;
+  await open(page, { data: seed });
+  await expect(page.locator('html')).toHaveAttribute('data-mode', 'short', { timeout: 5000 });
+  const tab = page.getByRole('tab', { name: /Short Break/ });
+  await expect(async () => {
+    const pill = (await page.locator('.mode-pill').boundingBox())!;
+    const box = (await tab.boundingBox())!;
+    expect(Math.abs(pill.x - box.x)).toBeLessThanOrEqual(2);
+    expect(Math.abs(pill.width - box.width)).toBeLessThanOrEqual(2);
+  }).toPass({ timeout: 3000 });
+  await page.waitForTimeout(800); // and it stays there once every animation has settled
+  const pill = (await page.locator('.mode-pill').boundingBox())!;
+  expect(Math.abs(pill.x - (await tab.boundingBox())!.x)).toBeLessThanOrEqual(2);
+});
+
 test('a session that ended while closed is credited on load', async ({ page }) => {
   const seed = focusInProgress(26);
   seed.timer.cycleCount = 3;
