@@ -69,9 +69,13 @@ test.describe('more faces', () => {
   for (const [id, label, cls] of [
     ['hourglass', 'Hourglass', 'hourglass'],
     ['plant', 'Plant Buddy', 'plant'],
-    ['enso', 'Zen Enso', 'enso'],
+    ['robot', 'Robot Pet', 'robot'],
     ['handheld', 'Retro Handheld', 'handheld'],
     ['potion', 'Potion', 'potion'],
+    ['tetris', 'Tetris', 'tetris'],
+    ['blob', 'Blob Pet', 'blobpet'],
+    ['spaceship', 'Spaceship', 'spaceship'],
+    ['hamster', 'Hamster Wheel', 'hamster'],
   ] as const) {
     test(`${label}: selectable, and shows progress halfway through a session`, async ({ page }) => {
       await open(page, { data: halfway() });
@@ -124,4 +128,35 @@ test('the handheld shows its caption under the device', async ({ page }) => {
   const dial = (await page.locator('.dial').boundingBox())!;
   await expect(page.locator('#sub')).toBeVisible();
   expect(sub.y).toBeGreaterThanOrEqual(dial.y + dial.height - 2);
+});
+
+
+test.describe('pets on a break', () => {
+  const onBreak = (mode: 'short' | 'long') => {
+    const seed = focusInProgress(0);
+    seed.timer = { ...seed.timer, mode, status: 'idle', endsAt: null, remainingMs: 5 * MIN };
+    return seed;
+  };
+  for (const [face, cls, state, mode] of [
+    ['robot', 'robot', 'charging', 'short'],
+    ['blob', 'blobpet', 'relaxed', 'long'],
+    ['hamster', 'hamster', 'napping', 'short'],
+  ] as const) {
+    test(`${face} is ${state}`, async ({ page }) => {
+      await open(page, { data: onBreak(mode), settings: { clockFace: face } });
+      await expect(page.locator(`svg.${cls}`)).toHaveAttribute('data-state', state);
+    });
+  }
+
+  test('robot cheers when a session completes', async ({ page }) => {
+    const seed = focusInProgress(0);
+    seed.timer.endsAt = Date.now() + 1500;
+    await open(page, { data: seed, settings: { clockFace: 'robot' } });
+    await expect(page.locator('svg.robot')).toHaveAttribute('data-state', 'happy', { timeout: 5000 });
+  });
+});
+
+test('a retired face (enso) falls back to the ring', async ({ page }) => {
+  await open(page, { settings: { clockFace: 'enso' } });
+  await expect(page.locator('.dial')).toHaveAttribute('data-face', 'ring');
 });

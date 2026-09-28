@@ -83,3 +83,15 @@ describe('settings migration', () => {
     expect(loadSettings().modeColors).toEqual({ focus: null, short: '#123456', long: null });
   });
 });
+
+describe('clock face migration', () => {
+  it('falls back to the ring for a retired face', () => {
+    localStorage.setItem('pomo:v1:settings', JSON.stringify({ clockFace: 'enso' }));
+    expect(loadSettings().clockFace).toBe('ring');
+  });
+
+  it('keeps a valid face', () => {
+    localStorage.setItem('pomo:v1:settings', JSON.stringify({ clockFace: 'hamster' }));
+    expect(loadSettings().clockFace).toBe('hamster');
+  });
+});

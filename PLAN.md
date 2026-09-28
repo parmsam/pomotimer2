@@ -121,7 +121,7 @@ Whole-timer "faces" that go beyond the Phase 2 timer styles (ring / minimal / ba
 - [x] Face picker in settings with live previews
 - [x] **Tomato**: Cirillo's original kitchen timer. A tomato dial that twists back as time runs down, with a wind-up animation on start and an optional mechanical tick. Leaves wilt slightly on breaks, and it wobbles and "rings" at the end
 - [x] **Tamagotchi**: an egg-shaped LCD device with pixel digits and a small pixel pet. The pet works alongside you during focus and plays or naps on breaks. It grows or evolves with completed pomodoros and your streak, and looks a bit sad after abandoned sessions (never punishing)
-- [x] More faces (requested): Hourglass, Plant Buddy, Zen Enso, Retro Handheld, Potion Flask
+- [x] More faces (requested): Hourglass, Plant Buddy, Retro Handheld, Potion Flask, Robot Pet (replaced Zen Enso), Tetris, Blob Pet, Spaceship Orbit, Hamster Wheel
 - [x] Faces follow the theme colours, respect reduced motion, and stay accessible (time always available to screen readers)
 
 #### Markdown export, import & bulk add
@@ -216,3 +216,4 @@ Not part of any phase. Pick these up only if people ask for them.
 - 2026-09-27 — Default quotes sourced from Wikiquote "Sourced" sections (and well-documented originals), cross-checked by hand. Extraction was unreliable (e.g. a nonsense citation), so anything that didn't check out was dropped. A test guards against known misattributions.
 - 2026-09-27 — Five more faces added on request. Faces expose data-level (0–100) for tests; continuous motion is CSS (off under reduced motion); art-top faces put the digits below the artwork.
 - 2026-09-27 — The pop-out mini timer mounts its own instance of the selected face, with the page's stylesheets and theme tokens copied into the PiP document, so it always matches the page.
+- 2026-09-27 — Zen Enso retired in favor of Robot Pet; saved settings with an unknown face fall back to the ring. In focus mode, the quote (if on) moves above the clock.

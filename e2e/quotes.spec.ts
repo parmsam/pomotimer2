@@ -40,12 +40,22 @@ test('my own quotes can replace the built-in list', async ({ page }) => {
   await expect(page.locator('#quote figcaption')).toHaveText('— Me');
 });
 
-test('focus mode hides the quote', async ({ page, isMobile }) => {
+test('in focus mode the quote moves above the clock (and the task list goes away)', async ({ page, isMobile }) => {
   test.skip(isMobile, 'keyboard');
   await open(page, { settings: { showQuotes: true } });
-  await expect(page.locator('#quote')).toBeVisible();
   await page.keyboard.press('f');
-  await expect(page.locator('#quote')).toBeHidden();
+  await expect(page.locator('#tasks')).toBeHidden();
+  await expect(page.locator('#quote')).toBeVisible();
+  const quote = (await page.locator('#quote').boundingBox())!;
+  const dial = (await page.locator('.dial').boundingBox())!;
+  expect(quote.y + quote.height).toBeLessThanOrEqual(dial.y);
+});
+
+test('with quotes off, focus mode shows only the timer', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'keyboard');
+  await open(page);
+  await page.keyboard.press('f');
+  await expect(page.locator('.side-col')).toBeHidden();
 });
 
 test('on wide screens the quote sits above the task list; with tasks hidden it sits under the timer', async ({ page, isMobile }) => {
@@ -67,4 +77,16 @@ test('on wide screens the quote sits above the task list; with tasks hidden it s
 test('the side column takes no space when it has nothing to show', async ({ page }) => {
   await open(page, { settings: { showTasks: false } });
   await expect(page.locator('.side-col')).toBeHidden();
+});
+
+test('the focus-mode quote is centered over the clock', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'keyboard');
+  await page.setViewportSize({ width: 1280, height: 820 });
+  await open(page, { settings: { showQuotes: true } });
+  await page.keyboard.press('f');
+  await page.waitForTimeout(800);
+  expect(await page.locator('#quote').evaluate((el) => getComputedStyle(el).textAlign)).toBe('center');
+  const quote = (await page.locator('#quote').boundingBox())!;
+  const dial = (await page.locator('.dial').boundingBox())!;
+  expect(Math.abs(quote.x + quote.width / 2 - (dial.x + dial.width / 2))).toBeLessThan(4);
 });

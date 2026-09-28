@@ -1875,9 +1875,6 @@ body.focus-mode .app-foot {
   font-size: 0.78rem;
   opacity: 0.85;
 }
-body.focus-mode .quote {
-  display: none;
-}
 .custom-quotes textarea {
   width: 100%;
   padding: 10px 12px;
@@ -1896,7 +1893,12 @@ body.focus-mode .quote {
 
 .dial[data-face='hourglass'] .dial-center,
 .dial[data-face='plant'] .dial-center,
-.dial[data-face='potion'] .dial-center {
+.dial[data-face='potion'] .dial-center,
+.dial[data-face='robot'] .dial-center,
+.dial[data-face='tetris'] .dial-center,
+.dial[data-face='blob'] .dial-center,
+.dial[data-face='spaceship'] .dial-center,
+.dial[data-face='hamster'] .dial-center {
   position: absolute;
   top: 78%;
   left: 0;
@@ -1904,12 +1906,22 @@ body.focus-mode .quote {
 }
 .dial[data-face='hourglass'] .time,
 .dial[data-face='plant'] .time,
-.dial[data-face='potion'] .time {
+.dial[data-face='potion'] .time,
+.dial[data-face='robot'] .time,
+.dial[data-face='tetris'] .time,
+.dial[data-face='blob'] .time,
+.dial[data-face='spaceship'] .time,
+.dial[data-face='hamster'] .time {
   font-size: 11cqw;
 }
 .dial[data-face='hourglass'] .sub,
 .dial[data-face='plant'] .sub,
-.dial[data-face='potion'] .sub {
+.dial[data-face='potion'] .sub,
+.dial[data-face='robot'] .sub,
+.dial[data-face='tetris'] .sub,
+.dial[data-face='blob'] .sub,
+.dial[data-face='spaceship'] .sub,
+.dial[data-face='hamster'] .sub {
   margin-top: 2px;
   font-size: 3.6cqw;
   max-width: 70cqw;
@@ -2029,41 +2041,6 @@ body.focus-mode .quote {
 .pl-cheek {
   fill: #ff9aa2;
   opacity: 0.55;
-}
-
-/* Zen Enso */
-.en-ghost {
-  fill: none;
-  stroke: var(--text);
-  stroke-opacity: 0.06;
-  stroke-width: 14;
-}
-.en-ink {
-  fill: none;
-  stroke: var(--text);
-  stroke-linecap: round;
-  transition: stroke-dasharray 0.3s linear;
-}
-.en-main {
-  stroke-width: 15;
-  stroke-opacity: 0.92;
-}
-.en-dry {
-  stroke-width: 4;
-  stroke-opacity: 0.35;
-}
-.en-seal {
-  transform-box: fill-box;
-  transform-origin: center;
-  transition: opacity 0.5s;
-}
-.en-seal rect {
-  fill: var(--mode);
-}
-.en-seal .en-seal-inner {
-  fill: none;
-  stroke: var(--on-accent);
-  stroke-width: 1.6;
 }
 
 /* Retro Handheld */
@@ -2226,9 +2203,25 @@ body.focus-mode .quote {
   max-width: 520px;
 }
 /* Nothing to show (tasks hidden, quotes off, or focus mode): take no space. */
-.side-col:not(:has(> :not([hidden]))),
-body.focus-mode .side-col {
+.side-col:not(:has(> :not([hidden]))) {
   display: none;
+}
+/* Focus mode: tasks go away; if quotes are on, the quote moves above the clock. */
+body.focus-mode .side-col {
+  order: -1;
+}
+body.focus-mode .side-col:has(> .quote[hidden]) {
+  display: none;
+}
+body.focus-mode .quote,
+body.focus-mode .stage.with-tasks .quote {
+  align-self: center;
+  max-width: min(460px, 100%);
+  text-align: center;
+  opacity: 0.85;
+}
+body.focus-mode .stage {
+  gap: 18px;
 }
 @media (min-width: 1000px) {
   .stage.with-tasks .side-col {
@@ -2261,7 +2254,12 @@ body.focus-mode .side-col {
 .dial[data-face='tamagotchi'] .sub,
 .dial[data-face='hourglass'] .sub,
 .dial[data-face='plant'] .sub,
-.dial[data-face='potion'] .sub {
+.dial[data-face='potion'] .sub,
+.dial[data-face='robot'] .sub,
+.dial[data-face='tetris'] .sub,
+.dial[data-face='blob'] .sub,
+.dial[data-face='spaceship'] .sub,
+.dial[data-face='hamster'] .sub {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -2283,4 +2281,356 @@ body.focus-mode .side-col {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+
+/* Robot Pet */
+.rb-bot {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+.rb-head,
+.rb-body {
+  fill: color-mix(in oklab, var(--text) 78%, var(--bg));
+}
+.rb-ear,
+.rb-arm,
+.rb-foot,
+.rb-neck {
+  fill: color-mix(in oklab, var(--text) 55%, var(--bg));
+}
+.rb-antenna {
+  stroke: color-mix(in oklab, var(--text) 55%, var(--bg));
+  stroke-width: 3;
+}
+.rb-bulb {
+  fill: var(--mode);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.robot[data-state='working'] .rb-bulb {
+  animation: rb-pulse 1.4s ease-in-out infinite;
+}
+@keyframes rb-pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+.rb-screen {
+  fill: #1d2230;
+}
+.rb-eye {
+  fill: #7ee0ff;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.robot[data-state='working'] .rb-eyes {
+  animation: rb-scan 3s ease-in-out infinite;
+}
+@keyframes rb-scan {
+  25% {
+    transform: translateX(-7px);
+  }
+  75% {
+    transform: translateX(7px);
+  }
+}
+.robot[data-state='idle'] .rb-eye {
+  animation: pl-blink 4s infinite;
+}
+.rb-happy,
+.rb-sleep,
+.rb-mouth {
+  fill: none;
+  stroke: #7ee0ff;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.rb-happy,
+.rb-sleep,
+.rb-bolt {
+  display: none;
+}
+.robot[data-state='happy'] .rb-eyes,
+.robot[data-state='charging'] .rb-eyes {
+  display: none;
+}
+.robot[data-state='happy'] .rb-happy,
+.robot[data-state='charging'] .rb-sleep,
+.robot[data-state='charging'] .rb-bolt {
+  display: inline;
+}
+.rb-bolt path {
+  fill: #f6c945;
+}
+.robot[data-state='charging'] .rb-bolt {
+  animation: rb-pulse 1.8s ease-in-out infinite;
+}
+.rb-battery {
+  fill: #1d2230;
+}
+.rb-battery-tip {
+  fill: #1d2230;
+}
+.rb-cell {
+  fill: var(--mode);
+  opacity: 0.18;
+}
+.rb-cell.on {
+  opacity: 1;
+}
+
+/* Tetris */
+.tt-bg {
+  fill: color-mix(in oklab, var(--bg) 70%, black);
+  stroke: color-mix(in oklab, var(--text) 25%, transparent);
+  stroke-width: 2;
+}
+.tt-piece rect {
+  stroke: rgb(255 255 255 / 0.35);
+  stroke-width: 1;
+}
+.tt-c0 rect {
+  fill: var(--mode);
+}
+.tt-c1 rect {
+  fill: var(--blob1);
+}
+.tt-c2 rect {
+  fill: var(--blob2);
+}
+.tt-c3 rect {
+  fill: var(--blob3);
+}
+
+/* Blob Pet */
+.bl-shadow {
+  fill: rgb(0 0 0 / 0.18);
+}
+.bl-jiggle {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+.blobpet[data-state='working'] .bl-jiggle {
+  animation: bl-jiggle 2.4s ease-in-out infinite;
+}
+.blobpet[data-state='idle'] .bl-jiggle {
+  animation: bl-jiggle 5s ease-in-out infinite;
+}
+@keyframes bl-jiggle {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  30% {
+    transform: scale(1.04, 0.96);
+  }
+  60% {
+    transform: scale(0.97, 1.03);
+  }
+}
+.blobpet[data-state='relaxed'] .bl-jiggle {
+  transform: scale(1.14, 0.8); /* melted into a comfy puddle */
+}
+.bl-body {
+  fill: color-mix(in oklab, var(--mode) 45%, var(--bg));
+}
+.bl-fill {
+  fill: var(--mode);
+  transition: y 0.6s var(--ease);
+}
+.bl-shine {
+  fill: white;
+  opacity: 0.35;
+}
+.bl-eyes ellipse {
+  fill: #1d2230;
+}
+.bl-glint {
+  fill: white;
+}
+.bl-closed,
+.bl-mouth {
+  fill: none;
+  stroke: #1d2230;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.bl-closed {
+  display: none;
+}
+.blobpet[data-state='relaxed'] .bl-eyes,
+.blobpet[data-state='relaxed'] .bl-glint {
+  display: none;
+}
+.blobpet[data-state='relaxed'] .bl-closed {
+  display: inline;
+}
+.bl-cheek {
+  fill: #ff9aa2;
+  opacity: 0.5;
+}
+
+/* Spaceship Orbit */
+.ss-star {
+  fill: var(--text);
+  opacity: 0.5;
+  animation: ss-twinkle 3s ease-in-out infinite;
+}
+@keyframes ss-twinkle {
+  50% {
+    opacity: 0.1;
+  }
+}
+.ss-orbit {
+  fill: none;
+  stroke: var(--text);
+  stroke-opacity: 0.15;
+  stroke-width: 1.5;
+  stroke-dasharray: 3 5;
+}
+.ss-trail {
+  fill: none;
+  stroke: var(--mode);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+.ss-globe {
+  fill: var(--mode);
+  filter: drop-shadow(0 0 18px color-mix(in oklab, var(--mode) 50%, transparent));
+}
+.ss-band {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.18);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+.ss-ring {
+  fill: none;
+  stroke: color-mix(in oklab, var(--text) 55%, transparent);
+  stroke-width: 3;
+}
+.ss-hull {
+  fill: var(--text);
+}
+.ss-window {
+  fill: var(--mode);
+}
+.ss-flame {
+  fill: #f6a445;
+  opacity: 0;
+}
+.spaceship.running .ss-flame {
+  opacity: 1;
+  animation: rb-pulse 0.3s ease-in-out infinite;
+}
+
+/* Hamster Wheel */
+.hw-stand {
+  fill: none;
+  stroke: color-mix(in oklab, var(--text) 45%, transparent);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+.hw-rim {
+  fill: color-mix(in oklab, var(--text) 5%, transparent);
+  stroke: color-mix(in oklab, var(--text) 30%, transparent);
+  stroke-width: 7;
+}
+.hw-progress {
+  fill: none;
+  stroke: var(--mode);
+  stroke-width: 7;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.4s linear;
+}
+.hw-spokes line {
+  stroke: color-mix(in oklab, var(--text) 22%, transparent);
+  stroke-width: 2;
+}
+.hw-spokes {
+  transform-box: view-box;
+  transform-origin: 110px 84px;
+}
+.hamster[data-state='running'] .hw-spokes {
+  animation: hw-spin 1.6s linear infinite;
+}
+@keyframes hw-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.hw-hub {
+  fill: color-mix(in oklab, var(--text) 45%, transparent);
+}
+.hw-body {
+  fill: #e0b584;
+}
+.hw-belly {
+  fill: #f6e3c8;
+}
+.hw-ear {
+  fill: #e8a6a0;
+}
+.hw-eye {
+  fill: #1d2230;
+}
+.hw-nose {
+  fill: #e87b86;
+}
+.hw-shut {
+  display: none;
+  fill: none;
+  stroke: #1d2230;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+.hw-leg {
+  fill: #c9955f;
+}
+.hamster[data-state='running'] .hw-leg-a {
+  animation: hw-step 0.35s ease-in-out infinite alternate;
+}
+.hamster[data-state='running'] .hw-leg-b {
+  animation: hw-step 0.35s ease-in-out infinite alternate-reverse;
+}
+@keyframes hw-step {
+  to {
+    transform: translateX(6px);
+  }
+}
+.hw-napper,
+.hamster[data-state='napping'] .hw-runner {
+  display: none;
+}
+.hamster[data-state='napping'] .hw-napper {
+  display: inline;
+}
+.hw-napper .hw-eye {
+  display: none;
+}
+.hw-napper .hw-shut {
+  display: inline;
+}
+.hw-z {
+  fill: var(--muted);
+  font: 600 12px var(--font);
+  animation: ss-twinkle 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .robot .rb-bulb,
+  .robot .rb-eyes,
+  .robot .rb-eye,
+  .robot .rb-bolt,
+  .bl-jiggle,
+  .ss-star,
+  .ss-flame,
+  .hw-spokes,
+  .hw-leg,
+  .hw-z {
+    animation: none !important;
+  }
 }

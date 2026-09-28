@@ -1,3 +1,4 @@
+import { FACE_IDS } from '../faces/types';
 import type { AppData, Settings } from './types';
 
 const PREFIX = 'pomo:v1:';
@@ -100,12 +101,15 @@ export function normalizeSettings(stored: unknown): Settings {
   const modeColors = { ...DEFAULT_SETTINGS.modeColors, ...(isObject(stored.modeColors) ? stored.modeColors : {}) };
   // v1 had a single focus "accent" color.
   if (typeof accent === 'string' && !isObject(stored.modeColors)) modeColors.focus = accent;
-  return {
+  const merged = {
     ...structuredClone(DEFAULT_SETTINGS),
     ...rest,
     durations: { ...DEFAULT_SETTINGS.durations, ...(isObject(stored.durations) ? stored.durations : {}) },
     modeColors,
   } as Settings;
+  // A face that no longer exists (e.g. the retired "enso") falls back to the ring.
+  if (!(FACE_IDS as readonly string[]).includes(merged.clockFace)) merged.clockFace = 'ring';
+  return merged;
 }
 
 export const loadSettings = (): Settings => normalizeSettings(read('settings'));

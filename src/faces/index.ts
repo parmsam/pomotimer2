@@ -1,10 +1,14 @@
-import { ensoFace } from './enso';
+import { blobFace } from './blob';
+import { hamsterFace } from './hamster';
 import { handheldFace } from './handheld';
 import { hourglassFace } from './hourglass';
 import { plantFace } from './plant';
 import { potionFace } from './potion';
 import { ringFace } from './ring';
+import { robotFace } from './robot';
+import { spaceshipFace } from './spaceship';
 import { tamagotchiFace } from './tamagotchi';
+import { tetrisFace } from './tetris';
 import { tomatoFace } from './tomato';
 import type { Face, FaceId } from './types';
 
@@ -14,9 +18,13 @@ export const FACES: Record<FaceId, () => Face> = {
   tamagotchi: tamagotchiFace,
   hourglass: hourglassFace,
   plant: plantFace,
-  enso: ensoFace,
+  robot: robotFace,
   handheld: handheldFace,
   potion: potionFace,
+  tetris: tetrisFace,
+  blob: blobFace,
+  spaceship: spaceshipFace,
+  hamster: hamsterFace,
 };
 
 export const FACE_LIST: { id: FaceId; label: string; preview: string }[] = (Object.keys(FACES) as FaceId[]).map((id) => {
