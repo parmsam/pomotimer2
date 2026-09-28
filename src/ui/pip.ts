@@ -1,6 +1,8 @@
+import { FACES, type Face, type FaceContext, type FaceEvent, type FaceId } from '../faces';
+
 /**
  * Pop-out mini timer: a small always-on-top window (Document Picture-in-Picture,
- * Chromium only) that mirrors the clock and drives the real timer.
+ * Chromium only) showing the same clock face as the page and driving the real timer.
  */
 interface DocumentPictureInPicture {
   requestWindow(opts?: { width?: number; height?: number }): Promise<Window>;
@@ -15,88 +17,120 @@ export interface PipState {
   /** Share of the session remaining, 1 → 0. */
   progress: number;
   running: boolean;
+  face: FaceId;
+  context: FaceContext;
 }
 
-const R = 44;
-const C = 2 * Math.PI * R;
-const THEME_VARS = ['--bg', '--bg2', '--text', '--on-accent', '--mode', '--muted', '--faint', '--surface', '--border'];
-
-const STYLES = `
-  * { box-sizing: border-box; }
+// Layout for the small window; everything else (faces, theme) comes from the page's own CSS.
+const PIP_STYLES = `
   html, body { margin: 0; height: 100%; }
-  body {
-    display: grid; place-items: center;
-    font-family: 'Outfit', system-ui, sans-serif; color: var(--text);
-    background: radial-gradient(120% 90% at 50% 0%, var(--bg2), var(--bg) 70%);
-    -webkit-font-smoothing: antialiased;
-  }
-  .mini { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-  .dial { position: relative; width: 132px; height: 132px; display: grid; place-items: center; }
-  svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .track { fill: none; stroke: var(--faint); stroke-width: 6; }
-  .prog { fill: none; stroke: var(--mode); stroke-width: 7; stroke-linecap: round; stroke-dasharray: ${C}; }
-  .time { font-size: 30px; font-weight: 300; font-variant-numeric: tabular-nums; }
-  .label { font-size: 12px; color: var(--muted); }
-  .row { display: flex; gap: 8px; }
-  button {
-    font: 600 13px 'Outfit', system-ui, sans-serif; letter-spacing: .05em; text-transform: uppercase;
-    border: 0; border-radius: 999px; padding: 8px 18px; cursor: pointer;
-  }
-  .toggle { color: var(--on-accent); background: var(--mode); min-width: 92px; }
-  .skip { color: var(--text); background: var(--surface); border: 1px solid var(--border); }
+  body { display: grid; place-items: center; overflow: hidden; }
+  .pip-mini { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px; }
+  .pip-mini .dial { width: min(86vw, calc(100vh - 78px)); }
+  .pip-mini .time { font-size: 19cqw; }
+  .pip-mini .sub { font-size: 5cqw; margin-top: 4px; }
+  /* No room below the device in the small window; its screen already shows the mode. */
+  .pip-mini .dial[data-face='handheld'] .sub { display: none; }
+  .pip-mini .row { display: flex; align-items: center; gap: 10px; }
+  .pip-mini .primary { min-width: 96px; padding: 9px 18px; font-size: 0.8rem; }
+  .pip-mini .icon-btn { width: 36px; height: 36px; }
+  .pip-mini .icon-btn svg { width: 17px; height: 17px; }
 `;
+
+const SKIP_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 4 10 8-10 8V4Z"/><path d="M19 5v14"/></svg>';
+
+/** Copies the page's stylesheets (inline and linked, incl. fonts) into another document. */
+function copyStyles(doc: Document) {
+  doc.head.querySelectorAll('[data-copied]').forEach((n) => n.remove());
+  for (const sheet of Array.from(document.styleSheets)) {
+    try {
+      const style = doc.createElement('style');
+      style.textContent = Array.from(sheet.cssRules, (r) => r.cssText).join('\n');
+      style.dataset.copied = '';
+      doc.head.append(style);
+    } catch {
+      // Cross-origin sheet (e.g. Google Fonts): link to it instead.
+      if (!sheet.href) continue;
+      const link = doc.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = sheet.href;
+      link.dataset.copied = '';
+      doc.head.append(link);
+    }
+  }
+  const pip = doc.createElement('style');
+  pip.textContent = PIP_STYLES;
+  pip.dataset.copied = '';
+  doc.head.append(pip);
+}
 
 export function createPip(deps: { getState(): PipState; toggle(): void; skip(): void; onClose(): void }) {
   let win: Window | null = null;
-  let els: { time: HTMLElement; label: HTMLElement; prog: SVGCircleElement; toggle: HTMLButtonElement } | null = null;
+  let face: Face | null = null;
+  let els: { dial: HTMLElement; layer: HTMLElement; time: HTMLElement; sub: HTMLElement; toggle: HTMLButtonElement } | null = null;
 
+  /** Theme tokens live as inline custom properties + data attributes on the page root. */
   function syncTheme() {
     if (!win) return;
-    const css = getComputedStyle(document.documentElement);
-    for (const v of THEME_VARS) win.document.documentElement.style.setProperty(v, css.getPropertyValue(v));
+    const src = document.documentElement;
+    const dst = win.document.documentElement;
+    dst.style.cssText = src.style.cssText;
+    for (const k of ['mode', 'scheme'] as const) {
+      if (src.dataset[k]) dst.dataset[k] = src.dataset[k];
+    }
+  }
+
+  function mountFace(id: FaceId, ctx: FaceContext) {
+    if (!els) return;
+    face?.unmount();
+    face = (FACES[id] ?? FACES.ring)();
+    els.dial.dataset.face = face.id;
+    face.mount(els.layer, ctx);
+    if (win) copyStyles(win.document); // a face may have loaded a font since the window opened
   }
 
   function update() {
-    if (!els) return;
+    if (!els || !win) return;
     const s = deps.getState();
+    if (face?.id !== s.face) mountFace(s.face, s.context);
     if (els.time.textContent !== s.time) els.time.textContent = s.time;
-    els.label.textContent = s.label;
-    els.prog.style.strokeDashoffset = String(C * (1 - Math.min(1, Math.max(0, s.progress))));
+    if (els.sub.textContent !== s.label) els.sub.textContent = s.label;
     els.toggle.textContent = s.running ? 'Pause' : 'Start';
+    const mode = document.documentElement.dataset.mode;
+    if (mode && win.document.documentElement.dataset.mode !== mode) syncTheme();
+    face?.setProgress(Math.min(1, Math.max(0, s.progress)), s.context);
   }
 
   async function open() {
     const pip = api();
     if (!pip || win) return;
-    win = await pip.requestWindow({ width: 240, height: 250 });
+    win = await pip.requestWindow({ width: 280, height: 330 });
     const doc = win.document;
     doc.title = 'pomo';
-    const style = doc.createElement('style');
-    style.textContent = STYLES;
-    const font = doc.createElement('link');
-    font.rel = 'stylesheet';
-    font.href = 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap';
-    doc.head.append(font, style);
+    copyStyles(doc);
     doc.body.innerHTML = `
-      <main class="mini">
+      <main class="pip-mini">
         <div class="dial">
-          <svg viewBox="0 0 100 100" aria-hidden="true">
-            <circle class="track" cx="50" cy="50" r="${R}"/>
-            <circle class="prog" cx="50" cy="50" r="${R}" transform="rotate(-90 50 50)"/>
-          </svg>
-          <div class="time" role="timer"></div>
+          <div class="face-layer" aria-hidden="true"></div>
+          <div class="dial-center">
+            <div class="time" role="timer"></div>
+            <div class="sub"></div>
+          </div>
         </div>
-        <div class="label"></div>
-        <div class="row"><button class="toggle" type="button"></button><button class="skip" type="button" aria-label="Skip">Skip</button></div>
+        <div class="row">
+          <button class="primary pip-toggle" type="button"></button>
+          <button class="icon-btn pip-skip" type="button" aria-label="Skip">${SKIP_ICON}</button>
+        </div>
       </main>`;
     els = {
+      dial: doc.querySelector('.dial')!,
+      layer: doc.querySelector('.face-layer')!,
       time: doc.querySelector('.time')!,
-      label: doc.querySelector('.label')!,
-      prog: doc.querySelector('.prog')!,
-      toggle: doc.querySelector('.toggle')!,
+      sub: doc.querySelector('.sub')!,
+      toggle: doc.querySelector('.pip-toggle')!,
     };
     els.toggle.addEventListener('click', deps.toggle);
-    doc.querySelector('.skip')!.addEventListener('click', deps.skip);
+    doc.querySelector('.pip-skip')!.addEventListener('click', deps.skip);
     doc.addEventListener('keydown', (e) => {
       if (e.key === ' ') {
         e.preventDefault();
@@ -104,6 +138,8 @@ export function createPip(deps: { getState(): PipState; toggle(): void; skip(): 
       }
     });
     win.addEventListener('pagehide', () => {
+      face?.unmount();
+      face = null;
       win = null;
       els = null;
       deps.onClose();
@@ -119,5 +155,7 @@ export function createPip(deps: { getState(): PipState; toggle(): void; skip(): 
     isOpen: () => win !== null,
     update,
     syncTheme,
+    /** Mirror face moments (wind-up, celebration…) in the pop-out. */
+    event: (e: FaceEvent) => face?.event?.(e, deps.getState().context),
   };
 }

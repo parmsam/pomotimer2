@@ -215,3 +215,4 @@ Not part of any phase. Pick these up only if people ask for them.
 - 2026-09-27 — Phase 4 is quotes only; the greeting and the customization ideas live on a separate Backburner list outside the phases.
 - 2026-09-27 — Default quotes sourced from Wikiquote "Sourced" sections (and well-documented originals), cross-checked by hand. Extraction was unreliable (e.g. a nonsense citation), so anything that didn't check out was dropped. A test guards against known misattributions.
 - 2026-09-27 — Five more faces added on request. Faces expose data-level (0–100) for tests; continuous motion is CSS (off under reduced motion); art-top faces put the digits below the artwork.
+- 2026-09-27 — The pop-out mini timer mounts its own instance of the selected face, with the page's stylesheets and theme tokens copied into the PiP document, so it always matches the page.

@@ -27,6 +27,7 @@ import { createBackground } from './ui/background';
 import { createQuoteView } from './ui/quoteView';
 import { createProgressFavicon } from './ui/favicon';
 import { createPip, pipSupported } from './ui/pip';
+import type { FaceContext, FaceEvent } from './faces';
 import { createWakeLock } from './ui/wakeLock';
 import { attachGestures } from './ui/gestures';
 import { createStatsView } from './ui/stats';
@@ -56,19 +57,23 @@ const cycleEl = $('#cycle');
 const liveEl = $('#live');
 const pill = $('.mode-pill');
 const modeTabs = [...document.querySelectorAll<HTMLButtonElement>('.modes button')];
-const view = createTimerView($('.dial'), {
-  rollingDigits: () => settings.get().rollingDigits,
-  context: () => {
-    const t = data.get().timer;
-    return {
-      mode: t.mode,
-      status: t.status,
-      remainingMs: timer.remaining(),
-      durationMs: timer.duration(),
-      totalPomodoros: data.get().history.filter((h) => h.mode === 'focus' && !h.abandoned).length,
-    };
-  },
-});
+/** What a clock face needs to draw itself; shared by the page and the pop-out. */
+const faceContext = (): FaceContext => {
+  const t = data.get().timer;
+  return {
+    mode: t.mode,
+    status: t.status,
+    remainingMs: timer.remaining(),
+    durationMs: timer.duration(),
+    totalPomodoros: data.get().history.filter((h) => h.mode === 'focus' && !h.abandoned).length,
+  };
+};
+const view = createTimerView($('.dial'), { rollingDigits: () => settings.get().rollingDigits, context: faceContext });
+/** Face moments go to the page and, if open, the pop-out. */
+const faceEvent = (e: FaceEvent) => {
+  view.event(e);
+  pip.event(e);
+};
 
 const haptic = (kind: Buzz) => settings.get().haptics && buzz(kind);
 const favicon = createProgressFavicon();
@@ -82,6 +87,8 @@ const pip = createPip({
       label: t.mode === 'focus' && task ? task.title : MODE_LABELS[t.mode],
       progress: timer.remaining() / timer.duration(),
       running: t.status === 'running',
+      face: settings.get().clockFace,
+      context: faceContext(),
     };
   },
   toggle: () => toggleBtn.click(),
@@ -145,7 +152,7 @@ const timer = createTimer(data, settings, ({ finished, next, missed, early }) =>
   }
   if (finished === 'focus') queueMicrotask(checkGoal);
   queueMicrotask(() => {
-    view.event('complete');
+    faceEvent('complete');
     if (!missed) background.pulse();
   });
   liveEl.textContent = `${MODE_LABELS[finished]} complete. Next: ${MODE_LABELS[next]}.`;
@@ -244,7 +251,7 @@ data.subscribe((d, prev) => {
   const p = prev.timer;
   if (t.mode !== p.mode) {
     renderMode();
-    view.event('mode');
+    faceEvent('mode');
   }
   if (t.status !== p.status || t.mode !== p.mode) {
     lastSecond = -1; // title and tab icon must refresh even if the displayed second didn't change
@@ -252,9 +259,9 @@ data.subscribe((d, prev) => {
     wakeLock.set(settings.get().keepAwake && t.status === 'running');
     pip.update();
   }
-  if (t.status === 'running' && p.status !== 'running') view.event('start');
-  if (t.status === 'paused' && p.status === 'running') view.event('pause');
-  if (d.history.length > prev.history.length && d.history.at(-1)?.abandoned) view.event('abandon');
+  if (t.status === 'running' && p.status !== 'running') faceEvent('start');
+  if (t.status === 'paused' && p.status === 'running') faceEvent('pause');
+  if (d.history.length > prev.history.length && d.history.at(-1)?.abandoned) faceEvent('abandon');
   if (t.status !== p.status || t.mode !== p.mode || t.cycleCount !== p.cycleCount || d.activeTaskId !== prev.activeTaskId || d.tasks !== prev.tasks) {
     renderStatus();
     renderCycle();
