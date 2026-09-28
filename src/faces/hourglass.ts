@@ -18,13 +18,20 @@ export function hourglassFace(): Face {
     const left = clamp01(p);
     // Sand volume in a cone grows with height², so height follows sqrt(volume).
     const topH = 58 * Math.sqrt(left);
-    root.querySelector('.hg-top-sand')!.setAttribute('y', String(92 - topH));
-    root.querySelector('.hg-top-sand')!.setAttribute('height', String(topH));
+    const surface = 92 - topH;
+    // Once sand is draining, its surface sinks into a funnel over the neck.
+    const dip = left < 1 ? Math.min(7, topH) : 0;
+    root
+      .querySelector('.hg-top-sand')!
+      .setAttribute('d', `M60 ${surface}H90Q110 ${surface + dip * 2} 130 ${surface}H160V92H60Z`);
     const h = 46 * Math.sqrt(1 - left);
     root
       .querySelector('.hg-bottom-sand')!
       .setAttribute('d', `M70 158H150V${158 - h * 0.35}Q110 ${158 - h * 1.25} 70 ${158 - h * 0.35}Z`);
-    root.querySelector('.hg-stream')!.setAttribute('y2', String(158 - h * 0.9));
+    // The stream lands on the mound's peak (the curve's midpoint), where grains splash.
+    const peak = 158 - h * 0.8;
+    root.querySelectorAll('.hg-stream, .hg-grains').forEach((l) => l.setAttribute('y2', String(peak)));
+    root.querySelector('.hg-splash')!.setAttribute('transform', `translate(0 ${peak})`);
     setLevel(root, 1 - left);
   }
 
@@ -42,9 +49,11 @@ export function hourglassFace(): Face {
           </defs>
           <g class="hg-flip">
             <path class="hg-glass" d="${GLASS}"/>
-            <rect class="hg-top-sand" x="60" width="100" clip-path="url(#hg-top)"/>
+            <path class="hg-top-sand" clip-path="url(#hg-top)"/>
             <path class="hg-bottom-sand" clip-path="url(#hg-bottom)"/>
-            <line class="hg-stream" x1="110" y1="92" x2="110" y2="150"/>
+            <line class="hg-stream" x1="110" y1="90" x2="110" y2="150"/>
+            <line class="hg-grains" x1="110" y1="90" x2="110" y2="150"/>
+            <g class="hg-splash"><circle cx="110" cy="-1" r="1.4"/><circle cx="110" cy="-1" r="1.2"/><circle cx="110" cy="-1" r="1"/></g>
             <path class="hg-shine" d="M80 32C80 52 94 66 100 74"/>
             <rect class="hg-plate" x="56" y="12" width="108" height="10" rx="4"/>
             <rect class="hg-plate" x="56" y="158" width="108" height="10" rx="4"/>

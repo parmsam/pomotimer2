@@ -217,3 +217,4 @@ Not part of any phase. Pick these up only if people ask for them.
 - 2026-09-27 — Five more faces added on request. Faces expose data-level (0–100) for tests; continuous motion is CSS (off under reduced motion); art-top faces put the digits below the artwork.
 - 2026-09-27 — The pop-out mini timer mounts its own instance of the selected face, with the page's stylesheets and theme tokens copied into the PiP document, so it always matches the page.
 - 2026-09-27 — Zen Enso retired in favor of Robot Pet; saved settings with an unknown face fall back to the ring. In focus mode, the quote (if on) moves above the clock.
+- 2026-09-27 — Robot Pet battery now drains during focus and recharges on breaks (it used to fill on focus and drain while "charging"). Blob Pet gets distinct short-break (stretch/yawn) and long-break (nap) moods via data-mode.

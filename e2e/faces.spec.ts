@@ -148,6 +148,23 @@ test.describe('pets on a break', () => {
     });
   }
 
+  test('robot spends its battery on focus and recharges on a break', async ({ page }) => {
+    await open(page, { data: focusInProgress(5), settings: { clockFace: 'robot' } });
+    await expect(page.locator('svg.robot')).toHaveAttribute('data-level', '80');
+    const seed = onBreak('short');
+    seed.timer = { ...seed.timer, status: 'paused', remainingMs: 1 * MIN };
+    await open(page, { data: seed, settings: { clockFace: 'robot' } });
+    await expect(page.locator('svg.robot')).toHaveAttribute('data-level', '80');
+  });
+
+  test('blob naps (with Zs) only on a long break', async ({ page }) => {
+    await open(page, { data: onBreak('long'), settings: { clockFace: 'blob' } });
+    await expect(page.locator('.bl-zs')).toBeVisible();
+    await open(page, { data: onBreak('short'), settings: { clockFace: 'blob' } });
+    await expect(page.locator('svg.blobpet')).toHaveAttribute('data-mode', 'short');
+    await expect(page.locator('.bl-zs')).toBeHidden();
+  });
+
   test('robot cheers when a session completes', async ({ page }) => {
     const seed = focusInProgress(0);
     seed.timer.endsAt = Date.now() + 1500;

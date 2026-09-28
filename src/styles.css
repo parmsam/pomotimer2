@@ -1945,19 +1945,72 @@ body.focus-mode .app-foot {
 .hg-bottom-sand {
   fill: var(--mode);
 }
-.hg-stream {
+.hg-stream,
+.hg-grains {
   stroke: var(--mode);
-  stroke-width: 2.5;
-  stroke-dasharray: 4 5;
+  stroke-linecap: round;
   opacity: 0;
+  transition: opacity 0.4s;
+}
+.hg-stream {
+  stroke-width: 1.6;
+}
+/* Loose grains tumbling down the stream. */
+.hg-grains {
+  stroke-width: 2.6;
+  stroke-dasharray: 0.5 4.5;
 }
 .hourglass.running .hg-stream {
+  opacity: 0.75;
+}
+.hourglass.running .hg-grains {
   opacity: 1;
-  animation: hg-fall 0.6s linear infinite;
+  animation: hg-fall 0.45s linear infinite;
 }
 @keyframes hg-fall {
   to {
-    stroke-dashoffset: -18;
+    stroke-dashoffset: -10;
+  }
+}
+.hg-splash circle {
+  fill: var(--mode);
+  opacity: 0;
+}
+.hourglass.running .hg-splash circle {
+  animation: hg-splash-l 0.7s ease-out infinite;
+}
+.hourglass.running .hg-splash circle:nth-child(2) {
+  animation-name: hg-splash-r;
+  animation-delay: -0.25s;
+}
+.hourglass.running .hg-splash circle:nth-child(3) {
+  animation-delay: -0.5s;
+  animation-duration: 0.9s;
+}
+@keyframes hg-splash-l {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  45% {
+    transform: translate(-4px, -4px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-7px, 1px);
+  }
+}
+@keyframes hg-splash-r {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  45% {
+    transform: translate(4px, -5px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(7px, 1px);
   }
 }
 .hg-shine {
@@ -2178,8 +2231,11 @@ body.focus-mode .app-foot {
   .pl-eye,
   .po-wave,
   .potion.running .po-bubble,
-  .hourglass.running .hg-stream {
+  .hourglass.running .hg-grains {
     animation: none;
+  }
+  .hourglass.running .hg-splash circle {
+    display: none;
   }
 }
 
@@ -2304,6 +2360,90 @@ body.focus-mode .stage {
   stroke: color-mix(in oklab, var(--text) 55%, var(--bg));
   stroke-width: 3;
 }
+.rb-antenna-g {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+/* Gentle breathing; slower and deeper while it naps on a charge. */
+.rb-bob {
+  animation: rb-bob 2.6s ease-in-out infinite;
+}
+.robot[data-state='charging'] .rb-bob {
+  animation-duration: 4.5s;
+}
+@keyframes rb-bob {
+  50% {
+    transform: translateY(-2px);
+  }
+}
+.rb-arm {
+  transform-box: fill-box;
+  transform-origin: 50% 12%;
+  transition: transform 0.4s ease;
+}
+/* Tap-tap-tapping away at the work. */
+.robot[data-state='working'] .rb-arm {
+  animation: rb-tap 0.9s ease-in-out infinite;
+}
+.robot[data-state='working'] .rb-arm-r {
+  animation-delay: -0.45s;
+}
+@keyframes rb-tap {
+  50% {
+    transform: rotate(-7deg);
+  }
+}
+/* Both arms up, waving. */
+.robot[data-state='happy'] .rb-arm-l {
+  animation: rb-wave-l 0.5s ease-in-out infinite alternate;
+}
+.robot[data-state='happy'] .rb-arm-r {
+  animation: rb-wave-r 0.5s ease-in-out infinite alternate;
+}
+@keyframes rb-wave-l {
+  from {
+    transform: rotate(145deg);
+  }
+  to {
+    transform: rotate(170deg);
+  }
+}
+@keyframes rb-wave-r {
+  from {
+    transform: rotate(-145deg);
+  }
+  to {
+    transform: rotate(-170deg);
+  }
+}
+.rb-zs {
+  display: none;
+}
+.robot[data-state='charging'] .rb-zs {
+  display: inline;
+}
+.rb-z {
+  fill: var(--muted);
+  font: 700 14px var(--font);
+  opacity: 0;
+  animation: rb-z 3s ease-out infinite;
+}
+.rb-z + .rb-z {
+  animation-delay: 1.5s;
+}
+@keyframes rb-z {
+  0% {
+    opacity: 0;
+    transform: translate(0, 4px);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(6px, -12px);
+  }
+}
 .rb-bulb {
   fill: var(--mode);
   transform-box: fill-box;
@@ -2336,8 +2476,15 @@ body.focus-mode .stage {
     transform: translateX(7px);
   }
 }
-.robot[data-state='idle'] .rb-eye {
+.robot[data-state='idle'] .rb-eye,
+.robot[data-state='working'] .rb-eye {
   animation: pl-blink 4s infinite;
+}
+.robot[data-state='happy'] .rb-mouth {
+  fill: #7ee0ff;
+}
+.robot[data-state='happy'] .rb-bulb {
+  animation: rb-pulse 0.4s ease-in-out infinite;
 }
 .rb-happy,
 .rb-sleep,
@@ -2380,6 +2527,14 @@ body.focus-mode .stage {
 }
 .rb-cell.on {
   opacity: 1;
+}
+.rb-cell.blink {
+  animation: rb-cell 1.2s ease-in-out infinite;
+}
+@keyframes rb-cell {
+  50% {
+    opacity: 0.35;
+  }
 }
 
 /* Tetris */
@@ -2431,8 +2586,98 @@ body.focus-mode .stage {
     transform: scale(0.97, 1.03);
   }
 }
-.blobpet[data-state='relaxed'] .bl-jiggle {
-  transform: scale(1.14, 0.8); /* melted into a comfy puddle */
+/* Short break: a comfy puddle that breathes, then every so often stretches up with a yawn. */
+/* Static puddle shapes, also used when motion is reduced. */
+.blobpet[data-mode='short'] .bl-jiggle {
+  transform: scale(1.14, 0.8);
+}
+.blobpet[data-mode='long'] .bl-jiggle {
+  transform: scale(1.2, 0.74);
+}
+.blobpet[data-mode='short'] .bl-jiggle {
+  animation: bl-stretch 9s ease-in-out infinite;
+}
+@keyframes bl-stretch {
+  0%,
+  100% {
+    transform: scale(1.14, 0.8);
+  }
+  15%,
+  45% {
+    transform: scale(1.1, 0.84);
+  }
+  30%,
+  58% {
+    transform: scale(1.14, 0.8);
+  }
+  70%,
+  76% {
+    transform: scale(0.92, 1.08);
+  }
+  84% {
+    transform: scale(1.18, 0.77);
+  }
+}
+.blobpet[data-mode='short'] .bl-yawn {
+  animation: bl-yawn 9s ease-in-out infinite;
+}
+.blobpet[data-mode='short'] .bl-mouth {
+  animation: bl-no-yawn 9s ease-in-out infinite;
+}
+@keyframes bl-yawn {
+  0%,
+  64%,
+  82%,
+  100% {
+    opacity: 0;
+  }
+  70%,
+  76% {
+    opacity: 1;
+  }
+}
+@keyframes bl-no-yawn {
+  0%,
+  64%,
+  82%,
+  100% {
+    opacity: 1;
+  }
+  70%,
+  76% {
+    opacity: 0;
+  }
+}
+/* Long break: melted flat and fast asleep, breathing slowly. */
+.blobpet[data-mode='long'] .bl-jiggle {
+  animation: bl-snooze 5s ease-in-out infinite;
+}
+@keyframes bl-snooze {
+  0%,
+  100% {
+    transform: scale(1.2, 0.74);
+  }
+  50% {
+    transform: scale(1.16, 0.78);
+  }
+}
+.bl-zs {
+  display: none;
+}
+.blobpet[data-mode='long'] .bl-zs {
+  display: inline;
+}
+.bl-z {
+  fill: var(--muted);
+  font: 700 14px var(--font);
+  opacity: 0;
+  animation: rb-z 3.6s ease-out infinite;
+}
+.bl-z:nth-child(2) {
+  animation-delay: 1.2s;
+}
+.bl-z:nth-child(3) {
+  animation-delay: 2.4s;
 }
 .bl-body {
   fill: color-mix(in oklab, var(--mode) 45%, var(--bg));
@@ -2445,8 +2690,47 @@ body.focus-mode .stage {
   fill: white;
   opacity: 0.35;
 }
+.bl-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pl-blink 4.5s infinite;
+}
 .bl-eyes ellipse {
   fill: #1d2230;
+}
+.bl-yawn {
+  fill: #1d2230;
+  opacity: 0;
+}
+/* Fizzing with effort while you work. */
+.bl-bubbles circle {
+  fill: white;
+  opacity: 0;
+}
+.blobpet[data-state='working'] .bl-bubbles circle {
+  animation: bl-bubble 2.8s ease-in infinite;
+}
+.blobpet[data-state='working'] .bl-bubbles circle:nth-child(2) {
+  animation-delay: 0.9s;
+}
+.blobpet[data-state='working'] .bl-bubbles circle:nth-child(3) {
+  animation-delay: 1.8s;
+}
+@keyframes bl-bubble {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  20% {
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate(3px, -22px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-2px, -44px);
+  }
 }
 .bl-glint {
   fill: white;
@@ -2627,7 +2911,16 @@ body.focus-mode .stage {
   .robot .rb-eyes,
   .robot .rb-eye,
   .robot .rb-bolt,
+  .robot .rb-bob,
+  .robot .rb-arm,
+  .robot .rb-z,
+  .robot .rb-cell,
   .bl-jiggle,
+  .bl-eyes,
+  .bl-bubbles circle,
+  .bl-yawn,
+  .bl-mouth,
+  .bl-z,
   .ss-star,
   .ss-flame,
   .hw-spokes,

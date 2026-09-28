@@ -6,7 +6,10 @@ import type { Face, FaceContext } from './types';
 const BLOB = 'M110 44C146 44 170 76 172 112C174 146 150 160 110 160C70 160 46 146 48 112C50 76 74 44 110 44Z';
 
 // Class is "blobpet": ".blob" is taken by the background color blobs.
-/** A squishy slime that jiggles while you work, fills up as you go, and melts on breaks. */
+/**
+ * A squishy slime that jiggles and fizzes while you work and fills up as you go. On a short
+ * break it melts into a puddle and has the odd stretch and yawn; on a long one it naps.
+ */
 export function blobFace(): Face {
   let root: SVGSVGElement | null = null;
 
@@ -17,6 +20,7 @@ export function blobFace(): Face {
     const f = fill(p, ctx);
     root.querySelector('.bl-fill')!.setAttribute('y', String(160 - 116 * f));
     root.setAttribute('data-state', ctx.mode !== 'focus' ? 'relaxed' : ctx.status === 'running' ? 'working' : 'idle');
+    root.setAttribute('data-mode', ctx.mode);
     setLevel(root, f);
   }
 
@@ -33,15 +37,20 @@ export function blobFace(): Face {
           <g class="bl-jiggle">
             <path class="bl-body" d="${BLOB}"/>
             <rect class="bl-fill" x="40" width="140" height="130" clip-path="url(#bl-clip)"/>
+            <g class="bl-bubbles" clip-path="url(#bl-clip)"><circle cx="84" cy="158" r="3"/><circle cx="118" cy="158" r="2.2"/><circle cx="142" cy="158" r="2.6"/></g>
             <ellipse class="bl-shine" cx="84" cy="70" rx="12" ry="7" transform="rotate(-30 84 70)"/>
             <g class="bl-face">
-              <g class="bl-eyes"><ellipse cx="94" cy="104" rx="6" ry="8"/><ellipse cx="126" cy="104" rx="6" ry="8"/></g>
-              <circle class="bl-glint" cx="96" cy="101" r="2"/><circle class="bl-glint" cx="128" cy="101" r="2"/>
+              <g class="bl-eyes">
+                <ellipse cx="94" cy="104" rx="6" ry="8"/><ellipse cx="126" cy="104" rx="6" ry="8"/>
+                <circle class="bl-glint" cx="96" cy="101" r="2"/><circle class="bl-glint" cx="128" cy="101" r="2"/>
+              </g>
               <path class="bl-closed" d="M88 106q6 4 12 0M120 106q6 4 12 0"/>
               <path class="bl-mouth" d="M103 122q7 6 14 0"/>
+              <ellipse class="bl-yawn" cx="110" cy="123" rx="5" ry="6"/>
               <ellipse class="bl-cheek" cx="80" cy="118" rx="7" ry="4"/><ellipse class="bl-cheek" cx="140" cy="118" rx="7" ry="4"/>
             </g>
           </g>
+          <g class="bl-zs"><text class="bl-z" x="166" y="84">z</text><text class="bl-z" x="176" y="72">z</text><text class="bl-z" x="186" y="60">z</text></g>
         </svg>`,
       );
       root = layer.querySelector('svg.blobpet');
