@@ -1678,6 +1678,28 @@ body.focus-mode .app-foot {
 .tomato-shadow {
   fill: rgb(0 0 0 / 0.18);
 }
+.tomato-tremble {
+  transform-box: fill-box;
+  transform-origin: 50% 60%;
+}
+.tomato[data-urgent] .tomato-tremble {
+  animation: tomato-tremble 0.18s linear infinite;
+}
+@keyframes tomato-tremble {
+  25% {
+    transform: rotate(-0.8deg);
+  }
+  75% {
+    transform: rotate(0.8deg);
+  }
+}
+.tomato-ring path {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0;
+}
 .tomato-body {
   filter: drop-shadow(0 10px 24px color-mix(in oklab, var(--mode) 40%, transparent));
 }
@@ -2045,9 +2067,67 @@ body.focus-mode .app-foot {
     transform: rotate(2deg);
   }
 }
+.pl-rustle {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
 .pl-pot {
   transform-box: fill-box;
   transform-origin: center bottom;
+}
+.pl-can,
+.pl-drops circle {
+  opacity: 0;
+}
+.pl-can {
+  transform-box: fill-box;
+  transform-origin: 30% 70%;
+}
+.pl-can-body {
+  fill: color-mix(in oklab, var(--text) 45%, var(--bg));
+}
+.pl-can-spout,
+.pl-can-handle {
+  fill: none;
+  stroke: color-mix(in oklab, var(--text) 45%, var(--bg));
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.pl-drops circle {
+  fill: #6fb7e6;
+}
+.pl-falling {
+  fill: color-mix(in oklab, var(--mode) 75%, white);
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.plant:not([data-mode='focus']) .pl-falling {
+  animation: pl-fall 9s ease-in infinite 2s;
+}
+@keyframes pl-fall {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  4% {
+    opacity: 1;
+  }
+  15% {
+    transform: translate(12px, 28px) rotate(40deg);
+  }
+  28% {
+    transform: translate(-4px, 58px) rotate(-20deg);
+  }
+  40% {
+    opacity: 0.9;
+    transform: translate(10px, 86px) rotate(60deg);
+  }
+  45%,
+  100% {
+    opacity: 0;
+    transform: translate(10px, 88px) rotate(60deg);
+  }
 }
 .pl-pot-body {
   fill: var(--mode);
@@ -2096,6 +2176,54 @@ body.focus-mode .app-foot {
 .hh-led {
   fill: #e0455c;
   opacity: 0.35;
+  transition: opacity 0.3s;
+}
+.handheld.running .hh-led {
+  opacity: 1;
+}
+.hh-scanlines {
+  fill-opacity: 0.07;
+  pointer-events: none;
+}
+#hh-scan rect {
+  fill: #0f380f;
+}
+/* Eats through the time that's left: chomps while running, mouth shut when paused. */
+.hh-chomper path {
+  fill: #0f380f;
+}
+.hh-chomp-open {
+  visibility: hidden;
+}
+.handheld.running .hh-chomp-open {
+  animation: hh-chomp-open 0.5s steps(1, end) infinite;
+}
+.handheld.running .hh-chomp-shut {
+  animation: hh-chomp-shut 0.5s steps(1, end) infinite;
+}
+@keyframes hh-chomp-open {
+  0% {
+    visibility: visible;
+  }
+  50%,
+  100% {
+    visibility: hidden;
+  }
+}
+@keyframes hh-chomp-shut {
+  0% {
+    visibility: hidden;
+  }
+  50%,
+  100% {
+    visibility: visible;
+  }
+}
+.hh-a,
+.hh-b,
+.hh-dpad {
+  transform-box: fill-box;
+  transform-origin: center;
 }
 .handheld .hh-screen {
   fill: #9bbc0f;
@@ -2207,6 +2335,45 @@ body.focus-mode .app-foot {
 .po-cork {
   fill: #b08a5a;
 }
+.po-cork-pop {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.po-glow-in {
+  stop-color: var(--mode);
+  stop-opacity: 0.45;
+}
+.po-glow-out {
+  stop-color: var(--mode);
+  stop-opacity: 0;
+}
+.po-aura {
+  transition: opacity 0.6s var(--ease);
+}
+.po-sparkles {
+  transition: opacity 0.6s var(--ease);
+}
+.po-sparkle {
+  fill: color-mix(in oklab, var(--mode) 50%, white);
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.potion.running .po-sparkle {
+  animation: po-sparkle 3.5s ease-in-out infinite;
+}
+@keyframes po-sparkle {
+  0%,
+  60%,
+  100% {
+    opacity: 0;
+    transform: scale(0.3) rotate(0deg);
+  }
+  75% {
+    opacity: 0.9;
+    transform: scale(1) rotate(45deg);
+  }
+}
 .po-steam circle {
   fill: color-mix(in oklab, var(--text) 40%, transparent);
 }
@@ -2219,9 +2386,13 @@ body.focus-mode .app-foot {
   .pl-eye,
   .po-wave,
   .potion.running .po-bubble,
+  .potion.running .po-sparkle,
+  .pl-falling,
+  .tomato[data-urgent] .tomato-tremble,
   .hourglass.running .hg-grains {
     animation: none;
   }
+  .pl-falling,
   .hourglass.running .hg-splash circle {
     display: none;
   }
@@ -2547,6 +2718,61 @@ body.focus-mode .stage {
 .tt-c3 rect {
   fill: var(--blob3);
 }
+/* Where the falling piece will land. */
+.tt-ghost rect {
+  fill: none;
+  stroke: color-mix(in oklab, var(--text) 35%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+}
+/* The falling piece shuffles left and right, like someone lining it up. */
+.tt-falling .tt-shift {
+  animation: tt-shuffle 3.2s steps(1, end) infinite;
+}
+@keyframes tt-shuffle {
+  35%,
+  60% {
+    transform: translateX(var(--dx));
+  }
+  0%,
+  30%,
+  65%,
+  100% {
+    transform: none;
+  }
+}
+.tt-box {
+  fill: color-mix(in oklab, var(--bg) 70%, black);
+  stroke: color-mix(in oklab, var(--text) 25%, transparent);
+  stroke-width: 1.5;
+}
+.tt-label,
+.tt-lines {
+  font-family: 'VT323', ui-monospace, monospace;
+  fill: color-mix(in oklab, var(--text) 70%, transparent);
+  text-anchor: middle;
+}
+.tt-label {
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+.tt-lines {
+  font-size: 20px;
+  fill: var(--text);
+}
+.tt-banner {
+  font: 400 26px 'VT323', ui-monospace, monospace;
+  fill: var(--text);
+  stroke: color-mix(in oklab, var(--bg) 70%, black);
+  stroke-width: 4;
+  paint-order: stroke;
+  letter-spacing: 2px;
+  text-anchor: middle;
+  dominant-baseline: central;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
 
 /* Blob Pet */
 .bl-shadow {
@@ -2797,7 +3023,80 @@ body.focus-mode .stage {
 }
 .spaceship.running .ss-flame {
   opacity: 1;
-  animation: rb-pulse 0.3s ease-in-out infinite;
+  animation: ss-flicker 0.24s ease-in-out infinite alternate;
+}
+/* The flame flickers out from the back of the ship. */
+.ss-flame,
+.ss-boost {
+  transform-box: fill-box;
+  transform-origin: right center;
+}
+@keyframes ss-flicker {
+  from {
+    transform: scaleX(0.7) scaleY(0.85);
+    opacity: 0.75;
+  }
+  to {
+    transform: scaleX(1.15);
+    opacity: 1;
+  }
+}
+/* A gentle bob in flight (in the ship's own frame). */
+.spaceship.running .ss-bob {
+  animation: ss-bob 1.8s ease-in-out infinite;
+}
+@keyframes ss-bob {
+  50% {
+    transform: translateY(1.5px);
+  }
+}
+/* The planet turns: surface spots drift across, with a fixed shadow on one side. */
+.ss-spots ellipse {
+  fill: rgb(0 0 0 / 0.14);
+}
+.ss-spots {
+  animation: ss-spin 26s linear infinite;
+}
+@keyframes ss-spin {
+  to {
+    transform: translateX(-56px); /* one globe width (2 × PR): the second copy takes over */
+  }
+}
+.ss-shade {
+  fill: rgb(0 0 0 / 0.2);
+}
+/* Now and then a comet streaks across the sky. */
+.ss-comet {
+  opacity: 0;
+  animation: ss-comet 13s ease-in infinite;
+  animation-delay: 4s;
+}
+@keyframes ss-comet {
+  0% {
+    opacity: 0;
+    transform: translate(10px, 14px);
+  }
+  2% {
+    opacity: 0.9;
+  }
+  9% {
+    opacity: 0;
+    transform: translate(130px, 52px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(130px, 52px);
+  }
+}
+.ss-comet-tail {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-opacity: 0.45;
+}
+.ss-comet-head {
+  fill: var(--text);
 }
 
 /* Hamster Wheel */
@@ -3027,6 +3326,11 @@ body.focus-mode .stage {
   .bl-z,
   .ss-star,
   .ss-flame,
+  .ss-bob,
+  .ss-spots,
+  .ss-comet,
+  .tt-falling .tt-shift,
+  .hh-chomper path,
   .hw-spokes,
   .hw-leg,
   .hw-gait,

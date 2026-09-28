@@ -122,6 +122,7 @@ Whole-timer "faces" that go beyond the Phase 2 timer styles (ring / minimal / ba
 - [x] **Tomato**: Cirillo's original kitchen timer. A tomato dial that twists back as time runs down, with a wind-up animation on start and an optional mechanical tick. Leaves wilt slightly on breaks, and it wobbles and "rings" at the end
 - [x] **Tamagotchi**: an egg-shaped LCD device with pixel digits and a small pixel pet. The pet works alongside you during focus and plays or naps on breaks. It grows or evolves with completed pomodoros and your streak, and looks a bit sad after abandoned sessions (never punishing)
 - [x] More faces (requested): Hourglass, Plant Buddy, Retro Handheld, Potion Flask, Robot Pet (replaced Zen Enso), Tetris, Blob Pet, Spaceship Orbit, Hamster Wheel
+- [x] Livelier faces, round 2: Tetris (row-by-row drops, shuffle, ghost piece, NEXT/LINES, line-clear finale), Spaceship (turning planet, flame flicker, comets, victory lap), Retro Handheld (chomper eats the time bar, scanlines, button presses), Tomato (minute tick, last-minute tremble, ringing), Potion (glow, sparkles, cork pop), Plant (watering can, leaf rustle, falling petals on breaks)
 - [x] Faces follow the theme colours, respect reduced motion, and stay accessible (time always available to screen readers)
 
 #### Markdown export, import & bulk add
@@ -177,6 +178,7 @@ Not part of any phase. Pick these up only if people ask for them.
 - [ ] Custom background photos (IndexedDB, a few images, never leave the device)
 - [ ] Per-scene controls: speed, density/intensity, color follows theme vs. mode
 - [ ] Remap keyboard shortcuts in settings
+- [ ] Command palette (Cmd/Ctrl+K) with fuzzy search and a command-bar timer syntax, e.g. "Start 50m focus", "Switch to Tamagotchi", "Toggle rain", "Export today", "Log interruption", "Set current task"
 
 ## Reference notes
 **pomodorotimer.online** (studied 2026-09-27; captured into `ref/`, which is gitignored). A Nuxt PWA with no backend; data lives in localStorage and IndexedDB. What stood out:
@@ -218,3 +220,4 @@ Not part of any phase. Pick these up only if people ask for them.
 - 2026-09-27 — The pop-out mini timer mounts its own instance of the selected face, with the page's stylesheets and theme tokens copied into the PiP document, so it always matches the page.
 - 2026-09-27 — Zen Enso retired in favor of Robot Pet; saved settings with an unknown face fall back to the ring. In focus mode, the quote (if on) moves above the clock.
 - 2026-09-27 — Robot Pet battery now drains during focus and recharges on breaks (it used to fill on focus and drain while "charging"). Blob Pet gets distinct short-break (stretch/yawn) and long-break (nap) moods via data-mode.
+- 2026-09-28 — Second animation pass on Tetris, Spaceship, Handheld, Tomato, Potion and Plant. Face unit tests mock reduced motion (static art); an e2e test plays a real completion on each. Command palette (Cmd/Ctrl+K) added to the backburner.

@@ -185,3 +185,17 @@ test('a retired face (enso) falls back to the ring', async ({ page }) => {
   await open(page, { settings: { clockFace: 'enso' } });
   await expect(page.locator('.dial')).toHaveAttribute('data-face', 'ring');
 });
+
+test.describe('completion animations run cleanly', () => {
+  for (const face of ['tetris', 'spaceship', 'handheld', 'tomato', 'potion', 'plant']) {
+    test(face, async ({ page }) => {
+      const seed = focusInProgress(0);
+      seed.timer.endsAt = Date.now() + 1500;
+      await open(page, { data: seed, settings: { clockFace: face } });
+      await expect(page.locator('.dial')).toHaveAttribute('data-face', face);
+      expect((await stored(page)).history).toHaveLength(0);
+      await expect.poll(async () => (await stored(page)).history.length, { timeout: 6000 }).toBe(1);
+      await page.waitForTimeout(1800); // let the celebration play out; page errors fail the test
+    });
+  }
+});

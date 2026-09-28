@@ -1,4 +1,4 @@
-import { animate } from 'animejs';
+import { animate, stagger } from 'animejs';
 import { reducedMotion } from '../fx/anims';
 import { clamp01, setLevel } from './common';
 import type { Face, FaceContext } from './types';
@@ -16,12 +16,16 @@ const LEAVES: [number, 1 | -1, number][] = [
 /** A little potted buddy whose plant grows through a focus session and blooms at the end. */
 export function plantFace(): Face {
   let root: SVGSVGElement | null = null;
+  let leaves = -1; // fully grown leaves, to rustle when a new one comes in
 
   // Grows during focus; stays fully grown (in bloom) on breaks.
   const growth = (p: number, ctx: FaceContext) => (ctx.mode === 'focus' ? 1 - clamp01(p) : 1);
 
-  function draw(g: number) {
+  const rustle = () => root && animate(root.querySelector('.pl-rustle')!, { rotate: [0, 3, -2, 0], duration: 900, ease: 'inOutSine' });
+
+  function draw(g: number, ctx: FaceContext) {
     if (!root) return;
+    root.dataset.mode = ctx.mode;
     const len = 12 + MAX_STEM * g;
     const top = BASE - len;
     root.querySelector('.pl-stem')!.setAttribute('d', `M110 ${BASE}Q${104 + g * 2} ${BASE - len / 2} 110 ${top}`);
@@ -33,6 +37,9 @@ export function plantFace(): Face {
     const bloom = clamp01((g - 0.9) / 0.1);
     root.querySelector('.pl-flower')!.setAttribute('transform', `translate(110 ${top}) scale(${bloom})`);
     root.querySelector('.pl-bud')!.setAttribute('transform', `translate(110 ${top}) scale(${1 - bloom})`);
+    const grown = LEAVES.filter(([, , from]) => g >= from + 0.14).length;
+    if (ctx.status === 'running' && leaves !== -1 && grown > leaves && !reducedMotion()) rustle();
+    leaves = grown;
     setLevel(root, g);
   }
 
@@ -45,12 +52,20 @@ export function plantFace(): Face {
       layer.insertAdjacentHTML(
         'beforeend',
         `<svg class="plant" viewBox="0 0 220 220" aria-hidden="true">
-          <g class="pl-sway">
+          <g class="pl-sway"><g class="pl-rustle">
             <path class="pl-stem"/>
             ${LEAVES.map(() => '<path class="pl-leaf" d="M0 0Q12 -10 26 0Q12 10 0 0Z"/>').join('')}
             <g class="pl-bud"><circle r="5"/></g>
             <g class="pl-flower">${petals}<circle class="pl-center" r="5"/></g>
+          </g></g>
+          <!-- On breaks, now and then a petal drifts down from the flower -->
+          <ellipse class="pl-falling" cx="116" cy="26" rx="4" ry="6.5"/>
+          <g class="pl-can">
+            <path class="pl-can-handle" d="M39 52q9-13 18 0"/>
+            <path class="pl-can-spout" d="M60 60l22-12"/>
+            <path class="pl-can-body" d="M34 52h28v20a4 4 0 0 1-4 4H38a4 4 0 0 1-4-4Z"/>
           </g>
+          <g class="pl-drops"><circle cx="84" cy="50" r="2"/><circle cx="88" cy="52" r="2"/><circle cx="80" cy="53" r="2"/></g>
           <g class="pl-pot">
             <path class="pl-pot-body" d="M78 124H142L134 168H86Z"/>
             <rect class="pl-rim" x="72" y="114" width="76" height="14" rx="5"/>
@@ -64,21 +79,33 @@ export function plantFace(): Face {
         </svg>`,
       );
       root = layer.querySelector('svg.plant');
-      draw(growth(ctx.remainingMs / ctx.durationMs, ctx));
+      draw(growth(ctx.remainingMs / ctx.durationMs, ctx), ctx);
     },
     setProgress(p, ctx) {
-      draw(growth(p, ctx));
+      draw(growth(p, ctx), ctx);
     },
     event(e, ctx) {
       if (!root) return;
-      if (e === 'mode') draw(growth(ctx.remainingMs / ctx.durationMs, ctx));
+      if (e === 'mode') draw(growth(ctx.remainingMs / ctx.durationMs, ctx), ctx);
       if (reducedMotion()) return;
       if (e === 'complete') animate(root.querySelector('.pl-pot')!, { y: [0, -10, 0], duration: 550, ease: 'out(3)' });
-      if (e === 'start') animate(root.querySelector('.pl-sway')!, { rotate: [0, 3, -2, 0], duration: 900, ease: 'inOutSine' });
+      if (e === 'start' && ctx.mode === 'focus') {
+        // A watering can tips in, the drops reach the soil and the plant perks up.
+        animate(root.querySelector('.pl-can')!, { opacity: [0, 1, 1, 0], rotate: [0, 28, 28, 0], duration: 1700, ease: 'inOutSine' });
+        animate(root.querySelectorAll('.pl-drops circle'), {
+          opacity: [0, 1, 0],
+          y: [0, 60],
+          duration: 650,
+          delay: stagger(180, { start: 450 }),
+          ease: 'in(2)',
+        });
+        setTimeout(rustle, 1100);
+      } else if (e === 'start') rustle();
     },
     unmount() {
       root?.remove();
       root = null;
+      leaves = -1;
     },
   };
 }

@@ -33,6 +33,7 @@ const TOMATO_SVG = `
     </defs>
     <g class="tomato-wobble">
       <ellipse class="tomato-shadow" cx="${CX}" cy="${CY + 92}" rx="70" ry="8"/>
+      <g class="tomato-tremble">
       <path class="tomato-body" d="M110 38c-52 0-94 30-94 86 0 52 42 90 94 90s94-38 94-90c0-56-42-86-94-86Z" fill="url(#tomato-body)"/>
       <g class="tomato-dial">${dialMarks()}</g>
       <ellipse class="tomato-shine" cx="72" cy="78" rx="18" ry="10" transform="rotate(-24 72 78)"/>
@@ -42,6 +43,12 @@ const TOMATO_SVG = `
       </g>
       <!-- fixed marker the dial turns toward; drawn over the leaves so it's always visible -->
       <path class="tomato-pointer" d="M110 49l-5.5-9h11Z"/>
+      </g>
+      <!-- "Ring" marks either side of the top, shown when the timer goes off -->
+      <g class="tomato-ring">
+        <path d="M38 44q-8 8 -10 18M28 36q-12 12 -15 26"/>
+        <path d="M182 44q8 8 10 18M192 36q12 12 15 26"/>
+      </g>
     </g>
   </svg>`;
 
@@ -49,6 +56,7 @@ export function tomatoFace(): Face {
   let root: SVGSVGElement | null = null;
   let dial: SVGGElement | null = null;
   let angle = 0;
+  let minute = -1; // whole minutes left, for the once-a-minute tick
 
   const angleFor = (ctx: FaceContext) => -(ctx.remainingMs / 60_000) * 6; // 6° per minute, 0 at the pointer
   const setAngle = (a: number) => {
@@ -74,6 +82,15 @@ export function tomatoFace(): Face {
     },
     setProgress(_p, ctx) {
       setAngle(angleFor(ctx));
+      const running = ctx.status === 'running';
+      // Trembles through the last minute, like it's about to go off.
+      root?.toggleAttribute('data-urgent', running && ctx.remainingMs > 0 && ctx.remainingMs <= 60_000);
+      // A small jolt each time a minute clicks past on the dial.
+      const m = Math.ceil(ctx.remainingMs / 60_000);
+      if (running && minute !== -1 && m < minute && root && !reducedMotion()) {
+        animate(root.querySelector('.tomato-tremble')!, { rotate: [0, -1.5, 1, 0], duration: 320, ease: 'out(2)' });
+      }
+      minute = m;
     },
     event(e, ctx) {
       if (!root || reducedMotion()) {
@@ -90,6 +107,7 @@ export function tomatoFace(): Face {
       } else if (e === 'complete') {
         animate(wobble, { rotate: [0, -7, 7, -5, 5, -3, 3, 0], duration: 1200, ease: 'inOutSine' });
         animate(wobble, { y: [0, -8, 0], duration: 500, ease: 'out(3)' });
+        animate(root.querySelectorAll('.tomato-ring path'), { opacity: [0, 1, 0, 1, 0, 1, 0], duration: 1300, ease: 'linear' });
       } else if (e === 'mode') {
         droop(ctx);
         const from = angle;
@@ -102,6 +120,7 @@ export function tomatoFace(): Face {
     unmount() {
       root?.remove();
       root = dial = null;
+      minute = -1;
     },
   };
 }
