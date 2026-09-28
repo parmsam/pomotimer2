@@ -25,7 +25,8 @@ test.describe('silent mode (Audio Session API)', () => {
     await page.getByRole('button', { name: 'Test' }).click();
     const log = () => page.evaluate(() => (window as unknown as { sessionLog: string[] }).sessionLog);
     expect(await log()).toEqual(['playback']);
-    await expect.poll(log, { timeout: 5000 }).toEqual(['playback', 'auto']);
+    // The bell rings ~4s before the session is handed back; allow slow CI runners plenty of time.
+    await expect.poll(log, { timeout: 10_000 }).toEqual(['playback', 'auto']);
 
     // Turned off: the session is left alone.
     await page.locator('label[for="set-alarmIgnoresSilent"]').click();
@@ -86,7 +87,7 @@ test.describe('ambient sound and the audio session (Safari)', () => {
     await page.locator('#toggle').click();
     await expect.poll(() => log(page)).toEqual(['playback']);
     await page.locator('#toggle').click();
-    await expect.poll(() => log(page)).toEqual(['playback', 'auto']);
+    await expect.poll(() => log(page), { timeout: 8000 }).toEqual(['playback', 'auto']); // after the fade-out
   });
 
   test('an alarm finishing does not cut off ambient sound that is still playing', async ({ page }) => {
