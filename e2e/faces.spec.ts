@@ -101,3 +101,27 @@ test.describe('more faces', () => {
     await expect(page.locator('svg.potion')).toHaveAttribute('data-level', '20');
   });
 });
+
+test('captions stay inside the face (two lines) and show the full text on hover', async ({ page }) => {
+  const long = 'Draft the quarterly report for the leadership offsite and send it to the team for review';
+  const seed = { ...focusInProgress(0), tasks: [{ id: 'a', title: long, estimate: 1, pomodoros: 0, trackedMs: 0, done: false, createdAt: 0, doneAt: null }], activeTaskId: 'a' };
+  seed.timer = { ...seed.timer, status: 'idle', endsAt: null };
+  for (const face of ['ring', 'tomato', 'potion']) {
+    await open(page, { data: seed, settings: { clockFace: face } });
+    const sub = page.locator('#sub');
+    await expect(sub).toHaveAttribute('title', new RegExp(long));
+    const lineHeight = await sub.evaluate((el) => parseFloat(getComputedStyle(el).lineHeight));
+    const box = (await sub.boundingBox())!;
+    expect(box.height, face).toBeLessThanOrEqual(lineHeight * 2 + 2);
+  }
+});
+
+test('the handheld shows its caption under the device', async ({ page }) => {
+  const seed = focusInProgress(0);
+  seed.timer = { ...seed.timer, mode: 'short', status: 'idle', endsAt: null, remainingMs: 5 * MIN };
+  await open(page, { data: seed, settings: { clockFace: 'handheld' } });
+  const sub = (await page.locator('#sub').boundingBox())!;
+  const dial = (await page.locator('.dial').boundingBox())!;
+  await expect(page.locator('#sub')).toBeVisible();
+  expect(sub.y).toBeGreaterThanOrEqual(dial.y + dial.height - 2);
+});

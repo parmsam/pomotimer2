@@ -193,6 +193,7 @@ function renderStatus() {
       ? `#${Math.max(1, round)} · ${task ? task.title : status === 'running' ? 'Stay with it' : 'Time to focus'}`
       : breakTip(mode, data.get().history.length);
   swapText(subEl, sub);
+  subEl.title = sub; // full text on hover when a face has to clip it
 }
 
 function renderCycle() {

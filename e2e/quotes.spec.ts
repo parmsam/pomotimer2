@@ -47,3 +47,24 @@ test('focus mode hides the quote', async ({ page, isMobile }) => {
   await page.keyboard.press('f');
   await expect(page.locator('#quote')).toBeHidden();
 });
+
+test('on wide screens the quote sits above the task list; with tasks hidden it sits under the timer', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'wide layout');
+  await page.setViewportSize({ width: 1280, height: 820 });
+  await open(page, { settings: { showQuotes: true } });
+  const quote = (await page.locator('#quote').boundingBox())!;
+  const dial = (await page.locator('.dial').boundingBox())!;
+  const tasks = (await page.locator('#tasks').boundingBox())!;
+  expect(quote.x).toBeGreaterThan(dial.x + dial.width); // right-hand column
+  expect(quote.y + quote.height).toBeLessThanOrEqual(tasks.y); // above the panel
+
+  await page.keyboard.press('t');
+  await expect(page.locator('#tasks')).toBeHidden();
+  const under = (await page.locator('#quote').boundingBox())!;
+  expect(under.y).toBeGreaterThan(dial.y + dial.height);
+});
+
+test('the side column takes no space when it has nothing to show', async ({ page }) => {
+  await open(page, { settings: { showTasks: false } });
+  await expect(page.locator('.side-col')).toBeHidden();
+});
