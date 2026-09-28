@@ -3,7 +3,7 @@ import './styles.css';
 
 import { createAmbientPlayer } from './core/ambient';
 import { canPlayThroughSilentMode, playAlarm, playTick, unlockAudio } from './core/audio';
-import { buzz, type Buzz } from './core/haptics';
+import { buzz, hapticTrigger, setHapticTriggersEnabled, type Buzz } from './core/haptics';
 import { formatTime } from './core/format';
 import { notify } from './core/notify';
 import { clearAll, defaultAppData, DEFAULT_SETTINGS, loadAppData, loadSettings, write } from './core/storage';
@@ -283,6 +283,7 @@ settings.subscribe((s, prev) => {
   if (s.clockFace !== prev.clockFace) view.setFace(s.clockFace);
   if (s.longBreakEvery !== prev.longBreakEvery) renderCycle();
   if (s.strictMode !== prev.strictMode) renderStatus();
+  if (s.haptics !== prev.haptics) setHapticTriggersEnabled(s.haptics);
   if (s.keepAwake !== prev.keepAwake) wakeLock.set(s.keepAwake && data.get().timer.status === 'running');
   if (s.theme !== prev.theme || s.modeColors !== prev.modeColors) setTimeout(() => pip.syncTheme(), 1000);
   if (s.ambient !== prev.ambient) previewAmbient();
@@ -391,6 +392,9 @@ modeTabs.forEach((b) =>
     void actions.switchTo(b.dataset.mode as Mode);
   }),
 );
+// iOS: taps on these land on a hidden switch that plays the system haptic.
+[toggleBtn, $('#reset'), $('#skip'), ...modeTabs].forEach(hapticTrigger);
+setHapticTriggersEnabled(settings.get().haptics);
 $('#tasks-toggle').addEventListener('click', () => tasks.toggleVisible());
 
 const toggleMute = () => {

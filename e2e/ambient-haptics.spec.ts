@@ -54,16 +54,34 @@ test.describe('haptics', () => {
     await expect.poll(vib, { timeout: 5000 }).toEqual([[12], [30, 60, 30, 60, 90]]);
   });
 
-  test('iOS (no navigator.vibrate) uses the hidden switch instead', async ({ page }) => {
+  test('iOS (no navigator.vibrate): a real tap lands on a hidden switch over the button', async ({ page }) => {
     await page.addInitScript(() => {
       delete (Navigator.prototype as unknown as { vibrate?: unknown }).vibrate;
     });
     await open(page, { settings: { mobileTipSeen: true } });
     expect(await page.evaluate(() => 'vibrate' in navigator)).toBe(false);
-    await page.locator('#toggle').click();
-    await expect(page.locator('.haptic-switch input')).toBeChecked();
-    await page.locator('#toggle').click();
-    await expect(page.locator('.haptic-switch input')).not.toBeChecked();
+    const toggle = page.locator('#toggle');
+    const sw = toggle.locator('[data-haptic-trigger] input[switch]');
+    await toggle.tap();
+    await expect(sw).toBeChecked();
+    // The button's own handler still runs, exactly once.
+    await expect(toggle).toHaveAttribute('aria-label', /^Pause/);
+    await toggle.tap();
+    await expect(sw).not.toBeChecked();
+    await expect(toggle).toHaveAttribute('aria-label', /^Resume/);
+    for (const id of ['#reset', '#skip']) await expect(page.locator(`${id} [data-haptic-trigger] input[switch]`)).toHaveCount(1);
+    await expect(page.locator('.modes [data-haptic-trigger] input[switch]')).toHaveCount(3);
+  });
+
+  test('iOS: turning vibration off silences the switches', async ({ page }) => {
+    await page.addInitScript(() => {
+      delete (Navigator.prototype as unknown as { vibrate?: unknown }).vibrate;
+    });
+    await open(page, { settings: { haptics: false, mobileTipSeen: true } });
+    const toggle = page.locator('#toggle');
+    await toggle.tap();
+    await expect(toggle).toHaveAttribute('aria-label', /^Pause/);
+    await expect(toggle.locator('[data-haptic-trigger] input[switch]')).not.toBeChecked();
   });
 
   test('can be turned off', async ({ page }) => {
