@@ -30,6 +30,7 @@ import { createPip, pipSupported } from './ui/pip';
 import type { FaceContext, FaceEvent } from './faces';
 import { createWakeLock } from './ui/wakeLock';
 import { attachGestures } from './ui/gestures';
+import { createFullscreenButton } from './ui/fullscreen';
 import { createStatsView } from './ui/stats';
 import { bindShortcuts, createShortcutsHelp, type Shortcut } from './ui/shortcuts';
 import { toast } from './ui/toast';
@@ -482,6 +483,7 @@ const openHelp = () => {
   if (!settings.get().shortcutsHintSeen) settings.set({ shortcutsHintSeen: true });
 };
 $('#shortcuts-open').addEventListener('click', openHelp);
+createFullscreenButton($<HTMLButtonElement>('#fullscreen'));
 $('#pip-open').hidden = !pipSupported();
 $('#pip-open').addEventListener('click', togglePip);
 

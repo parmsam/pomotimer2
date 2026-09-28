@@ -22,7 +22,7 @@ An aesthetic, customizable Pomodoro timer with smooth [anime.js](https://animejs
 - **Living backgrounds.** Soft CSS color blobs, or three.js scenes (fireflies, aurora, rain) that follow your theme, calm down on breaks and pulse when a session ends. three.js only loads if you pick one.
 - **Quotes (optional).** A quote under the timer, a new one each session: 100 well-sourced lines from scientists, philosophers and writers (kept in [`src/content/quotes.md`](src/content/quotes.md)), or your own.
 - **Make it yours.** Five themes, per-mode colors, interval presets (25/5/15 · 50/10/20 · 90/15/30), alarm sounds, and an optional tick.
-- **Stays with you.** A pop-out mini timer that floats above other windows (Chrome/Edge), progress in the tab icon, and the screen stays awake while a session runs.
+- **Stays with you.** A pop-out mini timer that floats above other windows (Chrome/Edge), a full-screen button, progress in the tab icon, and the screen stays awake while a session runs.
 - **Works with multiple tabs.** Open tabs stay in sync, and only one of them rings.
 - **Ambient sound.** Optional rain, brown noise, pink noise or vinyl crackle while you focus (generated in code, no audio files).
 - **Alarms on phones.** On iPhone the alarm can ring even with the silent switch on (Safari 17+).

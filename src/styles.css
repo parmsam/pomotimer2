@@ -2634,3 +2634,48 @@ body.focus-mode .stage {
     animation: none !important;
   }
 }
+
+/* ---------- Full-screen button ---------- */
+
+.fullscreen-btn {
+  position: fixed;
+  z-index: 5;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+  opacity: 0.55;
+  transition:
+    opacity 0.25s,
+    color 0.25s;
+}
+.fullscreen-btn:hover,
+.fullscreen-btn:focus-visible {
+  opacity: 1;
+  color: var(--text);
+}
+.fullscreen-btn svg {
+  width: 18px;
+  height: 18px;
+}
+/* Leave room so the fixed button never covers the end of the page. */
+.app {
+  padding-bottom: max(64px, env(safe-area-inset-bottom));
+}
+/* Phones: a floating button would sit over content while scrolling; put it at the end of the page. */
+@media (max-width: 600px) {
+  .fullscreen-btn {
+    position: static;
+    margin: 0 auto max(16px, env(safe-area-inset-bottom));
+  }
+  .app {
+    padding-bottom: 8px;
+  }
+}
