@@ -58,3 +58,43 @@ test('phones get a one-time tip about volume, silent mode and keeping the tab op
   await page.waitForTimeout(400);
   await expect(tip).toHaveCount(0);
 });
+
+test.describe('ambient sound and the audio session (Safari)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      const log: string[] = [];
+      let type = 'auto';
+      Object.defineProperty(navigator, 'audioSession', {
+        configurable: true,
+        value: {
+          get type() {
+            return type;
+          },
+          set type(v: string) {
+            if (v !== type) log.push(v);
+            type = v;
+          },
+        },
+      });
+      (window as unknown as { sessionLog: string[] }).sessionLog = log;
+    });
+  });
+  const log = (page: import('@playwright/test').Page) => page.evaluate(() => (window as unknown as { sessionLog: string[] }).sessionLog);
+
+  test('plays through the silent switch while running and hands the session back on pause', async ({ page }) => {
+    await open(page, { settings: { ambient: 'rain', mobileTipSeen: true } });
+    await page.locator('#toggle').click();
+    await expect.poll(() => log(page)).toEqual(['playback']);
+    await page.locator('#toggle').click();
+    await expect.poll(() => log(page)).toEqual(['playback', 'auto']);
+  });
+
+  test('an alarm finishing does not cut off ambient sound that is still playing', async ({ page }) => {
+    await open(page, { settings: { ambient: 'rain', mobileTipSeen: true } });
+    await page.locator('#toggle').click(); // ambient on → playback
+    await page.locator('#settings-open').click();
+    await page.getByRole('button', { name: 'Test' }).click(); // alarm rings, then releases its hold
+    await page.waitForTimeout(3500);
+    expect(await page.evaluate(() => (navigator as unknown as { audioSession: { type: string } }).audioSession.type)).toBe('playback');
+  });
+});

@@ -5,6 +5,13 @@ let ctx: AudioContext | null = null;
 /** The shared context (created on first unlock). */
 export const audioContext = (): AudioContext | null => ctx;
 
+// Safari can suspend or "interrupt" audio (calls, backgrounding); any tap or key brings it back.
+for (const type of ['pointerdown', 'keydown']) {
+  document.addEventListener(type, () => {
+    if (ctx && ctx.state !== 'running') void ctx.resume();
+  }, { capture: true, passive: true });
+}
+
 /** Call from a user gesture so browsers allow playback later. */
 export function unlockAudio(): void {
   try {
@@ -78,20 +85,32 @@ type AudioSession = { type: string };
 const audioSession = (): AudioSession | undefined => (navigator as Navigator & { audioSession?: AudioSession }).audioSession;
 export const canPlayThroughSilentMode = () => !!audioSession();
 
+/**
+ * Who currently needs a "playback" session (the alarm while ringing, ambient sound while
+ * playing). Shared so one finishing doesn't switch the session back under the other.
+ */
+const playbackOwners = new Set<string>();
+export function holdPlaybackSession(owner: string, on: boolean) {
+  if (on) playbackOwners.add(owner);
+  else playbackOwners.delete(owner);
+  const session = audioSession();
+  if (!session) return;
+  try {
+    session.type = playbackOwners.size ? 'playback' : 'auto';
+  } catch {
+    // Unsupported value in this browser.
+  }
+}
+
 let sessionReset: number | undefined;
 
 export function playAlarm(sound: AlarmSound, volume: number, opts: { ignoreSilentMode?: boolean } = {}): void {
   if (sound === 'none') return;
-  const session = audioSession();
-  if (opts.ignoreSilentMode && session) {
-    try {
-      session.type = 'playback';
-      clearTimeout(sessionReset);
-      const lengthMs = Math.max(...SOUNDS[sound].map((n) => n.at + n.dur)) * 1000;
-      sessionReset = window.setTimeout(() => (session.type = 'auto'), lengthMs + 500);
-    } catch {
-      // Unsupported value in this browser: fall back to the default session.
-    }
+  if (opts.ignoreSilentMode && audioSession()) {
+    holdPlaybackSession('alarm', true);
+    clearTimeout(sessionReset);
+    const lengthMs = Math.max(...SOUNDS[sound].map((n) => n.at + n.dur)) * 1000;
+    sessionReset = window.setTimeout(() => holdPlaybackSession('alarm', false), lengthMs + 500);
   }
   play(SOUNDS[sound], volume);
 }

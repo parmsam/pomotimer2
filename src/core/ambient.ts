@@ -1,4 +1,4 @@
-import { audioContext, unlockAudio } from './audio';
+import { audioContext, holdPlaybackSession, unlockAudio } from './audio';
 
 export type AmbientSound = 'off' | 'rain' | 'brown' | 'pink' | 'vinyl';
 
@@ -79,6 +79,7 @@ export function createAmbientPlayer() {
     gain.gain.setValueAtTime(gain.gain.value, t);
     gain.gain.linearRampToValueAtTime(0, t + FADE);
     source.stop(t + FADE + 0.05);
+    holdPlaybackSession('ambient', false);
   }
 
   function play(kind: AmbientSound) {
@@ -98,7 +99,11 @@ export function createAmbientPlayer() {
     const { input, output } = chain(ctx, kind);
     source.connect(input);
     output.connect(gain).connect(ctx.destination);
+    // A chosen sound, like a white-noise app: keep playing through the iOS silent switch.
+    holdPlaybackSession('ambient', true);
     source.start();
+    // Anchor the ramp explicitly; WebKit mis-times ramps that have no preceding event.
+    gain.gain.setValueAtTime(0, ctx.currentTime);
     gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + FADE);
     current = { kind, source, gain };
   }
