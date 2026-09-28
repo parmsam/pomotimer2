@@ -1994,8 +1994,9 @@ body.focus-mode .app-foot {
   fill: #f6c945;
 }
 .pl-sway {
-  transform-box: view-box;
-  transform-origin: 110px 118px;
+  /* Pivot at the base of the stem. fill-box, not px: Safari misplaces px origins on scaled SVG. */
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
   animation: pl-sway 5s ease-in-out infinite;
 }
 @keyframes pl-sway {
@@ -2551,8 +2552,9 @@ body.focus-mode .stage {
   stroke-width: 2;
 }
 .hw-spokes {
-  transform-box: view-box;
-  transform-origin: 110px 84px;
+  /* The spokes are symmetric around the hub, so their own center is the axle. */
+  transform-box: fill-box;
+  transform-origin: center;
 }
 .hamster[data-state='running'] .hw-spokes {
   animation: hw-spin 1.6s linear infinite;

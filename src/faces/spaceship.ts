@@ -6,8 +6,10 @@ import type { Face } from './types';
 // A tilted orbit (ellipse) around a ringed planet, seen at an angle.
 const CX = 110;
 const CY = 82;
-const RX = 92;
-const RY = 34;
+const RX = 94;
+const RY = 42; // tall enough that the orbit clears the planet top and bottom
+const PR = 28; // planet radius
+const TILT = -14; // ring tilt
 const STARS: [number, number, number][] = [
   [20, 24, 1.4], [46, 150, 1], [70, 12, 1.2], [168, 20, 1.6], [196, 70, 1], [186, 142, 1.3], [30, 96, 1], [140, 160, 1.1], [104, 6, 0.9],
 ];
@@ -31,11 +33,9 @@ export function spaceshipFace(): Face {
     ship.setAttribute('transform', `translate(${x} ${y}) rotate(${heading}) scale(${scale})`);
     root.querySelector(behind ? '.ss-back' : '.ss-front')!.append(ship);
     // The trail path starts at the front of the orbit and runs the same way as the ship.
-    // Drawn twice: behind the planet, and again over it for the near half of the orbit.
-    root.querySelectorAll<SVGPathElement>('.ss-trail').forEach((trail) => {
-      const len = trail.getTotalLength?.() ?? 400;
-      trail.style.strokeDasharray = `${len * done} ${len}`;
-    });
+    const trail = root.querySelector<SVGPathElement>('.ss-trail')!;
+    const len = trail.getTotalLength?.() ?? 400;
+    trail.style.strokeDasharray = `${len * done} ${len}`;
     setLevel(root, done);
   }
 
@@ -48,19 +48,20 @@ export function spaceshipFace(): Face {
       layer.insertAdjacentHTML(
         'beforeend',
         `<svg class="spaceship" viewBox="0 0 220 220" aria-hidden="true">
-          <defs><clipPath id="ss-near"><rect x="0" y="${CY}" width="220" height="120"/></clipPath></defs>
+          <defs>
+            <clipPath id="ss-globe-clip"><circle cx="${CX}" cy="${CY}" r="${PR}"/></clipPath>
+            <!-- The near half of the ring, in the ring's own (tilted) frame -->
+            <clipPath id="ss-ring-near"><rect x="${CX - 70}" y="${CY}" width="140" height="40" transform="rotate(${TILT} ${CX} ${CY})"/></clipPath>
+          </defs>
           ${stars}
           <ellipse class="ss-orbit" cx="${CX}" cy="${CY}" rx="${RX}" ry="${RY}"/>
           <path class="ss-trail" d="M${CX} ${CY + RY}A${RX} ${RY} 0 1 1 ${CX} ${CY - RY}A${RX} ${RY} 0 1 1 ${CX} ${CY + RY}"/>
           <g class="ss-back"></g>
           <g class="ss-planet">
-            <circle class="ss-globe" cx="${CX}" cy="${CY}" r="38"/>
-            <path class="ss-band" d="M76 72q34 10 68 0M74 90q36 10 72 0"/>
-            <ellipse class="ss-ring" cx="${CX}" cy="${CY + 2}" rx="58" ry="12" transform="rotate(-12 ${CX} ${CY})"/>
-          </g>
-          <g clip-path="url(#ss-near)">
-            <ellipse class="ss-orbit" cx="${CX}" cy="${CY}" rx="${RX}" ry="${RY}"/>
-            <path class="ss-trail ss-trail-near" d="M${CX} ${CY + RY}A${RX} ${RY} 0 1 1 ${CX} ${CY - RY}A${RX} ${RY} 0 1 1 ${CX} ${CY + RY}"/>
+            <ellipse class="ss-ring" cx="${CX}" cy="${CY}" rx="${PR + 20}" ry="10" transform="rotate(${TILT} ${CX} ${CY})"/>
+            <circle class="ss-globe" cx="${CX}" cy="${CY}" r="${PR}"/>
+            <path class="ss-band" clip-path="url(#ss-globe-clip)" d="M${CX - PR + 4} ${CY - 8}q${PR - 4} 8 ${2 * PR - 8} 0M${CX - PR + 2} ${CY + 8}q${PR - 2} 8 ${2 * PR - 4} 0"/>
+            <ellipse class="ss-ring" cx="${CX}" cy="${CY}" rx="${PR + 20}" ry="10" transform="rotate(${TILT} ${CX} ${CY})" clip-path="url(#ss-ring-near)"/>
           </g>
           <g class="ss-front"></g>
           <g class="ss-ship">

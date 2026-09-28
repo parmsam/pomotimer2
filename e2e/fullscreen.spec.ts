@@ -31,9 +31,13 @@ test('the button never covers the footer at the end of the page', async ({ page 
   const btn = page.locator('#fullscreen');
   if (!(await btn.isVisible())) return;
   const b = (await btn.boundingBox())!;
-  const f = (await page.locator('.app-foot').boundingBox())!;
-  const overlap = !(b.x > f.x + f.width || b.x + b.width < f.x || b.y > f.y + f.height || b.y + b.height < f.y);
-  expect(overlap).toBe(false);
+  // The footer box is full-width; what must stay uncovered is its actual text and links.
+  for (const item of await page.locator('.app-foot > *').all()) {
+    const f = await item.boundingBox();
+    if (!f) continue;
+    const overlap = !(b.x > f.x + f.width || b.x + b.width < f.x || b.y > f.y + f.height || b.y + b.height < f.y);
+    expect(overlap).toBe(false);
+  }
 });
 
 test('on phones the button sits at the end of the page instead of floating over content', async ({ page, isMobile }) => {

@@ -34,6 +34,7 @@ CI (`.github/workflows/ci.yml`) runs typecheck, unit and e2e tests on every bran
 - **Storage**: go through `src/core/storage.ts` only. Keys are namespaced `pomo:v1:*`; wrap every read/write in try/catch and fall back to defaults. Bump the version and add a migration when the schema changes.
 - **State**: mutate via the store in `src/core/store.ts`; UI modules subscribe, they don't hold their own copies of persisted state.
 - **Theming**: colors are CSS custom properties in `src/themes/tokens.css`; theme presets only set tokens.
+- **SVG pivots**: never use pixel `transform-origin` (or `transform-box: view-box`) on SVG artwork. Safari misplaces them once the SVG is scaled (this broke the ring, then the hamster wheel). Use `transform-box: fill-box` with percentages/keywords, or SVG `transform` attributes. `src/styles.test.ts` enforces this.
 - **Motion**: respect `prefers-reduced-motion` — skip three.js scenes and use minimal anime.js transitions.
 - **Assets**: reference with paths relative to Vite's `base` (`/pomotimer2/`); sounds live in `public/sounds/` and must be CC0 or otherwise redistributable.
 - Keep bundles lean: don't add dependencies for things a few lines of TS can do.
