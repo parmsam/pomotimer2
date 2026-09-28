@@ -39,6 +39,10 @@ export interface DataActions {
   /** Download the session log as Markdown; `days` null = all time. */
   exportLog(days: number | null): void;
   resetAll(): void;
+  /** Delete session history (which is what the streak, stats and goal are counted from). */
+  clearHistory(): void;
+  /** Settings back to defaults; tasks and history stay. */
+  resetSettings(): void;
   exportBackup(): void;
   importBackup(file: File): Promise<void>;
 }
@@ -115,6 +119,7 @@ export function createSettingsPanel(settings: Store<Settings>, dataActions: Data
     toggle('autoStartBreaks', 'Auto-start breaks'),
     toggle('autoStartFocus', 'Auto-start focus', 'After a break ends'),
     toggle('strictMode', 'Strict mode', 'No pausing — stopping a pomodoro abandons it'),
+    toggle('confirmBreakPause', 'Confirm pausing a break', 'Ask first, so a stray tap doesn’t stop your break'),
     toggle('trackInterruptions', 'Track interruptions', 'Log internal/external distractions during focus (I)'),
   );
 
@@ -257,15 +262,22 @@ export function createSettingsPanel(settings: Store<Settings>, dataActions: Data
   });
   const importBtn = el('button', { className: 'btn', type: 'button' }, 'Import backup');
   importBtn.addEventListener('click', () => fileInput.click());
+  const confirmed = async (title: string, body: string, confirm: string) =>
+    (await ask({ title, body, confirm, danger: true })) === 'confirm';
+  const historyBtn = el('button', { className: 'btn danger', type: 'button' }, 'Clear history');
+  historyBtn.addEventListener('click', async () => {
+    const body = 'This deletes your session history, which resets your streak, stats and daily goal. Tasks and settings stay.';
+    if (await confirmed('Clear history?', body, 'Clear')) dataActions.clearHistory();
+  });
+  const settingsBtn = el('button', { className: 'btn danger', type: 'button' }, 'Reset settings');
+  settingsBtn.addEventListener('click', async () => {
+    const body = 'This puts every setting back to its default. Your tasks, history and custom quotes stay.';
+    if (await confirmed('Reset settings?', body, 'Reset')) dataActions.resetSettings();
+  });
   const resetBtn = el('button', { className: 'btn danger', type: 'button' }, 'Reset everything');
   resetBtn.addEventListener('click', async () => {
-    const r = await ask({
-      title: 'Reset everything?',
-      body: 'This deletes your settings, tasks and history in this browser. Export a backup first if you might want them back.',
-      confirm: 'Reset',
-      danger: true,
-    });
-    if (r === 'confirm') dataActions.resetAll();
+    const body = 'This deletes your settings, tasks and history in this browser. Export a backup first if you might want them back.';
+    if (await confirmed('Reset everything?', body, 'Reset')) dataActions.resetAll();
   });
   const logRange = el(
     'select',
@@ -283,7 +295,8 @@ export function createSettingsPanel(settings: Store<Settings>, dataActions: Data
     'Data',
     el('div', { className: 'row' }, el('span', { className: 'label' }, 'Session log as Markdown'), logRange, logBtn),
     el('p', { className: 'hint' }, 'Everything is saved only in this browser. Back it up to move to another device or browser.'),
-    el('div', { className: 'data-actions' }, exportBtn, importBtn, fileInput, resetBtn),
+    el('div', { className: 'data-actions' }, exportBtn, importBtn, fileInput),
+    el('div', { className: 'data-actions' }, historyBtn, settingsBtn, resetBtn),
   );
 
   const shortcutsBtn = el('button', { className: 'btn', type: 'button' }, 'View shortcuts');

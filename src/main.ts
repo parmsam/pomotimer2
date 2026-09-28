@@ -307,6 +307,17 @@ const panel = createSettingsPanel(settings, {
     data.set(defaultAppData(settings.get()));
     toast('Everything has been reset');
   },
+  clearHistory() {
+    data.set({ history: [], goalCelebratedOn: null });
+    toast('History cleared');
+  },
+  resetSettings() {
+    const s = settings.get();
+    // Keep what you wrote and the tips you've already dismissed.
+    const { customQuotes, mobileTipSeen, gesturesTipSeen, shortcutsHintSeen } = s;
+    settings.set({ ...structuredClone(DEFAULT_SETTINGS), customQuotes, mobileTipSeen, gesturesTipSeen, shortcutsHintSeen });
+    toast('Settings reset to defaults');
+  },
   exportBackup() {
     const blob = new Blob([JSON.stringify(makeBackup(settings.get(), data.get()), null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
@@ -365,7 +376,9 @@ toggleBtn.addEventListener('click', () => {
   maybeShowMobileTip();
   haptic('tap');
   press(toggleBtn);
+  const t = data.get().timer;
   if (strictStop()) actions.reset('Stop');
+  else if (t.mode !== 'focus' && t.status === 'running') void actions.pauseBreak(settings.get().confirmBreakPause);
   else timer.toggle();
 });
 $('#reset').addEventListener('click', (e) => {

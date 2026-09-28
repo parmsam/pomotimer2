@@ -143,3 +143,41 @@ test.describe('interruption tracking', () => {
     expect((await stored(page)).notes).toEqual([]);
   });
 });
+
+test.describe('pausing a break', () => {
+  const onBreak = () => {
+    const seed = focusInProgress(0);
+    seed.timer = { ...seed.timer, mode: 'short', endsAt: Date.now() + 4 * 60_000 };
+    return seed;
+  };
+
+  test('pauses straight away by default', async ({ page }) => {
+    await open(page, { data: onBreak() });
+    await page.locator('#toggle').click();
+    await expect(page.getByRole('alertdialog')).toHaveCount(0);
+    expect((await stored(page)).timer.status).toBe('paused');
+  });
+
+  test('with "Confirm pausing a break" on, asks first', async ({ page }) => {
+    await open(page, { data: onBreak(), settings: { confirmBreakPause: true } });
+    const dialog = page.getByRole('alertdialog');
+    await page.locator('#toggle').click();
+    await dialog.getByRole('button', { name: 'Keep resting' }).click();
+    expect((await stored(page)).timer.status).toBe('running');
+
+    await page.locator('#toggle').click();
+    await dialog.getByRole('button', { name: 'Pause' }).click();
+    expect((await stored(page)).timer.status).toBe('paused');
+    // Resuming never asks.
+    await page.locator('#toggle').click();
+    await expect(dialog).toHaveCount(0);
+    expect((await stored(page)).timer.status).toBe('running');
+  });
+
+  test('focus sessions are unaffected by the break setting', async ({ page }) => {
+    await open(page, { data: focusInProgress(5), settings: { confirmBreakPause: true } });
+    await page.locator('#toggle').click();
+    await expect(page.getByRole('alertdialog')).toHaveCount(0);
+    expect((await stored(page)).timer.status).toBe('paused');
+  });
+});

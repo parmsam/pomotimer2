@@ -120,4 +120,39 @@ test.describe('backup', () => {
     await page.getByRole('alertdialog').getByRole('button', { name: 'Reset' }).click();
     await expect(page.locator('.task')).toHaveCount(0);
   });
+
+  test('clear history resets the streak but keeps tasks and settings', async ({ page }) => {
+    const now = Date.now();
+    const history = [{ mode: 'focus', endedAt: now - 3_600_000, durationMs: 1_500_000, focusedMs: 1_500_000 }];
+    const idle = { ...focusInProgress(0).timer, status: 'idle', endsAt: null };
+    await open(page, { data: { ...focusInProgress(0), timer: idle, tasks: [task], history }, settings: { theme: 'midnight' } });
+    const drawer = await openSettings(page);
+    await drawer.getByRole('button', { name: 'Clear history' }).click();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Clear' }).click();
+    const d = await stored(page);
+    expect(d.history).toEqual([]);
+    expect(d.tasks).toHaveLength(1);
+    expect((await storedSettings(page)).theme).toBe('midnight');
+  });
+
+  test('reset settings restores defaults but keeps tasks, history and custom quotes', async ({ page }) => {
+    const history = [{ mode: 'focus', endedAt: Date.now() - 3_600_000, durationMs: 1_500_000, focusedMs: 1_500_000 }];
+    const idle = { ...focusInProgress(0).timer, status: 'idle', endsAt: null, remainingMs: 50 * 60_000 };
+    await open(page, {
+      data: { ...focusInProgress(0), timer: idle, tasks: [task], history },
+      settings: { theme: 'midnight', durations: { focus: 50, short: 10, long: 20 }, customQuotes: 'Mine', gesturesTipSeen: true },
+    });
+    const drawer = await openSettings(page);
+    await drawer.getByRole('button', { name: 'Reset settings' }).click();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Reset' }).click();
+    const s = await storedSettings(page);
+    expect(s.theme).toBe('lofi-dusk');
+    expect(s.durations).toEqual({ focus: 25, short: 5, long: 15 });
+    expect(s.customQuotes).toBe('Mine');
+    expect(s.gesturesTipSeen).toBe(true);
+    await expect(page.locator('#time')).toHaveText('25:00');
+    const d = await stored(page);
+    expect(d.tasks).toHaveLength(1);
+    expect(d.history).toHaveLength(1);
+  });
 });

@@ -20,6 +20,7 @@ export const DEFAULT_SETTINGS: Settings = {
   titleCountdown: true,
   keepAwake: true,
   strictMode: false,
+  confirmBreakPause: false,
   showTasks: true,
   muted: false,
   ambient: 'off',

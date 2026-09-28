@@ -26,6 +26,13 @@ export function createSessionActions(data: Store<AppData>, timer: Timer) {
     return before === `${t().mode}:${data.get().history.length}` ? r : 'cancel';
   }
 
+  /** Pausing a running break, optionally after a confirmation (guards against stray taps). */
+  async function pauseBreak(confirm: boolean) {
+    if (!confirm) return timer.toggle();
+    const r = await confirmFor({ title: 'Pause this break?', body: 'Your break is still running. Pause it?', confirm: 'Pause', cancel: 'Keep resting' });
+    if (r === 'confirm' && t().status === 'running') timer.toggle();
+  }
+
   async function reset(verb: 'Restart' | 'Stop' = 'Restart') {
     if (!focusInProgress()) return timer.reset();
     // Decide up front: the clock keeps running while the dialog is open.
@@ -94,5 +101,5 @@ export function createSessionActions(data: Store<AppData>, timer: Timer) {
     }
   }
 
-  return { reset, skip, switchTo };
+  return { reset, skip, switchTo, pauseBreak };
 }

@@ -26,6 +26,8 @@ export interface Settings {
   keepAwake: boolean;
   /** No pausing: stopping a focus session abandons it. */
   strictMode: boolean;
+  /** Ask before pausing a running break, so a stray tap doesn't stop it. */
+  confirmBreakPause: boolean;
   showTasks: boolean;
   muted: boolean;
   ambient: 'off' | 'rain' | 'brown' | 'pink' | 'vinyl';
