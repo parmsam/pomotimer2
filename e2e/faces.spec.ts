@@ -173,6 +173,14 @@ test.describe('pets on a break', () => {
   });
 });
 
+test('the hamster sprints only for the last stretch of a focus session', async ({ page }) => {
+  await open(page, { data: focusInProgress(20), settings: { clockFace: 'hamster' } });
+  await expect(page.locator('svg.hamster')).toHaveAttribute('data-state', 'running');
+  await expect(page.locator('svg.hamster')).not.toHaveAttribute('data-sprint');
+  await open(page, { data: focusInProgress(23), settings: { clockFace: 'hamster' } });
+  await expect(page.locator('svg.hamster')).toHaveAttribute('data-sprint', '');
+});
+
 test('a retired face (enso) falls back to the ring', async ({ page }) => {
   await open(page, { settings: { clockFace: 'enso' } });
   await expect(page.locator('.dial')).toHaveAttribute('data-face', 'ring');
