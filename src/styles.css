@@ -2848,6 +2848,16 @@ body.focus-mode .stage {
     transform: rotate(360deg);
   }
 }
+/* Rungs on the inside of the rim, turning with the spokes. */
+.hw-rungs {
+  fill: none;
+  stroke: color-mix(in oklab, var(--text) 16%, transparent);
+  stroke-width: 4;
+  stroke-dasharray: 2 11;
+}
+.hamster[data-sprint] .hw-spokes {
+  animation-duration: 0.9s;
+}
 .hw-hub {
   fill: color-mix(in oklab, var(--text) 45%, transparent);
 }
@@ -2860,11 +2870,29 @@ body.focus-mode .stage {
 .hw-ear {
   fill: #e8a6a0;
 }
+.hw-cheek {
+  fill: #ff9aa2;
+  opacity: 0.45;
+}
+.hw-tail {
+  fill: #c9955f;
+}
 .hw-eye {
   fill: #1d2230;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pl-blink 4s infinite;
 }
 .hw-nose {
   fill: #e87b86;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.hw-whiskers {
+  fill: none;
+  stroke: color-mix(in oklab, var(--text) 50%, transparent);
+  stroke-width: 0.8;
+  stroke-linecap: round;
 }
 .hw-shut {
   display: none;
@@ -2876,15 +2904,93 @@ body.focus-mode .stage {
 .hw-leg {
   fill: #c9955f;
 }
-.hamster[data-state='running'] .hw-leg-a {
+.hw-gait {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+/* Galloping: the body bobs and leans into the run while the legs scurry. */
+.hamster[data-state='running'] .hw-gait {
+  animation: hw-gallop 0.35s ease-in-out infinite;
+}
+@keyframes hw-gallop {
+  0%,
+  100% {
+    transform: translateY(0) rotate(4deg);
+  }
+  50% {
+    transform: translateY(-3px) rotate(7deg);
+  }
+}
+.hamster[data-state='running'] .hw-leg {
   animation: hw-step 0.35s ease-in-out infinite alternate;
 }
 .hamster[data-state='running'] .hw-leg-b {
-  animation: hw-step 0.35s ease-in-out infinite alternate-reverse;
+  animation-direction: alternate-reverse;
+}
+.hamster[data-state='running'] .hw-leg-front {
+  animation-delay: -0.12s;
 }
 @keyframes hw-step {
+  from {
+    transform: translateX(-3px);
+  }
   to {
-    transform: translateX(6px);
+    transform: translate(4px, -1px);
+  }
+}
+.hamster[data-sprint] .hw-gait,
+.hamster[data-sprint] .hw-leg {
+  animation-duration: 0.22s;
+}
+.hw-dust circle {
+  fill: color-mix(in oklab, var(--text) 40%, transparent);
+  opacity: 0;
+}
+.hamster[data-state='running'] .hw-dust circle {
+  animation: hw-dust 0.7s ease-out infinite;
+}
+.hamster[data-state='running'] .hw-dust circle + circle {
+  animation-delay: -0.35s;
+}
+@keyframes hw-dust {
+  0% {
+    opacity: 0.6;
+    transform: translate(0, 0) scale(0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-12px, -4px) scale(1.3);
+  }
+}
+.hw-dust circle {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+/* Paused: sniffing about. */
+.hamster[data-state='idle'] .hw-nose {
+  animation: hw-sniff 1.8s ease-in-out infinite;
+}
+@keyframes hw-sniff {
+  0%,
+  40%,
+  100% {
+    transform: scale(1);
+  }
+  10%,
+  30% {
+    transform: scale(1.35);
+  }
+  20% {
+    transform: scale(0.9);
+  }
+}
+.hamster[data-state='idle'] .hw-gait,
+.hw-napper .hw-gait {
+  animation: hw-breathe 3s ease-in-out infinite;
+}
+@keyframes hw-breathe {
+  50% {
+    transform: scale(1.03, 0.96);
   }
 }
 .hw-napper,
@@ -2894,16 +3000,26 @@ body.focus-mode .stage {
 .hamster[data-state='napping'] .hw-napper {
   display: inline;
 }
-.hw-napper .hw-eye {
+/* Curled up asleep: paws tucked in, eyes shut. */
+.hw-napper .hw-eye,
+.hw-napper .hw-leg,
+.hw-napper .hw-whiskers {
   display: none;
 }
 .hw-napper .hw-shut {
   display: inline;
 }
+.hw-napper .hw-gait {
+  animation-duration: 4s;
+}
 .hw-z {
   fill: var(--muted);
-  font: 600 12px var(--font);
-  animation: ss-twinkle 2.4s ease-in-out infinite;
+  font: 700 13px var(--font);
+  opacity: 0;
+  animation: rb-z 3s ease-out infinite;
+}
+.hw-z + .hw-z {
+  animation-delay: 1.5s;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2925,8 +3041,18 @@ body.focus-mode .stage {
   .ss-flame,
   .hw-spokes,
   .hw-leg,
+  .hw-gait,
+  .hw-eye,
+  .hw-nose,
+  .hw-dust circle,
   .hw-z {
     animation: none !important;
+  }
+  /* Zs fade in through their animation; show them still instead. */
+  .rb-z,
+  .bl-z,
+  .hw-z {
+    opacity: 1;
   }
 }
 
