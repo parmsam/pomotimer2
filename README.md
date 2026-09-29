@@ -53,6 +53,21 @@ Press <kbd>?</kbd> in the app to see them all, or <kbd>⌘</kbd>/<kbd>Ctrl</kbd>
 | <kbd>,</kbd> | Settings |
 | <kbd>Esc</kbd> | Close any panel or dialog |
 
+## Links, automation & AI agents
+
+**Link actions** run one action on top of your saved settings, so they work from bookmarks, launchers (Raycast, Alfred, Apple Shortcuts) or anything that opens a URL:
+
+| Link | Does |
+|---|---|
+| `?do=start` | Start (or resume) the current session |
+| `?do=start&mode=focus&min=50&task=Write+report` | Start a one-off 50-minute focus on a task (added if new). `mode` is `focus`, `short` or `long` |
+| `?do=pause` · `?do=skip` · `?do=reset` | Pause, skip or restart |
+| `?do=add-task&task=Email+Sam&estimate=2` | Add a task |
+
+For example, `https://parmsam.github.io/pomotimer2/?do=start&mode=focus`. The installed app's icon menu has the same shortcuts. If a link would abandon a focus session in progress, the app asks first.
+
+**Scripting API.** Agents and scripts driving the page in a browser (Playwright, DevTools, Claude in Chrome and so on) can call `window.pomo` instead of clicking around. `pomo.help()` lists everything; the main calls are `pomo.state()`, `pomo.start({ mode, minutes, task })`, `pomo.pause()`, `pomo.tasks()`, `pomo.addTask(title)`, and `pomo.run(...)`, which runs any command-palette action (`pomo.run('start 50m focus')`). An agent outside the browser can't reach your timer, because your data never leaves the browser. A short description for LLMs is at [`llms.txt`](https://parmsam.github.io/pomotimer2/llms.txt).
+
 ## Privacy
 
 pomo is a static site on GitHub Pages. Settings, tasks and history are saved in your browser's `localStorage` and never sent anywhere. Clearing site data removes them, so use **Settings → Data → Export backup** if you want a copy.

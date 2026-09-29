@@ -10,6 +10,14 @@ test('has an installable manifest with icons', async ({ page, request }) => {
     expect((await request.get(new URL(icon.src, page.url()).toString())).status()).toBe(200);
   }
   expect(manifest.icons.some((i: { purpose?: string }) => i.purpose === 'maskable')).toBe(true);
+  expect(manifest.shortcuts.map((x: { url: string }) => x.url)).toContain('/pomotimer2/?do=start&mode=focus');
+});
+
+test('publishes llms.txt for agents', async ({ page, request }) => {
+  await page.goto('./');
+  const res = await request.get(new URL('llms.txt', page.url()).toString());
+  expect(res.status()).toBe(200);
+  expect(await res.text()).toContain('window.pomo');
 });
 
 test('works offline once loaded', async ({ page, context }) => {

@@ -2,7 +2,7 @@ import './themes/tokens.css';
 import './styles.css';
 
 import { AMBIENT_OPTIONS, createAmbientPlayer } from './core/ambient';
-import { canPlayThroughSilentMode, playAlarm, playTick, unlockAudio } from './core/audio';
+import { audioContext, canPlayThroughSilentMode, playAlarm, playTick, unlockAudio } from './core/audio';
 import { buzz, hapticTrigger, setHapticTriggersEnabled, type Buzz } from './core/haptics';
 import { formatTime } from './core/format';
 import { notify } from './core/notify';
@@ -12,6 +12,8 @@ import { createTimer } from './core/timer';
 import { MODE_LABELS, type Mode, type SessionRecord, type Settings } from './core/types';
 import { removeSession } from './core/history';
 import { parseCommand } from './core/commands';
+import { createAgentApi } from './core/agentApi';
+import { parseUrlAction, stripAction, type UrlAction } from './core/urlActions';
 import { celebrate, driftBlobs, entrance, press, slidePill, swapText } from './fx/anims';
 import { applyTheme, THEMES } from './themes/presets';
 import { FACE_LIST } from './faces';
@@ -718,6 +720,48 @@ bindShortcuts(SHORTCUTS, {
   settingsOpen: () => panel.isOpen(),
   popoverOpen: () => false,
 });
+
+// ---- Scripting API for agents and automation (see `pomo.help()`)
+const pomo = createAgentApi({
+  data,
+  settings,
+  timer,
+  version: __APP_VERSION__,
+  addTask: (title, estimate) => tasks.add(title, estimate),
+  setActiveTask: (id) => tasks.setActive(id),
+  commands: paletteCommands,
+  parse: parsedCommands,
+});
+window.pomo = pomo;
+
+// ---- Link actions, e.g. ?do=start&mode=focus&min=50&task=Write+report
+/** Runs like the buttons do, so abandoning a focus session still asks first. */
+async function runUrlAction(a: UrlAction) {
+  if (a.kind === 'invalid') return toast(`Couldn’t run that link: ${a.reason}`, { duration: 5000 });
+  if (a.kind === 'pause') return timer.pause();
+  if (a.kind === 'skip') return actions.skip();
+  if (a.kind === 'reset') return actions.reset();
+  if (a.kind === 'add-task') {
+    tasks.add(a.title, a.estimate);
+    return toast(`Task added: ${a.title}`, { duration: 2500 });
+  }
+  if (a.mode && a.mode !== data.get().timer.mode) await actions.switchTo(a.mode);
+  if (a.mode && data.get().timer.mode !== a.mode) return; // switching was cancelled
+  try {
+    pomo.start({ ...(a.minutes ? { minutes: a.minutes } : {}), ...(a.task ? { task: a.task } : {}) });
+  } catch (err) {
+    return toast(`Couldn’t run that link: ${(err as Error).message.replace(/^pomo\.\w+: /, '')}`, { duration: 5000 });
+  }
+  // Without a click or key press first, browsers may keep the alarm silent.
+  unlockAudio();
+  if (audioContext()?.state !== 'running' && !settings.get().muted) toast('Timer started. Tap anywhere to turn on the alarm sound', { duration: 6000 });
+}
+
+const urlAction = parseUrlAction(location.search);
+if (urlAction) {
+  history.replaceState(history.state, '', stripAction(location.href));
+  queueMicrotask(() => void runUrlAction(urlAction));
+}
 
 // First visit on a touch screen: mention the timer gestures once.
 if (settings.get().showTips && !settings.get().gesturesTipSeen && window.matchMedia('(hover: none) and (pointer: coarse)').matches) {

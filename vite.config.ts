@@ -28,6 +28,12 @@ export default defineConfig({
           { src: 'pwa-512.png', sizes: '512x512', type: 'image/png' },
           { src: 'pwa-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
+        // Long-press / right-click the installed app icon. These use the ?do= link actions.
+        shortcuts: [
+          { name: 'Start focus', url: '/pomotimer2/?do=start&mode=focus' },
+          { name: 'Start short break', url: '/pomotimer2/?do=start&mode=short' },
+          { name: 'Start long break', url: '/pomotimer2/?do=start&mode=long' },
+        ],
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],

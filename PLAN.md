@@ -165,6 +165,13 @@ Basics already exist (Space, R, S, `,`, Esc).
 - [x] Rotation: random without repeats until the list is exhausted; don't change mid-session
 - [x] Accessible: quote text is real text (not an image), muted styling, and it can be hidden entirely
 
+### Phase 5 — Links & agents
+- [x] Link actions: `?do=start|pause|skip|reset|add-task` with `mode`, `min`, `task`, `estimate`; params are stripped after running, and abandoning a focus session still asks first
+- [x] PWA icon shortcuts (start focus / short / long break) built on link actions
+- [x] `window.pomo` scripting API for agents and automation driving the page: state, start/pause/reset/skip/finish, tasks, and every palette command via `pomo.run()`
+- [x] `public/llms.txt` describing link actions and the API
+- WebMCP (`navigator.modelContext`) skipped for now: it needs an agent built into the browser; revisit if that becomes common
+
 ## Backburner (revisit if there's demand)
 Not part of any phase. Pick these up only if people ask for them.
 - [ ] Optional name + time-of-day greeting (e.g. "Good morning, Sam"; "Welcome back" after a gap). Off by default; the name is stored locally only
@@ -225,4 +232,5 @@ Not part of any phase. Pick these up only if people ask for them.
 - 2026-09-28 — Command palette (Cmd/Ctrl+K) shipped from the backburner. "Start 50m focus" sets a one-off length for that session only (new `timer.plannedMs`, cleared on restart/switch/completion); "set focus to 50m" changes the saved setting. Picking the ambient sound that's already on turns it off, so "toggle rain" works both ways. Keyboard-only for now (no top-bar button).
 - 2026-09-28 — Fixed a label race in `swapText`: Start and Pause swapped in the same tick (e.g. auto-started breaks) left the button reading "Start" while running.
 - 2026-09-28 — Accidental pomodoros: a finished focus session can be undone from its toast (removes the record, takes back the task's 🍅 and focused time, restores the cycle dot, and returns to Focus if still on the following break). Older sessions are deleted from Progress → Recent sessions (last 15 focus sessions), with an Undo toast instead of a confirm dialog. When the daily-goal toast shows, it takes the place of the Undo toast.
+- 2026-09-29 — Agent access without a backend: link actions (`?do=`) for anything that opens a URL, and `window.pomo` for agents that drive the page. Settings never go in the URL. The API acts without confirmation dialogs (explicit programmatic intent) but `finish()` only counts past halfway; link actions go through the normal dialogs since a stale bookmark could fire mid-session. `llms.txt` added; WebMCP deferred. An outside agent still can't see the timer, since data stays in the browser.
 - 2026-09-29 — Fixed keep-awake for sessions restored on reload: the startup `wakeLock.set` call had landed after a `return` inside `previewAmbient` (since 9c3da73), so the screen could sleep until the next pause/resume.

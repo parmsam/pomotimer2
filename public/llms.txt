@@ -1,0 +1,38 @@
+# pomo
+
+> An aesthetic Pomodoro timer that runs entirely in the browser (static site, no account, no server). Settings, tasks and history are stored in the browser's localStorage, so an agent can only read or change them by driving a browser with the app open.
+
+App: https://parmsam.github.io/pomotimer2/
+Source: https://github.com/parmsam/pomotimer2
+
+## Link actions
+
+Open the app with a `do` query parameter to run one action on top of the user's saved settings. The parameters are removed from the URL once the action has run.
+
+- `?do=start`: start or resume the current session
+- `?do=start&mode=focus|short|long`: switch mode and start
+- `&min=50` (with start): one-off length in minutes for this session only (1–1440; `1h`, `1h 30m` also work)
+- `&task=Write+report` (with start): make this open task current, adding it if it doesn't exist
+- `?do=pause`, `?do=skip`, `?do=reset`: pause, go to the next session, restart the current one
+- `?do=add-task&task=Email+Sam&estimate=2`: add a task (estimate is 1–20 pomodoros, default 1)
+
+If an action would abandon a focus session in progress, the app shows a confirmation dialog. Browsers may keep the alarm silent until someone clicks or presses a key on the page.
+
+## Scripting API (in the page)
+
+When you control the page (Playwright `page.evaluate`, DevTools, a browser agent), use `window.pomo`. Calls are synchronous, return plain JSON-safe data, and throw an Error with a readable message on bad input. They act directly, without the confirmation dialogs.
+
+- `pomo.help()`: this reference as text
+- `pomo.state()`: `{ mode, modeLabel, status, remainingMs, remaining, durationMs, progress, next, cycle, task, today: { pomodoros, focusMinutes, goal, goalReached }, streakDays }`
+- `pomo.start({ mode?, minutes?, task? })`: start or resume; `task` is an id or title
+- `pomo.pause()`, `pomo.reset()`, `pomo.skip()`
+- `pomo.finish()`: count the current focus session now (only past the halfway mark)
+- `pomo.addMinutes(n)`: `n` may be negative
+- `pomo.tasks()`, `pomo.addTask(title, estimate?)`, `pomo.setTask(idOrTitle | null)`
+- `pomo.commands()`: every command-palette action available now, as `{ id, title, group }`
+- `pomo.run(idOrText)`: run a palette command by id or title, or palette text such as `"start 50m focus"`, `"set focus to 45m"`, `"add task Write report 🍅3"`, `"Theme:matcha"`
+
+## Pomodoro rules the app follows
+
+- A pomodoro is indivisible: stopping or skipping a focus session early means it doesn't count, but the focused minutes stay in today's total. Past halfway it can still be counted.
+- The default rhythm is 25 minutes of focus, 5-minute short breaks, and a 15-minute long break after every 4 pomodoros. The user can change all of these.
