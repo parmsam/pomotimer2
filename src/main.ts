@@ -125,7 +125,6 @@ function previewAmbient() {
   if (s.ambient === 'off' || s.muted) {
     ambientPreview = undefined;
     return syncAmbient();
-wakeLock.set(settings.get().keepAwake && data.get().timer.status === 'running');
   }
   ambient.setVolume(s.ambientVolume);
   ambient.play(s.ambient);
@@ -761,3 +760,5 @@ requestAnimationFrame(frame);
 setInterval(secondTick, 200);
 setupPwa(() => data.get().timer.status === 'running', () => settings.get().showTips);
 syncAmbient();
+// A session restored on reload doesn't change status, so take the wake lock now.
+wakeLock.set(settings.get().keepAwake && data.get().timer.status === 'running');

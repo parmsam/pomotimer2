@@ -1,4 +1,5 @@
-import { blur, expect, open, test } from './helpers';
+import type { Page } from '@playwright/test';
+import { blur, expect, focusInProgress, open, test } from './helpers';
 
 test('+ and − add or remove a minute', async ({ page, isMobile }) => {
   test.skip(isMobile, 'keyboard');
@@ -26,31 +27,41 @@ test('the tab icon shows progress while a session runs', async ({ page }) => {
   await expect(icon).toHaveAttribute('type', 'image/svg+xml');
 });
 
-test('keeps the screen awake while running', async ({ page }) => {
-  await page.addInitScript(() => {
-    const log: string[] = [];
-    (window as unknown as { wakeLog: string[] }).wakeLog = log;
-    Object.defineProperty(navigator, 'wakeLock', {
-      configurable: true,
-      value: {
-        request: async () => {
-          log.push('request');
-          const s = new EventTarget() as EventTarget & { release(): Promise<void> };
-          s.release = async () => {
-            log.push('release');
-            s.dispatchEvent(new Event('release'));
-          };
-          return s;
-        },
+/** Stands in for the Screen Wake Lock API and logs requests/releases to window.wakeLog. */
+const fakeWakeLock = () => {
+  const log: string[] = [];
+  (window as unknown as { wakeLog: string[] }).wakeLog = log;
+  Object.defineProperty(navigator, 'wakeLock', {
+    configurable: true,
+    value: {
+      request: async () => {
+        log.push('request');
+        const s = new EventTarget() as EventTarget & { release(): Promise<void> };
+        s.release = async () => {
+          log.push('release');
+          s.dispatchEvent(new Event('release'));
+        };
+        return s;
       },
-    });
+    },
   });
+};
+const wakeLog = (page: Page) => page.evaluate(() => (window as unknown as { wakeLog: string[] }).wakeLog);
+
+test('keeps the screen awake while running', async ({ page }) => {
+  await page.addInitScript(fakeWakeLock);
   await open(page);
-  const log = () => page.evaluate(() => (window as unknown as { wakeLog: string[] }).wakeLog);
+  const log = () => wakeLog(page);
   await page.locator('#toggle').click();
   await expect.poll(log).toEqual(['request']);
   await page.locator('#toggle').click();
   await expect.poll(log).toEqual(['request', 'release']);
+});
+
+test('keeps the screen awake for a session restored on reload', async ({ page }) => {
+  await page.addInitScript(fakeWakeLock);
+  await open(page, { data: focusInProgress(5) });
+  await expect.poll(() => wakeLog(page)).toEqual(['request']);
 });
 
 test.describe('pop-out mini timer', () => {
