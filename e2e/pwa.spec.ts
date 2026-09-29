@@ -20,6 +20,15 @@ test('publishes llms.txt for agents', async ({ page, request }) => {
   expect(await res.text()).toContain('window.pomo');
 });
 
+test('the service worker lets real files through instead of serving the app', async ({ page }) => {
+  await page.goto('./');
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.reload();
+  expect(await page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
+  await page.goto('./llms.txt');
+  await expect(page.locator('body')).toContainText('window.pomo');
+});
+
 test('works offline once loaded', async ({ page, context }) => {
   await page.goto('./');
   await expect(page.getByRole('status').filter({ hasText: 'works offline' })).toBeVisible({ timeout: 15_000 });

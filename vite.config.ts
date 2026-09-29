@@ -37,6 +37,9 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
+        // Serve the app for page URLs only; real files (llms.txt, …) come from the network.
+        // Matched against path + query, so only the path may end in an extension (?task=v1.2 is still the app).
+        navigateFallbackDenylist: [/^[^?#]*\/[^/?#]+\.[^/?#]+$/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
