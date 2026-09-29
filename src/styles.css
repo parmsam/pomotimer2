@@ -1418,6 +1418,44 @@ kbd {
   font-size: 0.82rem;
 }
 
+.recent {
+  margin-top: 20px;
+}
+.recent ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.recent li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 2px 0 2px 2px;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+.recent-when {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.recent-detail {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+}
+.recent li.abandoned .recent-when {
+  color: var(--muted);
+}
+.recent-empty {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
 .chart {
   position: relative;
   padding-top: 18px;

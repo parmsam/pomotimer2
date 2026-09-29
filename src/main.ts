@@ -9,7 +9,8 @@ import { notify } from './core/notify';
 import { clearAll, defaultAppData, DEFAULT_SETTINGS, loadAppData, loadSettings, write } from './core/storage';
 import { createStore, persist } from './core/store';
 import { createTimer } from './core/timer';
-import { MODE_LABELS, type Mode, type Settings } from './core/types';
+import { MODE_LABELS, type Mode, type SessionRecord, type Settings } from './core/types';
+import { removeSession } from './core/history';
 import { parseCommand } from './core/commands';
 import { celebrate, driftBlobs, entrance, press, slidePill, swapText } from './fx/anims';
 import { applyTheme, THEMES } from './themes/presets';
@@ -155,7 +156,13 @@ const timer = createTimer(data, settings, ({ finished, next, missed, early }) =>
   } else if (early) {
     celebrate($('#burst'), $('.dial'));
   }
-  if (finished === 'focus') queueMicrotask(checkGoal);
+  if (finished === 'focus') {
+    const rec = data.get().history.at(-1);
+    queueMicrotask(() => {
+      // The goal toast wins; the session can still be deleted from the progress view.
+      if (!checkGoal() && rec && !rec.abandoned) offerUndo(rec, missed);
+    });
+  }
   queueMicrotask(() => {
     faceEvent('complete');
     if (!missed) background.pulse();
@@ -163,12 +170,35 @@ const timer = createTimer(data, settings, ({ finished, next, missed, early }) =>
   liveEl.textContent = `${MODE_LABELS[finished]} complete. Next: ${MODE_LABELS[next]}.`;
 });
 
-function checkGoal() {
+/** A pomodoro that ran by accident can be taken back for a few seconds after it ends. */
+function offerUndo(rec: SessionRecord, missed: boolean) {
+  toast(missed ? 'A pomodoro finished while you were away' : 'Pomodoro counted', {
+    duration: 10_000,
+    action: { label: 'Undo', run: () => undoCompletion(rec) },
+  });
+}
+
+function undoCompletion(rec: SessionRecord) {
+  const latest = data.get().history.at(-1)?.endedAt === rec.endedAt;
+  // Still on the break that followed it: go back to focus, as if it never ran.
+  if (latest && data.get().timer.mode !== 'focus') timer.setMode('focus');
+  const removed = removeSession(data.get(), rec);
+  if (!removed) return;
+  data.set((d) => ({
+    history: removed.history,
+    tasks: removed.tasks,
+    ...(latest ? { timer: { ...d.timer, cycleCount: Math.max(0, d.timer.cycleCount - 1) } } : {}),
+  }));
+  toast('Pomodoro removed', { duration: 2000 });
+}
+
+/** Celebrates the daily goal once per day. True when it showed its toast. */
+function checkGoal(): boolean {
   const { goal } = stats.current();
   const today = dayKey(Date.now());
-  if (!goal.reached || data.get().goalCelebratedOn === today) return;
+  if (!goal.reached || data.get().goalCelebratedOn === today) return false;
   data.set({ goalCelebratedOn: today });
-  if (!settings.get().celebrateGoal) return;
+  if (!settings.get().celebrateGoal) return false;
   toast(`Daily goal reached — ${goal.done} pomodoros today 🎉`, {
     duration: 6000,
     action: {
@@ -180,6 +210,7 @@ function checkGoal() {
     },
   });
   setTimeout(() => celebrate($('#burst'), $('.dial')), 450);
+  return true;
 }
 
 // ---- Rendering

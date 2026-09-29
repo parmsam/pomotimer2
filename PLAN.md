@@ -179,6 +179,7 @@ Not part of any phase. Pick these up only if people ask for them.
 - [ ] Per-scene controls: speed, density/intensity, color follows theme vs. mode
 - [ ] Remap keyboard shortcuts in settings
 - [x] Command palette (Cmd/Ctrl+K) with fuzzy search and a command-bar timer syntax, e.g. "Start 50m focus", "Switch to Tamagotchi", "Toggle rain", "Export today", "Log interruption", "Set current task"
+- [x] Undo an accidental pomodoro: an Undo button on the "Pomodoro counted" toast (10 s), and deletable sessions (with undo) under "Recent sessions" in the progress view
 
 ## Reference notes
 **pomodorotimer.online** (studied 2026-09-27; captured into `ref/`, which is gitignored). A Nuxt PWA with no backend; data lives in localStorage and IndexedDB. What stood out:
@@ -223,3 +224,4 @@ Not part of any phase. Pick these up only if people ask for them.
 - 2026-09-28 — Second animation pass on Tetris, Spaceship, Handheld, Tomato, Potion and Plant. Face unit tests mock reduced motion (static art); an e2e test plays a real completion on each. Command palette (Cmd/Ctrl+K) added to the backburner.
 - 2026-09-28 — Command palette (Cmd/Ctrl+K) shipped from the backburner. "Start 50m focus" sets a one-off length for that session only (new `timer.plannedMs`, cleared on restart/switch/completion); "set focus to 50m" changes the saved setting. Picking the ambient sound that's already on turns it off, so "toggle rain" works both ways. Keyboard-only for now (no top-bar button).
 - 2026-09-28 — Fixed a label race in `swapText`: Start and Pause swapped in the same tick (e.g. auto-started breaks) left the button reading "Start" while running.
+- 2026-09-28 — Accidental pomodoros: a finished focus session can be undone from its toast (removes the record, takes back the task's 🍅 and focused time, restores the cycle dot, and returns to Focus if still on the following break). Older sessions are deleted from Progress → Recent sessions (last 15 focus sessions), with an Undo toast instead of a confirm dialog. When the daily-goal toast shows, it takes the place of the Undo toast.

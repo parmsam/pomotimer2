@@ -1,10 +1,12 @@
 import { animate, stagger } from 'animejs';
 import { formatDuration } from '../core/format';
+import { removeSession, restoreSession } from '../core/history';
 import { computeStats, dayKey, STREAK_FOCUS_MS, type DayStats, type Stats } from '../core/stats';
 import type { Store } from '../core/store';
 import type { Timer } from '../core/timer';
-import type { AppData, Mode, Settings } from '../core/types';
+import type { AppData, Mode, SessionRecord, Settings } from '../core/types';
 import { reducedMotion } from '../fx/anims';
+import { toast } from './toast';
 
 export interface StatsView {
   current(): Stats;
@@ -12,6 +14,21 @@ export interface StatsView {
   refresh(): void;
   open(): void;
   isOpen(): boolean;
+}
+
+const RECENT = 15;
+const TRASH = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
+
+/** "Today 10:32", "Yesterday 18:05", "Mon, Sep 22 09:10". */
+function when(ts: number): string {
+  const time = new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const key = dayKey(ts);
+  const now = new Date();
+  if (key === dayKey(now.getTime())) return `Today ${time}`;
+  const y = new Date(now);
+  y.setDate(y.getDate() - 1);
+  if (key === dayKey(y.getTime())) return `Yesterday ${time}`;
+  return `${new Date(ts).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })} ${time}`;
 }
 
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
@@ -104,6 +121,81 @@ export function createStatsView(data: Store<AppData>, settings: Store<Settings>,
         <tbody>${rows}</tbody></table>`;
   }
 
+  /** Latest focus sessions, each deletable (with undo) in case one ran by accident. */
+  function recentList(): HTMLElement {
+    const wrap = document.createElement('section');
+    wrap.className = 'recent';
+    const h = document.createElement('h3');
+    h.className = 'stats-h';
+    h.id = 'st-recent';
+    h.textContent = 'Recent sessions';
+    wrap.append(h);
+    const sessions = data
+      .get()
+      .history.filter((r) => r.mode === 'focus')
+      .slice(-RECENT)
+      .reverse();
+    if (!sessions.length) {
+      const p = document.createElement('p');
+      p.className = 'recent-empty';
+      p.textContent = 'Finished pomodoros show up here.';
+      wrap.append(p);
+      return wrap;
+    }
+    const ul = document.createElement('ul');
+    ul.setAttribute('aria-labelledby', h.id);
+    sessions.forEach((rec, i) => {
+      const li = document.createElement('li');
+      const label = document.createElement('span');
+      label.className = 'recent-when';
+      label.textContent = when(rec.endedAt);
+      const detail = document.createElement('span');
+      detail.className = 'recent-detail';
+      const task = rec.taskId ? data.get().tasks.find((t) => t.id === rec.taskId) : undefined;
+      detail.textContent = [
+        formatDuration(rec.focusedMs ?? rec.durationMs),
+        rec.abandoned ? 'stopped early' : '',
+        task?.title ?? '',
+      ]
+        .filter(Boolean)
+        .join(' · ');
+      li.classList.toggle('abandoned', !!rec.abandoned);
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'icon-sm';
+      del.dataset.recent = String(i);
+      del.setAttribute('aria-label', `Delete the ${when(rec.endedAt)} session`);
+      del.title = 'Delete';
+      del.innerHTML = TRASH;
+      del.addEventListener('click', () => remove(rec));
+      li.append(label, detail, del);
+      ul.append(li);
+    });
+    wrap.append(ul);
+    return wrap;
+  }
+
+  function remove(rec: SessionRecord) {
+    const removed = removeSession(data.get(), rec);
+    if (!removed) return;
+    data.set({ history: removed.history, tasks: removed.tasks });
+    toast(rec.abandoned ? 'Session deleted' : 'Pomodoro deleted', {
+      duration: 6000,
+      action: { label: 'Undo', run: () => data.set((d) => restoreSession(d, rec, removed.credit)) },
+    });
+  }
+
+  /** Redraws the open dialog in place (no entrance animation), keeping focus on the same row. */
+  function rerender() {
+    if (!backdrop) return;
+    const focused = (document.activeElement as HTMLElement | null)?.dataset.recent;
+    const fresh = build(current());
+    backdrop.replaceChildren(...fresh.childNodes);
+    if (focused === undefined) return;
+    const rows = backdrop.querySelectorAll<HTMLElement>('[data-recent]');
+    (rows[Math.min(Number(focused), rows.length - 1)] ?? backdrop.querySelector<HTMLElement>('.shortcuts-head button'))?.focus();
+  }
+
   function build(s: Stats): HTMLElement {
     const el = document.createElement('div');
     el.className = 'dialog-backdrop';
@@ -130,6 +222,7 @@ export function createStatsView(data: Store<AppData>, settings: Store<Settings>,
         ${chart(s.week)}
         <p class="stats-note">One pomodoro — or ${STREAK_FOCUS_MS / 60_000} focused minutes — keeps your streak going.${extras.length ? ` Today: ${extras.join(', ')}.` : ''}</p>
       </div>`;
+    el.querySelector('.dialog')!.append(recentList());
 
     const tip = el.querySelector<HTMLElement>('.chart-tip')!;
     const chartEl = el.querySelector<HTMLElement>('.chart')!;
@@ -190,6 +283,7 @@ export function createStatsView(data: Store<AppData>, settings: Store<Settings>,
   chip.addEventListener('click', open);
   data.subscribe((d, prev) => {
     if (d.history !== prev.history || d.timer.mode !== prev.timer.mode) refresh();
+    if (d.history !== prev.history) rerender();
   });
   settings.subscribe((s, prev) => {
     if (s.dailyGoal !== prev.dailyGoal) refresh();
