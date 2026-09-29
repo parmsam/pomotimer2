@@ -86,3 +86,7 @@ All planned phases are done. Ideas on the backburner are listed in [`PLAN.md`](P
 - The [Pomodoro Technique](https://en.wikipedia.org/wiki/Pomodoro_Technique) was created by Francesco Cirillo.
 - Inspired by [studywithme.io](https://studywithme.io/aesthetic-pomodoro-timer/), [pomodorotimer.online](https://pomodorotimer.online) and [tomatotimers.com](https://www.tomatotimers.com).
 - Font: [Outfit](https://fonts.google.com/specimen/Outfit).
+
+## License
+
+[MIT](LICENSE) © 2026 Sam Parmar
