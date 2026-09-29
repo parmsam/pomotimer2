@@ -32,6 +32,20 @@ When you control the page (Playwright `page.evaluate`, DevTools, a browser agent
 - `pomo.commands()`: every command-palette action available now, as `{ id, title, group }`
 - `pomo.run(idOrText)`: run a palette command by id or title, or palette text such as `"start 50m focus"`, `"set focus to 45m"`, `"add task Write report 🍅3"`, `"Theme:matcha"`
 
+## Common agent recipes
+
+- What is the timer status?
+  `pomo.state()`, then report `remaining`, `modeLabel`, `status`, `task` and `today`. No need to read the page.
+- Start a 50-minute focus session on "Write report"
+  `pomo.start({ mode: 'focus', minutes: 50, task: 'Write report' })`, or open `?do=start&mode=focus&min=50&task=Write+report`.
+  Check `pomo.state()` first: switching away from a focus session in progress abandons it.
+- Add three tasks
+  `['Email Sam', 'Plan sprint', 'Review PRs'].map((title) => pomo.addTask(title))`: one call per task, with an optional estimate (`pomo.addTask(title, 3)`). As links, open `?do=add-task&task=…` once per task.
+- Pause, or stop early
+  `pomo.pause()` keeps the session. Past halfway, `pomo.finish()` counts it; `skip()` and `reset()` don't.
+- Change a setting or the theme
+  `pomo.run('Theme:matcha')`. Find ids with `pomo.commands()`. Never edit localStorage directly.
+
 ## Pomodoro rules the app follows
 
 - A pomodoro is indivisible: stopping or skipping a focus session early means it doesn't count, but the focused minutes stay in today's total. Past halfway it can still be counted.

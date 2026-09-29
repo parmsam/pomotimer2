@@ -1,5 +1,6 @@
+import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createAgentApi, type AgentCommand } from './agentApi';
+import { createAgentApi, RECIPES, type AgentCommand } from './agentApi';
 import { DEFAULT_SETTINGS, defaultAppData } from './storage';
 import { createStore } from './store';
 import { createTimer } from './timer';
@@ -144,5 +145,28 @@ describe('pomo API', () => {
     api.run('start 50m focus');
     expect(ran).toEqual(['theme:matcha', 'mute', 'parsed:start']);
     expect(() => api.run('fly me to the moon')).toThrow(/no command/);
+  });
+});
+
+describe('agent recipes', () => {
+  it('every recipe runs against the real timer', () => {
+    const ran: string[] = [];
+    const { api, data } = setup([{ id: 'Theme:matcha', title: 'Theme: Matcha', group: 'Appearance', run: () => void ran.push('matcha') }]);
+    for (const r of RECIPES) {
+      const result = new Function('pomo', `return ${r.code}`)(api) as unknown;
+      expect(result, r.ask).toBeTruthy();
+    }
+    expect(data.get().timer).toMatchObject({ mode: 'focus', status: 'paused' });
+    expect(api.tasks().map((x) => x.title)).toEqual(['Write report', 'Email Sam', 'Plan sprint', 'Review PRs']);
+    expect(ran).toEqual(['matcha']);
+  });
+
+  it('help() and llms.txt show every recipe', () => {
+    const { api } = setup();
+    const llms = readFileSync('public/llms.txt', 'utf8');
+    for (const r of RECIPES) {
+      expect(api.help()).toContain(r.code);
+      expect(llms, r.ask).toContain(r.code);
+    }
   });
 });

@@ -170,6 +170,7 @@ Basics already exist (Space, R, S, `,`, Esc).
 - [x] PWA icon shortcuts (start focus / short / long break) built on link actions
 - [x] `window.pomo` scripting API for agents and automation driving the page: state, start/pause/reset/skip/finish, tasks, and every palette command via `pomo.run()`
 - [x] `public/llms.txt` describing link actions and the API
+- [x] "Common agent recipes" (status, start on a task, add tasks, pause/stop early, change a setting) in `pomo.help()` and `llms.txt`
 - WebMCP (`navigator.modelContext`) skipped for now: it needs an agent built into the browser; revisit if that becomes common
 
 ## Backburner (revisit if there's demand)
@@ -235,3 +236,4 @@ Not part of any phase. Pick these up only if people ask for them.
 - 2026-09-29 — Agent access without a backend: link actions (`?do=`) for anything that opens a URL, and `window.pomo` for agents that drive the page. Settings never go in the URL. The API acts without confirmation dialogs (explicit programmatic intent) but `finish()` only counts past halfway; link actions go through the normal dialogs since a stale bookmark could fire mid-session. `llms.txt` added; WebMCP deferred. An outside agent still can't see the timer, since data stays in the browser.
 - 2026-09-29 — Fixed keep-awake for sessions restored on reload: the startup `wakeLock.set` call had landed after a `return` inside `previewAmbient` (since 9c3da73), so the screen could sleep until the next pause/resume.
 - 2026-09-29 — The service worker's navigation fallback served the app for every URL in scope, so `llms.txt` showed the app in any browser that had visited before. URLs ending in a file extension are now excluded (`navigateFallbackDenylist`). Tests for published files must navigate with a controlling service worker, not use `request.get`, which bypasses it.
+- 2026-09-29 — Added five agent recipes to `pomo.help()` and `llms.txt`, kept short so they don't compete with the reference. They live in `RECIPES` in `core/agentApi.ts`; a unit test runs each one against the real timer and checks both texts include it.

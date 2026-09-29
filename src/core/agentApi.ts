@@ -86,6 +86,38 @@ export interface AgentApiDeps {
 const MODES: Mode[] = ['focus', 'short', 'long'];
 const MAX_MINUTES = 24 * 60;
 
+/**
+ * Common requests and the calls that answer them, shown in `pomo.help()` and `llms.txt`.
+ * The unit tests run every `code` against the real timer, so they can't go stale.
+ */
+export const RECIPES: { ask: string; code: string; note: string }[] = [
+  {
+    ask: 'What is the timer status?',
+    code: 'pomo.state()',
+    note: 'Report remaining, modeLabel, status, task and today. No need to read the page.',
+  },
+  {
+    ask: 'Start a 50-minute focus session on "Write report"',
+    code: "pomo.start({ mode: 'focus', minutes: 50, task: 'Write report' })",
+    note: 'Check pomo.state() first: switching away from a focus session in progress abandons it.',
+  },
+  {
+    ask: 'Add three tasks',
+    code: "['Email Sam', 'Plan sprint', 'Review PRs'].map((title) => pomo.addTask(title))",
+    note: 'One call per task, with an optional estimate: pomo.addTask(title, 3).',
+  },
+  {
+    ask: 'Pause, or stop early',
+    code: 'pomo.pause()',
+    note: "pause() keeps the session. Past halfway, pomo.finish() counts it; skip() and reset() don't.",
+  },
+  {
+    ask: 'Change a setting or the theme',
+    code: "pomo.run('Theme:matcha')",
+    note: 'Find ids with pomo.commands(). Never edit localStorage directly.',
+  },
+];
+
 const HELP = `pomo: Pomodoro timer scripting API (window.pomo). Data stays in this browser.
 All calls are synchronous and return the new state unless noted.
 
@@ -101,10 +133,13 @@ pomo.tasks()                         the task list
 pomo.addTask(title, estimate?)       returns the new task
 pomo.setTask(idOrTitle | null)       make a task current
 pomo.commands()                      every command-palette action available now
-pomo.run(idOrText)                   run one, e.g. pomo.run("theme:matcha") or pomo.run("start 50m focus")
+pomo.run(idOrText)                   run one, e.g. pomo.run("Theme:matcha") or pomo.run("start 50m focus")
 
 Leaving a focus session early keeps its focused minutes in today's total.
-Sound can't start until someone has clicked or pressed a key on the page.`;
+Sound can't start until someone has clicked or pressed a key on the page.
+
+Common requests:
+${RECIPES.map((r) => `- ${r.ask}\n    ${r.code}\n    ${r.note}`).join('\n')}`;
 
 export function createAgentApi(deps: AgentApiDeps): PomoApi {
   const { data, settings, timer } = deps;
