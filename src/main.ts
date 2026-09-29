@@ -1,7 +1,7 @@
 import './themes/tokens.css';
 import './styles.css';
 
-import { createAmbientPlayer } from './core/ambient';
+import { AMBIENT_OPTIONS, createAmbientPlayer } from './core/ambient';
 import { canPlayThroughSilentMode, playAlarm, playTick, unlockAudio } from './core/audio';
 import { buzz, hapticTrigger, setHapticTriggersEnabled, type Buzz } from './core/haptics';
 import { formatTime } from './core/format';
@@ -9,11 +9,14 @@ import { notify } from './core/notify';
 import { clearAll, defaultAppData, DEFAULT_SETTINGS, loadAppData, loadSettings, write } from './core/storage';
 import { createStore, persist } from './core/store';
 import { createTimer } from './core/timer';
-import { MODE_LABELS, type Mode } from './core/types';
+import { MODE_LABELS, type Mode, type Settings } from './core/types';
+import { parseCommand } from './core/commands';
 import { celebrate, driftBlobs, entrance, press, slidePill, swapText } from './fx/anims';
-import { applyTheme } from './themes/presets';
+import { applyTheme, THEMES } from './themes/presets';
+import { FACE_LIST } from './faces';
+import { SCENES } from './fx/scenes';
 import { backupFilename, makeBackup, parseBackup } from './core/backup';
-import { historyToMarkdown, tasksToMarkdown } from './core/markdown';
+import { historyToMarkdown, parseTasksMarkdown, tasksToMarkdown } from './core/markdown';
 import { dayKey } from './core/stats';
 import { copyText, downloadText } from './ui/clipboard';
 import { attachMenu, menuOpen } from './ui/menu';
@@ -30,7 +33,8 @@ import { createPip, pipSupported } from './ui/pip';
 import type { FaceContext, FaceEvent } from './faces';
 import { createWakeLock } from './ui/wakeLock';
 import { attachGestures } from './ui/gestures';
-import { createFullscreenButton } from './ui/fullscreen';
+import { createFullscreenButton, fullscreenSupported } from './ui/fullscreen';
+import { createPalette, type PaletteCommand } from './ui/palette';
 import { createStatsView } from './ui/stats';
 import { bindShortcuts, createShortcutsHelp, type Shortcut } from './ui/shortcuts';
 import { toast } from './ui/toast';
@@ -296,11 +300,13 @@ settings.subscribe((s, prev) => {
 const logMarkdown = (days: number | null) =>
   historyToMarkdown({ ...data.get(), now: Date.now(), days, dailyGoal: settings.get().dailyGoal });
 
+const downloadLog = (days: number | null) => {
+  downloadText(`pomo-log-${dayKey(Date.now())}${days === null ? '-all' : days === 1 ? '' : `-${days}d`}.md`, logMarkdown(days));
+  toast('Log downloaded');
+};
+
 const panel = createSettingsPanel(settings, {
-  exportLog(days) {
-    downloadText(`pomo-log-${dayKey(Date.now())}${days === null ? '-all' : days === 1 ? '' : `-${days}d`}.md`, logMarkdown(days));
-    toast('Log downloaded');
-  },
+  exportLog: downloadLog,
   resetAll() {
     clearAll();
     settings.set(structuredClone(DEFAULT_SETTINGS));
@@ -410,6 +416,18 @@ modeTabs.forEach((b) =>
 setHapticTriggersEnabled(settings.get().haptics);
 $('#tasks-toggle').addEventListener('click', () => tasks.toggleVisible());
 
+const nudgeMinute = (add: boolean) => {
+  timer.addTime(add ? 60_000 : -60_000);
+  toast(`${add ? '+1' : '−1'} minute · ${formatTime(timer.remaining())}`, { duration: 1500 });
+};
+const copyTasks = async () => {
+  const md = tasksToMarkdown(data.get().tasks);
+  if (!md) return toast('No tasks to copy yet');
+  toast((await copyText(md)) ? 'Tasks copied as Markdown' : 'Couldn’t copy. Try Download log in Settings');
+};
+const copyTodayLog = async () => toast((await copyText(logMarkdown(1))) ? 'Today’s log copied' : 'Couldn’t copy. Try Download log in Settings');
+const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
+
 const toggleMute = () => {
   const muted = !settings.get().muted;
   settings.set({ muted });
@@ -463,33 +481,20 @@ const SHORTCUTS: Shortcut[] = [
     label: 'Add / remove a minute',
     group: 'Timer',
     match: (k) => k === '+' || k === '=' || k === '-',
-    run: (e) => {
-      const add = e.key !== '-';
-      timer.addTime(add ? 60_000 : -60_000);
-      toast(`${add ? '+1' : '−1'} minute · ${formatTime(timer.remaining())}`, { duration: 1500 });
-    },
+    run: (e) => nudgeMinute(e.key !== '-'),
   },
   { keys: ['P'], label: 'Pop out a mini timer (Chrome, Edge)', group: 'General', match: (k) => k === 'p', run: () => togglePip() },
   { keys: ['F'], label: 'Focus mode (hide everything but the timer)', group: 'General', match: (k) => k === 'f', run: () => focusMode.toggle() },
   { keys: ['M'], label: 'Mute / unmute sounds', group: 'General', match: (k) => k === 'm', run: toggleMute },
   { keys: [','], label: 'Open / close settings', group: 'General', inSettings: true, match: (k) => k === ',', run: () => panel.toggle() },
+  { keys: [isMac ? '⌘' : 'Ctrl', 'K'], label: 'Command palette: search every action', group: 'General' },
   { keys: ['?'], label: 'Show these shortcuts', group: 'General', inSettings: true, match: (k) => k === '?', run: () => openHelp() },
   { keys: ['Esc'], label: 'Close any panel or dialog', group: 'General' },
 ];
 
 attachMenu($<HTMLButtonElement>('#tasks-menu'), () => [
-  {
-    label: 'Copy tasks as Markdown',
-    run: async () => {
-      const md = tasksToMarkdown(data.get().tasks);
-      if (!md) return toast('No tasks to copy yet');
-      toast((await copyText(md)) ? 'Tasks copied as Markdown' : 'Couldn’t copy. Try Download log in Settings');
-    },
-  },
-  {
-    label: 'Copy today’s log',
-    run: async () => toast((await copyText(logMarkdown(1))) ? 'Today’s log copied' : 'Couldn’t copy. Try Download log in Settings'),
-  },
+  { label: 'Copy tasks as Markdown', run: copyTasks },
+  { label: 'Copy today’s log', run: copyTodayLog },
   { label: 'Import from Markdown…', run: () => tasks.importMarkdown() },
 ]);
 
@@ -500,18 +505,186 @@ const openHelp = () => {
   if (!settings.get().shortcutsHintSeen) settings.set({ shortcutsHintSeen: true });
 };
 $('#shortcuts-open').addEventListener('click', openHelp);
-createFullscreenButton($<HTMLButtonElement>('#fullscreen'));
+const fullscreen = createFullscreenButton($<HTMLButtonElement>('#fullscreen'));
 $('#pip-open').hidden = !pipSupported();
 $('#pip-open').addEventListener('click', togglePip);
 
+// ---- Command palette
+const SETTING_TOGGLES: [keyof Settings, string][] = [
+  ['strictMode', 'strict mode'],
+  ['autoStartBreaks', 'auto-start breaks'],
+  ['autoStartFocus', 'auto-start focus'],
+  ['focusModeOnStart', 'focus mode on start'],
+  ['tick', 'ticking sound'],
+  ['keepAwake', 'keep screen on'],
+  ['showQuotes', 'quotes'],
+  ['trackInterruptions', 'interruption tracking'],
+];
+const minutesLabel = (ms: number) => `${Math.round(ms / 60_000)} min`;
+
+function paletteCommands(): PaletteCommand[] {
+  const s = settings.get();
+  const d = data.get();
+  const t = d.timer;
+  const pick = <T extends { id: string; label: string }>(group: string, items: T[], currentId: string, set: (id: T['id']) => void, keywords = '') =>
+    items.map((x) => ({ id: `${group}:${x.id}`, title: `${group}: ${x.label}`, group: 'Appearance', keywords, current: x.id === currentId, run: () => set(x.id) }));
+  const toggleLabel = strictStop() ? 'Stop session' : t.status === 'running' ? 'Pause' : t.status === 'paused' ? 'Resume' : `Start ${MODE_LABELS[t.mode].toLowerCase()}`;
+  return [
+    { id: 'toggle', title: toggleLabel, group: 'Timer', keys: ['Space'], keywords: 'start pause resume stop play timer', run: () => toggleBtn.click() },
+    { id: 'reset', title: 'Restart session', group: 'Timer', keys: ['R'], keywords: 'reset', run: () => $('#reset').click() },
+    { id: 'skip', title: `Skip to ${MODE_LABELS[timer.upcoming()].toLowerCase()}`, group: 'Timer', keys: ['S'], keywords: 'next', run: () => $('#skip').click() },
+    ...(['focus', 'short', 'long'] as Mode[]).map((m, i) => ({
+      id: `mode:${m}`,
+      title: `Switch to ${MODE_LABELS[m].toLowerCase()}`,
+      group: 'Timer',
+      keys: [String(i + 1)],
+      keywords: 'mode',
+      current: t.mode === m,
+      run: () => void actions.switchTo(m),
+    })),
+    { id: 'add-minute', title: 'Add a minute', group: 'Timer', keys: ['+'], keywords: 'more time extend', run: () => nudgeMinute(true) },
+    { id: 'remove-minute', title: 'Remove a minute', group: 'Timer', keys: ['−'], keywords: 'less time shorten', run: () => nudgeMinute(false) },
+    ...(!$('#interrupt').hidden ? [{ id: 'interrupt', title: 'Log an interruption', group: 'Timer', keys: ['I'], keywords: 'distraction note', run: () => interruptions.open() }] : []),
+    { id: 'new-task', title: 'New task', group: 'Tasks', keys: ['N'], keywords: 'add create todo', run: () => tasks.focusInput() },
+    ...d.tasks
+      .filter((x) => !x.done)
+      .map((x) => ({
+        id: `task:${x.id}`,
+        title: `Set current task: ${x.title}`,
+        group: 'Tasks',
+        keywords: 'active work on select',
+        current: x.id === d.activeTaskId,
+        run: () => {
+          tasks.setActive(x.id);
+          toast(`Current task: ${x.title}`, { duration: 2000 });
+        },
+      })),
+    { id: 'tasks-visible', title: s.showTasks ? 'Hide tasks' : 'Show tasks', group: 'Tasks', keys: ['T'], keywords: 'toggle list panel', run: () => tasks.toggleVisible() },
+    { id: 'copy-tasks', title: 'Copy tasks as Markdown', group: 'Tasks', keywords: 'export clipboard', run: () => void copyTasks() },
+    { id: 'import-tasks', title: 'Import tasks from Markdown…', group: 'Tasks', keywords: 'paste bulk add', run: () => tasks.importMarkdown() },
+    { id: 'copy-today', title: 'Copy today’s log', group: 'Export', keywords: 'export today markdown clipboard history', run: () => void copyTodayLog() },
+    { id: 'download-today', title: 'Download today’s log', group: 'Export', keywords: 'export today markdown file history', run: () => downloadLog(1) },
+    { id: 'download-all', title: 'Download full history', group: 'Export', keywords: 'export all log markdown file', run: () => downloadLog(null) },
+    ...pick('Clock face', FACE_LIST, s.clockFace, (clockFace) => settings.set({ clockFace }), 'switch timer style'),
+    ...pick('Theme', THEMES.map((x) => ({ id: x.id, label: x.name })), s.theme, (theme) => settings.set({ theme }), 'colors colours palette'),
+    ...pick(
+      'Background',
+      [{ id: 'blobs', label: 'Blobs' }, ...SCENES, { id: 'none', label: 'None' }] as { id: Settings['background']; label: string }[],
+      s.background,
+      (background) => settings.set({ background }),
+      'scene',
+    ),
+    { id: 'focus-mode', title: focusMode.isOn() ? 'Exit focus mode' : 'Focus mode', group: 'View', keys: ['F'], keywords: 'zen hide distraction', run: () => focusMode.toggle() },
+    ...(fullscreenSupported() ? [{ id: 'fullscreen', title: 'Toggle full screen', group: 'View', keywords: 'fullscreen', run: () => void fullscreen.toggle() }] : []),
+    ...(pipSupported() ? [{ id: 'pip', title: 'Pop out mini timer', group: 'View', keys: ['P'], keywords: 'picture in picture window', run: togglePip }] : []),
+    { id: 'mute', title: s.muted ? 'Unmute sounds' : 'Mute sounds', group: 'Sound', keys: ['M'], keywords: 'sound audio silence volume', run: toggleMute },
+    ...AMBIENT_OPTIONS.filter((o) => o.id !== 'off').map((o) => ({
+      id: `ambient:${o.id}`,
+      title: `Ambient sound: ${o.label}`,
+      group: 'Sound',
+      keywords: 'toggle noise background audio',
+      current: s.ambient === o.id,
+      // Picking the sound that's already on turns it off, so "toggle rain" works both ways.
+      run: () => {
+        const ambient = s.ambient === o.id ? 'off' : o.id;
+        settings.set({ ambient });
+        toast(ambient === 'off' ? 'Ambient sound off' : `Ambient sound: ${o.label}${t.status === 'running' ? '' : ' (plays while a session runs)'}`, { duration: 2500 });
+      },
+    })),
+    ...SETTING_TOGGLES.map(([key, label]) => {
+      const onNow = !!s[key];
+      return {
+        id: `setting:${key}`,
+        title: `Turn ${onNow ? 'off' : 'on'} ${label}`,
+        group: 'Settings',
+        keywords: 'toggle enable disable',
+        run: () => {
+          settings.set({ [key]: !onNow } as Partial<Settings>);
+          toast(`${label[0].toUpperCase()}${label.slice(1)} ${onNow ? 'off' : 'on'}`, { duration: 2000 });
+        },
+      };
+    }),
+    { id: 'settings', title: 'Open settings', group: 'General', keys: [','], keywords: 'preferences options', run: () => panel.open() },
+    { id: 'stats', title: 'Progress, streak & goal', group: 'General', keys: ['G'], keywords: 'stats history statistics', run: () => stats.open() },
+    { id: 'shortcuts', title: 'Keyboard shortcuts', group: 'General', keys: ['?'], keywords: 'help keys', run: openHelp },
+  ];
+}
+
+/** Commands built from what's typed, e.g. "start 50m focus" or "add task Write report". */
+function parsedCommands(query: string): PaletteCommand[] {
+  const p = parseCommand(query);
+  if (!p) return [];
+  const t = data.get().timer;
+  if (p.kind === 'add-task') {
+    const parsed = parseTasksMarkdown(p.title).tasks[0];
+    if (!parsed) return [];
+    return [
+      {
+        id: 'parsed:add-task',
+        title: `Add task “${parsed.title}”${parsed.estimate > 1 ? ` · ${parsed.estimate} pomodoros` : ''}`,
+        group: 'Tasks',
+        run: () => {
+          tasks.add(parsed.title, parsed.estimate);
+          toast('Task added', { duration: 2000 });
+        },
+      },
+    ];
+  }
+  if (p.kind === 'set-length') {
+    const now = settings.get().durations[p.mode];
+    return [
+      {
+        id: 'parsed:set-length',
+        title: `Set ${MODE_LABELS[p.mode].toLowerCase()} length to ${p.minutes} min (now ${now} min)`,
+        group: 'Settings',
+        run: () => {
+          settings.set({ durations: { ...settings.get().durations, [p.mode]: p.minutes } });
+          toast(`${MODE_LABELS[p.mode]} is now ${p.minutes} min`, { duration: 2500 });
+        },
+      },
+    ];
+  }
+  const mode = p.mode ?? t.mode;
+  const sameRunning = mode === t.mode && t.status === 'running';
+  if (sameRunning && p.ms === null) return [];
+  const label = MODE_LABELS[mode].toLowerCase();
+  const title = sameRunning
+    ? `Make this ${label} ${minutesLabel(p.ms!)}`
+    : `Start ${p.ms ? `a ${minutesLabel(p.ms)} ` : ''}${label}`;
+  return [
+    {
+      id: 'parsed:start',
+      title,
+      group: 'Timer',
+      run: async () => {
+        if (mode !== data.get().timer.mode) await actions.switchTo(mode);
+        if (data.get().timer.mode !== mode) return; // switching was cancelled
+        unlockAudio();
+        if (p.ms) timer.setLength(p.ms);
+        timer.start();
+        if (sameRunning) toast(`This ${label} is now ${minutesLabel(p.ms!)} · ${formatTime(timer.remaining())} left`, { duration: 2500 });
+      },
+    },
+  ];
+}
+
+const palette = createPalette({ commands: paletteCommands, parse: parsedCommands });
+document.addEventListener('keydown', (e) => {
+  if (!(e.metaKey || e.ctrlKey) || e.altKey || e.shiftKey || e.key.toLowerCase() !== 'k' || palette.isOpen()) return;
+  if (dialogOpen() || help.isOpen() || stats.isOpen() || interruptions.isOpen() || importOpen() || menuOpen()) return;
+  e.preventDefault();
+  if (panel.isOpen()) panel.close();
+  palette.open();
+});
+
 // Esc closes settings even from inside one of its inputs, otherwise leaves focus mode.
 document.addEventListener('keydown', (e) => {
-  if (e.key !== 'Escape' || e.defaultPrevented || dialogOpen() || help.isOpen() || stats.isOpen() || interruptions.isOpen() || importOpen() || menuOpen()) return;
+  if (e.key !== 'Escape' || e.defaultPrevented || dialogOpen() || help.isOpen() || stats.isOpen() || interruptions.isOpen() || importOpen() || menuOpen() || palette.isOpen()) return;
   if (panel.isOpen()) panel.close();
   else if (focusMode.isOn()) focusMode.exit();
 });
 bindShortcuts(SHORTCUTS, {
-  modalOpen: () => dialogOpen() || help.isOpen() || interruptions.isOpen() || stats.isOpen() || importOpen() || menuOpen(),
+  modalOpen: () => dialogOpen() || help.isOpen() || interruptions.isOpen() || stats.isOpen() || importOpen() || menuOpen() || palette.isOpen(),
   settingsOpen: () => panel.isOpen(),
   popoverOpen: () => false,
 });

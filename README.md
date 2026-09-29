@@ -33,10 +33,11 @@ An aesthetic, customizable Pomodoro timer with smooth [anime.js](https://animejs
 
 ## Keyboard shortcuts
 
-Press <kbd>?</kbd> in the app to see them all.
+Press <kbd>?</kbd> in the app to see them all, or <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>K</kbd> for the command palette: search every action, or type things like `start 50m focus`, `10m break`, `set focus to 45m` or `add task Write report 🍅3`.
 
 | Key | Action |
 |---|---|
+| <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>K</kbd> | Command palette |
 | <kbd>Space</kbd> | Start / pause |
 | <kbd>R</kbd> / <kbd>S</kbd> | Restart / skip session |
 | <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> | Focus / short break / long break |

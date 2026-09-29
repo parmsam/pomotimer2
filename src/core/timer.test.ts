@@ -273,3 +273,41 @@ describe('adding and removing time', () => {
     expect(timer.progress()).toBe(0);
   });
 });
+
+describe('one-off session length', () => {
+  it('runs a longer session without touching the setting, and records its real length', () => {
+    const { timer, t, settings, data } = setup();
+    timer.setLength(50 * MIN);
+    timer.start();
+    expect(timer.duration()).toBe(50 * MIN);
+    expect(timer.remaining()).toBe(50 * MIN);
+    advance(25 * MIN);
+    expect(timer.progress()).toBe(0.5);
+    advance(25 * MIN + 100);
+    expect(data.get().history.at(-1)).toMatchObject({ mode: 'focus', durationMs: 50 * MIN });
+    expect(settings.get().durations.focus).toBe(25);
+    // The next session goes back to the usual lengths.
+    expect(t().plannedMs).toBeNull();
+    expect(timer.remaining()).toBe(5 * MIN);
+  });
+
+  it('keeps time already spent when a running session is resized', () => {
+    const { timer } = setup();
+    timer.start();
+    advance(10 * MIN);
+    timer.setLength(50 * MIN);
+    expect(timer.remaining()).toBe(40 * MIN);
+    expect(timer.progress()).toBeCloseTo(0.2);
+  });
+
+  it('is dropped on restart and when the setting changes', () => {
+    const { timer, t, settings } = setup();
+    timer.setLength(50 * MIN);
+    timer.reset();
+    expect(timer.remaining()).toBe(25 * MIN);
+    timer.setLength(50 * MIN);
+    settings.set({ durations: { ...settings.get().durations, focus: 30 } });
+    expect(t().plannedMs).toBeNull();
+    expect(timer.remaining()).toBe(30 * MIN);
+  });
+});

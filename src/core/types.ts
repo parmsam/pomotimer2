@@ -75,6 +75,8 @@ export interface TimerState {
   /** Focus time accumulated in this session across pauses, excluding the open segment. */
   focusedMs: number;
   interruptions: Interruptions;
+  /** Length of this one session when it differs from the setting (e.g. "start 50m focus"); null uses the setting. */
+  plannedMs: number | null;
 }
 
 export interface Interruptions {

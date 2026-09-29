@@ -33,6 +33,8 @@ export interface Timer {
   interrupt(kind: keyof Interruptions): void;
   /** Add (or with a negative value, remove) time from the current session. */
   addTime(ms: number): void;
+  /** Make the current session `ms` long (time already spent still counts), without changing the setting. */
+  setLength(ms: number): void;
   /** Milliseconds left in the current session, derived from the clock while running. */
   remaining(): number;
   duration(mode?: Mode): number;
@@ -45,10 +47,11 @@ export interface Timer {
   upcoming(): Mode;
 }
 
-const freshSession = (): Pick<TimerState, 'segmentStart' | 'focusedMs' | 'interruptions'> => ({
+const freshSession = (): Pick<TimerState, 'segmentStart' | 'focusedMs' | 'interruptions' | 'plannedMs'> => ({
   segmentStart: null,
   focusedMs: 0,
   interruptions: { internal: 0, external: 0 },
+  plannedMs: null,
 });
 
 /**
@@ -70,7 +73,12 @@ export function createTimer(
   const t = () => data.get().timer;
   const setTimer = (patch: Partial<TimerState>) => data.set((d) => ({ timer: { ...d.timer, ...patch } }));
 
-  const duration = (mode: Mode = t().mode) => settings.get().durations[mode] * 60_000;
+  /** The mode's length from settings, ignoring any one-off length. */
+  const usual = (mode: Mode) => settings.get().durations[mode] * 60_000;
+  const duration = (mode: Mode = t().mode) => {
+    const planned = t().plannedMs;
+    return mode === t().mode && typeof planned === 'number' && planned > 0 ? planned : usual(mode);
+  };
 
   const remaining = () => {
     const s = t();
@@ -129,7 +137,7 @@ export function createTimer(
         finished === 'focus' && d.activeTaskId
           ? d.tasks.map((x) => (x.id === d.activeTaskId ? { ...x, pomodoros: x.pomodoros + 1 } : x))
           : d.tasks,
-      timer: { mode: next, status: 'idle', endsAt: null, remainingMs: duration(next), cycleCount: count, ...freshSession() },
+      timer: { mode: next, status: 'idle', endsAt: null, remainingMs: usual(next), cycleCount: count, ...freshSession() },
     }));
 
     onComplete({ finished, next, missed, early });
@@ -172,7 +180,17 @@ export function createTimer(
   function setMode(mode: Mode) {
     clearTimeout(timeout);
     abandon();
-    setTimer({ mode, status: 'idle', endsAt: null, remainingMs: duration(mode), ...freshSession() });
+    setTimer({ mode, status: 'idle', endsAt: null, remainingMs: usual(mode), ...freshSession() });
+  }
+
+  function addTime(ms: number) {
+    const s = t();
+    if (s.status === 'running' && s.endsAt !== null) {
+      setTimer({ endsAt: Math.max(Date.now() + 1000, s.endsAt + ms) });
+      schedule();
+    } else {
+      setTimer({ remainingMs: Math.max(1000, remaining() + ms) });
+    }
   }
 
   const upcoming = () => nextMode(t().mode, t().cycleCount + (t().mode === 'focus' ? 1 : 0));
@@ -180,7 +198,7 @@ export function createTimer(
   // Keep an untouched session in sync when its duration setting changes.
   settings.subscribe((s, prev) => {
     const { mode, status } = t();
-    if (status === 'idle' && s.durations[mode] !== prev.durations[mode]) setTimer({ remainingMs: duration(mode) });
+    if (status === 'idle' && s.durations[mode] !== prev.durations[mode]) setTimer({ plannedMs: null, remainingMs: usual(mode) });
   });
 
   // Another tab may start, pause or finish the session: follow its lead.
@@ -212,14 +230,11 @@ export function createTimer(
     splitSegment: () => {
       if (t().segmentStart !== null) closeSegment(true);
     },
-    addTime(ms) {
-      const s = t();
-      if (s.status === 'running' && s.endsAt !== null) {
-        setTimer({ endsAt: Math.max(Date.now() + 1000, s.endsAt + ms) });
-        schedule();
-      } else {
-        setTimer({ remainingMs: Math.max(1000, remaining() + ms) });
-      }
+    addTime,
+    setLength(ms) {
+      const delta = ms - duration();
+      setTimer({ plannedMs: ms });
+      addTime(delta);
     },
     interrupt: (kind) => {
       if (t().mode !== 'focus' || t().status === 'idle') return;

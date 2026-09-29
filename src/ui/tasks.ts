@@ -21,6 +21,8 @@ const uid = () => (crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`).sl
 export interface TasksPanel {
   add(title: string, estimate?: number): void;
   addMany(tasks: ParsedTask[]): void;
+  /** Make a task the one the timer credits. */
+  setActive(id: string | null): void;
   importMarkdown(initial?: string): void;
   /** Refresh live values (the active task's tracked time). Call about once a second. */
   tick(): void;
@@ -380,6 +382,7 @@ export function createTasksPanel(data: Store<AppData>, settings: Store<Settings>
   return {
     add,
     addMany,
+    setActive,
     importMarkdown,
     tick() {
       const id = data.get().activeTaskId;

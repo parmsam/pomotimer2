@@ -38,7 +38,7 @@ export function parseBackup(text: string): { settings: Settings; data: AppData; 
   const data = normalizeAppData(b.data, settings);
   if (data.timer.status === 'running') {
     const left = data.timer.endsAt ? Math.max(0, data.timer.endsAt - Date.parse(b.exportedAt ?? '')) : 0;
-    data.timer = { ...data.timer, status: left > 0 ? 'paused' : 'idle', endsAt: null, segmentStart: null, remainingMs: left || settings.durations[data.timer.mode] * 60_000 };
+    data.timer = { ...data.timer, status: left > 0 ? 'paused' : 'idle', endsAt: null, segmentStart: null, remainingMs: left || settings.durations[data.timer.mode] * 60_000, ...(left > 0 ? {} : { plannedMs: null }) };
   }
   return { settings, data, exportedAt: typeof b.exportedAt === 'string' ? b.exportedAt : '' };
 }

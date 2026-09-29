@@ -65,18 +65,25 @@ export function rollChar(el: HTMLElement, direction: 1 | -1 = 1): void {
 }
 
 /** Swaps text with a quick fade/slide. */
+/** Text each element is animating towards, so back-to-back swaps (Pause → Start → Pause) land on the last one. */
+const swapping = new WeakMap<HTMLElement, string>();
+
 export function swapText(el: HTMLElement, text: string): void {
-  if (el.textContent === text) return;
+  if ((swapping.get(el) ?? el.textContent) === text) return;
   if (reducedMotion()) {
+    swapping.delete(el);
     el.textContent = text;
     return;
   }
+  swapping.set(el, text);
   animate(el, {
     y: [0, -8],
     opacity: [1, 0],
     duration: 140,
     ease: 'in(2)',
     onComplete: () => {
+      if (swapping.get(el) !== text) return; // a newer swap owns the element now
+      swapping.delete(el);
       el.textContent = text;
       animate(el, { y: [8, 0], opacity: [0, 1], duration: 260, ease: 'out(3)' });
     },

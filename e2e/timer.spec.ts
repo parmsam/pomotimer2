@@ -38,6 +38,17 @@ test('a finished focus session moves to a short break and fills a cycle dot', as
   expect(d.history).toHaveLength(1);
 });
 
+test('an auto-started break shows Pause, not Start', async ({ page }) => {
+  // Regression: Start and Pause swapped in the same tick left the button reading "Start".
+  const seed = focusInProgress(0);
+  seed.timer.endsAt = Date.now() + 3000;
+  await open(page, { data: seed, settings: { autoStartBreaks: true } });
+  await expect(page.locator('html')).toHaveAttribute('data-mode', 'short', { timeout: 6000 });
+  await expect(page.locator('#time')).toHaveText(/^0[45]:\d\d$/);
+  await page.waitForTimeout(600); // let the label animation settle
+  await expect(page.locator('.primary-label')).toHaveText('Pause');
+});
+
 test('the mode pill lands on the new tab after the first completion adds a tab count', async ({ page }) => {
   const seed = focusInProgress(0);
   seed.timer.endsAt = Date.now() + 1500;

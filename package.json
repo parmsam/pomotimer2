@@ -1,6 +1,6 @@
 {
   "name": "pomotimer2",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "description": "An aesthetic, customizable Pomodoro timer with anime.js motion and optional three.js backgrounds.",
   "type": "module",

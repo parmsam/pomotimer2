@@ -52,6 +52,7 @@ export function defaultAppData(settings: Settings): AppData {
       segmentStart: null,
       focusedMs: 0,
       interruptions: { internal: 0, external: 0 },
+      plannedMs: null,
     },
     history: [],
     tasks: [],
