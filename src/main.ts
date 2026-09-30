@@ -35,7 +35,7 @@ import { createProgressFavicon } from './ui/favicon';
 import { createPip, pipSupported } from './ui/pip';
 import type { FaceContext, FaceEvent } from './faces';
 import { createWakeLock } from './ui/wakeLock';
-import { attachGestures } from './ui/gestures';
+import { attachGestures, blockPinchZoom } from './ui/gestures';
 import { createFullscreenButton, fullscreenSupported } from './ui/fullscreen';
 import { createPalette, type PaletteCommand } from './ui/palette';
 import { createStatsView } from './ui/stats';
@@ -436,6 +436,7 @@ attachGestures($('.dial'), {
   currentMode: () => data.get().timer.mode,
   feedback: () => haptic('tap'),
 });
+blockPinchZoom();
 
 modeTabs.forEach((b) =>
   b.addEventListener('click', () => {

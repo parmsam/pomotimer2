@@ -75,3 +75,19 @@ test('mouse clicks on the timer do nothing (gestures are touch-only)', async ({ 
   await page.locator('.dial').click();
   await expect(page.locator('.primary-label')).toHaveText('Start');
 });
+
+test('pinch and focus zoom are blocked, leaving browser zoom', async ({ page }) => {
+  await open(page);
+  // maximum-scale stops iOS zooming into small text fields and Android pinch zoom.
+  await expect(page.locator('meta[name="viewport"]')).toHaveAttribute('content', /maximum-scale=1\b/);
+  expect(await page.evaluate(() => getComputedStyle(document.documentElement).touchAction)).toBe('pan-x pan-y');
+  // Safari's pinch gesture events are cancelled.
+  const prevented = await page.evaluate(() =>
+    ['gesturestart', 'gesturechange'].map((type) => {
+      const e = new Event(type, { bubbles: true, cancelable: true });
+      document.body.dispatchEvent(e);
+      return e.defaultPrevented;
+    }),
+  );
+  expect(prevented).toEqual([true, true]);
+});
