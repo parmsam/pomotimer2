@@ -55,13 +55,3 @@ export function attachGestures(
   el.addEventListener('pointerup', end);
   el.addEventListener('pointercancel', end);
 }
-
-/**
- * Safari ignores the viewport's maximum-scale and touch-action for pinches (iOS touch,
- * macOS trackpad) but lets us cancel its gesture events. Browser zoom (⌘/Ctrl +/−) is unaffected.
- */
-export function blockPinchZoom(target: EventTarget = document) {
-  for (const type of ['gesturestart', 'gesturechange']) {
-    target.addEventListener(type, (e) => e.preventDefault(), { passive: false });
-  }
-}

@@ -10,9 +10,18 @@ body {
   height: 100%;
 }
 
-/* No pinch or double-tap zoom (browser zoom still works); see blockPinchZoom() for Safari. */
+/* No double-tap zoom (pinch still works), so quick taps on the timer don't zoom. */
 html {
-  touch-action: pan-x pan-y;
+  touch-action: manipulation;
+}
+
+/* iOS zooms into any text field under 16px on focus; only iOS Safari has -webkit-touch-callout. */
+@supports (-webkit-touch-callout: none) {
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1em) !important;
+  }
 }
 
 /* Author display rules (e.g. .icon-btn { display: grid }) would otherwise beat [hidden]. */
