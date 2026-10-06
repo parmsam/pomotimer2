@@ -116,9 +116,9 @@ export function createStatsView(data: Store<AppData>, settings: Store<Settings>,
         <div class="bars">${bars}</div>
         <div class="chart-tip" hidden></div>
       </div>
-      <table class="sr-only"><caption>Focus by day, last 7 days</caption>
+      <div class="sr-only"><table><caption>Focus by day, last 7 days</caption>
         <thead><tr><th scope="col">Day</th><th scope="col">Pomodoros</th><th scope="col">Focus time</th></tr></thead>
-        <tbody>${rows}</tbody></table>`;
+        <tbody>${rows}</tbody></table></div>`;
   }
 
   /** Latest focus sessions, each deletable (with undo) in case one ran by accident. */

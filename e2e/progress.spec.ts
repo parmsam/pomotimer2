@@ -66,6 +66,9 @@ test('progress dialog: tiles, a 7-day chart with tooltips, and a data table', as
   await expect(dialog.locator('.bar')).toHaveCount(7);
   await expect(dialog.locator('.bar.today .bar-value')).toHaveText('50m');
   await expect(dialog.locator('table tbody tr')).toHaveCount(7);
+  // Firefox doesn't clip a <caption> when .sr-only sits on the table itself, so wrap it.
+  await expect(dialog.locator('.sr-only > table')).toHaveCount(1);
+  await expect(dialog.locator('table.sr-only')).toHaveCount(0);
 
   if (!isMobile) {
     await dialog.locator('.bar').nth(3).hover();
