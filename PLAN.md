@@ -173,6 +173,9 @@ Basics already exist (Space, R, S, `,`, Esc).
 - [x] "Common agent recipes" (status, start on a task, add tasks, pause/stop early, change a setting) in `pomo.help()` and `llms.txt`
 - WebMCP (`navigator.modelContext`) skipped for now: it needs an agent built into the browser; revisit if that becomes common
 
+### Branding
+- [x] Launch splash (tomato + wordmark, follows the theme), on by default; Appearance → "Splash screen" turns it off. A tap or key press skips it
+
 ## Backburner (revisit if there's demand)
 Not part of any phase. Pick these up only if people ask for them.
 - [ ] Optional name + time-of-day greeting (e.g. "Good morning, Sam"; "Welcome back" after a gap). Off by default; the name is stored locally only
@@ -238,3 +241,4 @@ Not part of any phase. Pick these up only if people ask for them.
 - 2026-09-29 — The service worker's navigation fallback served the app for every URL in scope, so `llms.txt` showed the app in any browser that had visited before. URLs ending in a file extension are now excluded (`navigateFallbackDenylist`). Tests for published files must navigate with a controlling service worker, not use `request.get`, which bypasses it.
 - 2026-09-29 — Added five agent recipes to `pomo.help()` and `llms.txt`, kept short so they don't compete with the reference. They live in `RECIPES` in `core/agentApi.ts`; a unit test runs each one against the real timer and checks both texts include it.
 - 2026-09-30 — Pinch zoom stays; double-tap zoom is off (`touch-action: manipulation`) so quick taps on the timer don't zoom. iOS zooms into text fields under 16px on focus, so fields are at least 16px on iOS only (`@supports (-webkit-touch-callout: none)`). We avoid `maximum-scale=1` because it blocks pinch on Android. Also fixed `src/styles.test.ts`: `?raw` CSS imports are empty under Vitest, so the SVG-pivot check had been passing vacuously; it now reads the file from disk.
+- 2026-10-06 — Launch splash for branding, on by default. Its markup and CSS are inline in `index.html` so it paints before the bundle; a tiny inline head script reads `pomo:v1:settings` directly (the one read outside `storage.ts`) and hides it pre-paint when it's off. It stays up ~1.1 s from navigation start, the app's entrance animation plays as it fades, and the first tap or key only dismisses it (swallowed, so Space doesn't start the timer). E2E `open()` turns it off unless a test asks for it.

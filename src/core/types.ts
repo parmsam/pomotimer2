@@ -17,6 +17,8 @@ export interface Settings {
   clockFace: import('../faces/types').FaceId;
   /** Roll each digit in as the clock changes. */
   rollingDigits: boolean;
+  /** Show the logo briefly when the app opens. */
+  splash: boolean;
   alarm: AlarmSound;
   volume: number;
   tick: boolean;

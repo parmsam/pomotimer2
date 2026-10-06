@@ -185,6 +185,7 @@ export function createSettingsPanel(settings: Store<Settings>, dataActions: Data
     el('div', { className: 'mode-colors' }, ...colorPickers),
     colorsReset,
     toggle('rollingDigits', 'Rolling digits', 'Animate the clock as each digit changes'),
+    toggle('splash', 'Splash screen', 'Show the pomo logo for a moment when the app opens'),
   );
 
   // --- Sound

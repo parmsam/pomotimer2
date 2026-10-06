@@ -44,6 +44,7 @@ import { toast } from './ui/toast';
 import { createInterruptionLogger } from './ui/interruptions';
 import { createSessionActions } from './ui/sessionActions';
 import { createSettingsPanel } from './ui/settingsPanel';
+import { liftSplash } from './ui/splash';
 import { createTasksPanel } from './ui/tasks';
 import { createTimerView } from './ui/timerView';
 
@@ -550,6 +551,7 @@ const SETTING_TOGGLES: [keyof Settings, string][] = [
   ['tick', 'ticking sound'],
   ['keepAwake', 'keep screen on'],
   ['showQuotes', 'quotes'],
+  ['splash', 'splash screen'],
   ['trackInterruptions', 'interruption tracking'],
 ];
 const minutesLabel = (ms: number) => `${Math.round(ms / 60_000)} min`;
@@ -799,7 +801,8 @@ renderStatus();
 renderCycle();
 view.render(timer.remaining(), timer.duration());
 driftBlobs();
-entrance();
+// The app comes in as the splash (if any) fades out.
+liftSplash(entrance);
 requestAnimationFrame(frame);
 setInterval(secondTick, 200);
 setupPwa(() => data.get().timer.status === 'running', () => settings.get().showTips);

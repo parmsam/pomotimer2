@@ -13,6 +13,7 @@ export const DEFAULT_SETTINGS: Settings = {
   clockFace: 'ring',
   background: 'blobs',
   rollingDigits: false,
+  splash: true,
   alarm: 'bell',
   volume: 0.6,
   tick: false,
