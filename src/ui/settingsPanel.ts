@@ -222,6 +222,7 @@ export function createSettingsPanel(settings: Store<Settings>, dataActions: Data
     'Sound',
     el('div', { className: 'row' }, el('label', { htmlFor: alarmSelect.id }, 'Alarm'), alarmSelect, testBtn),
     el('div', { className: 'row' }, el('label', { htmlFor: volume.id }, 'Volume'), volume),
+    toggle('alarmUntilDismissed', 'Ring until dismissed', 'Repeats until you tap or press a key, like a real alarm (stops after 15 min)'),
     toggle('tick', 'Ticking', 'Soft tick every second during focus'),
     el('div', { className: 'row' }, el('label', { htmlFor: ambientSelect.id }, 'Ambient sound', el('small', {}, 'While a session runs')), ambientSelect),
     el('div', { className: 'row' }, el('label', { htmlFor: ambientVolume.id }, 'Ambient volume'), ambientVolume),

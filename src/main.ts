@@ -2,7 +2,7 @@ import './themes/tokens.css';
 import './styles.css';
 
 import { AMBIENT_OPTIONS, createAmbientPlayer } from './core/ambient';
-import { audioContext, canPlayThroughSilentMode, playAlarm, playTick, unlockAudio } from './core/audio';
+import { audioContext, canPlayThroughSilentMode, playAlarm, playTick, ringAlarm, stopAlarm, unlockAudio } from './core/audio';
 import { buzz, hapticTrigger, setHapticTriggersEnabled, type Buzz } from './core/haptics';
 import { formatTime } from './core/format';
 import { notify } from './core/notify';
@@ -150,8 +150,11 @@ const timer = createTimer(data, settings, ({ finished, next, missed, early }) =>
     const s = settings.get();
     // With several tabs open, only one rings and notifies.
     onceAcrossTabs('pomo-session-end', () => {
-      if (!s.muted) playAlarm(s.alarm, s.volume, { ignoreSilentMode: s.alarmIgnoresSilent });
-      if (s.notifications) notify(`${MODE_LABELS[finished]} complete`, COMPLETE_MESSAGES[finished]);
+      const sticky = s.alarmUntilDismissed;
+      const note = s.notifications ? notify(`${MODE_LABELS[finished]} complete`, COMPLETE_MESSAGES[finished], { sticky, onClick: () => stopAlarm() }) : undefined;
+      if (s.muted) return;
+      if (sticky) ringAlarm(s.alarm, s.volume, { ignoreSilentMode: s.alarmIgnoresSilent, stopped: () => note?.close() });
+      else playAlarm(s.alarm, s.volume, { ignoreSilentMode: s.alarmIgnoresSilent });
     });
     celebrate($('#burst'), $('.dial'));
     haptic('success');

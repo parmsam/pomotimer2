@@ -40,6 +40,8 @@ export interface Settings {
   haptics: boolean;
   /** iOS: let the alarm sound even when the phone's silent switch is on. */
   alarmIgnoresSilent: boolean;
+  /** Keep ringing (and keep the notification up) until dismissed, like a real alarm. */
+  alarmUntilDismissed: boolean;
   /** The one-time tip about phone audio/notifications has been shown. */
   mobileTipSeen: boolean;
   /** Show the interruption logger during focus (Cirillo's internal/external marks). */

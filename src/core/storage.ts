@@ -29,6 +29,7 @@ export const DEFAULT_SETTINGS: Settings = {
   ambientOnBreaks: false,
   haptics: true,
   alarmIgnoresSilent: true,
+  alarmUntilDismissed: false,
   mobileTipSeen: false,
   trackInterruptions: false,
   dailyGoal: 8,

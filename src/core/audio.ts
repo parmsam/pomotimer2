@@ -9,6 +9,7 @@ export const audioContext = (): AudioContext | null => ctx;
 for (const type of ['pointerdown', 'keydown']) {
   document.addEventListener(type, () => {
     if (ctx && ctx.state !== 'running') void ctx.resume();
+    stopAlarm(); // a repeating alarm stops as soon as you're back
   }, { capture: true, passive: true });
 }
 
@@ -109,10 +110,46 @@ export function playAlarm(sound: AlarmSound, volume: number, opts: { ignoreSilen
   if (opts.ignoreSilentMode && audioSession()) {
     holdPlaybackSession('alarm', true);
     clearTimeout(sessionReset);
-    const lengthMs = Math.max(...SOUNDS[sound].map((n) => n.at + n.dur)) * 1000;
-    sessionReset = window.setTimeout(() => holdPlaybackSession('alarm', false), lengthMs + 500);
+    sessionReset = window.setTimeout(() => holdPlaybackSession('alarm', false), lengthMs(sound) + 500);
   }
   play(SOUNDS[sound], volume);
+}
+
+const lengthMs = (sound: Exclude<AlarmSound, 'none'>) => Math.max(...SOUNDS[sound].map((n) => n.at + n.dur)) * 1000;
+
+/** Like a real alarm: gives up eventually if nobody comes back. */
+export const RING_LIMIT_MS = 15 * 60_000;
+const RING_GAP_MS = 1200;
+let ringTimer: number | undefined;
+let onStop: (() => void) | undefined;
+// A tap in one tab silences the tab that's ringing.
+const alarmChannel = typeof BroadcastChannel === 'function' ? new BroadcastChannel('pomo-alarm') : null;
+if (alarmChannel) alarmChannel.onmessage = () => stopAlarm(false);
+
+/** Repeats the alarm until `stopAlarm()` (any tap or key) or the limit. `stopped` runs once when it ends. */
+export function ringAlarm(sound: AlarmSound, volume: number, opts: { ignoreSilentMode?: boolean; stopped?: () => void } = {}): void {
+  stopAlarm(false);
+  if (sound === 'none' || volume <= 0) return;
+  const giveUpAt = Date.now() + RING_LIMIT_MS;
+  onStop = opts.stopped;
+  const ring = () => {
+    if (Date.now() >= giveUpAt) return stopAlarm(false);
+    playAlarm(sound, volume, opts);
+    ringTimer = window.setTimeout(ring, lengthMs(sound) + RING_GAP_MS);
+  };
+  ring();
+}
+
+export const alarmRinging = () => ringTimer !== undefined;
+
+export function stopAlarm(tellOtherTabs = true): void {
+  if (ringTimer === undefined) return;
+  clearTimeout(ringTimer);
+  ringTimer = undefined;
+  if (tellOtherTabs) alarmChannel?.postMessage('stop');
+  const stopped = onStop;
+  onStop = undefined;
+  stopped?.();
 }
 
 export function playTick(volume: number): void {
